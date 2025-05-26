@@ -25,9 +25,17 @@
       "total": "Progression totale",
       "evaluated": "Questions évaluées"
     },
+    "previous": "Précédent",
+    "next": "Suivant",
     "evaluator": {
       "comment": "Votre commentaire",
       "commentPlaceholder": "Écrivez votre commentaire ici..."
+    },
+    "completion": {
+      "title": "Évaluation terminée !",
+      "message": "Vous avez évalué toutes les questions avec succès. Que souhaitez-vous faire maintenant ?",
+      "review": "Revoir les évaluations",
+      "goHome": "Retour à l'accueil"
     }
   }
 }

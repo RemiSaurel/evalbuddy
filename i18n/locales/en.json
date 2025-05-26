@@ -25,9 +25,17 @@
       "total": "Total Progress",
       "evaluated": "Evaluated Questions"
     },
+    "previous": "Previous",
+    "next": "Next",
     "evaluator": {
       "comment": "Your Comment",
       "commentPlaceholder": "Write your comment here..."
+    },
+    "completion": {
+      "title": "Evaluation Completed!",
+      "message": "You have successfully evaluated all questions. What would you like to do next?",
+      "review": "Review Evaluations",
+      "goHome": "Go to Home"
     }
   }
 }
