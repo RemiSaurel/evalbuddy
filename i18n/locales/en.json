@@ -1,0 +1,33 @@
+{
+  "evaluation": {
+    "create": "Create Evaluation",
+    "resumeTitle": "Resume Evaluation",
+    "title": "Evaluation",
+    "answer": "Answer",
+    "learnerAnswer": "Learner's Answer",
+    "mastery": {
+      "NOT_ATTAINED": "Not Attained",
+      "INSUFFICIENT": "Insufficient",
+      "SUFFICIENT": "Sufficient",
+      "TOTAL": "Total"
+    },
+    "difficulty": "Difficulty",
+    "difficultyLevels": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "question": {
+      "title": "Question"
+    },
+    "progress": {
+      "currentQuestion": "Current Question Progress",
+      "total": "Total Progress",
+      "evaluated": "Evaluated Questions"
+    },
+    "evaluator": {
+      "comment": "Your Comment",
+      "commentPlaceholder": "Write your comment here..."
+    }
+  }
+}
