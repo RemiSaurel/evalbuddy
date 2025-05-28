@@ -1,19 +1,88 @@
-import type { MasteryLevel } from '@/models/index'
-import { QUESTIONS } from '@/utils/data'
+import type { EvaluationResult, EvaluationSession, MasteryLevelType } from '@/models/index'
+import { evaluationStorage } from '@/utils/storage'
 
-export function useEvaluation() {
+export function useEvaluation(sessionId?: string) {
+  // Session management
+  const currentSession = ref<EvaluationSession | null>(null)
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
+
   // Track current question group and index within that group
   const currentQuestionGroupIndex = ref(0)
   const currentQuestionIndexInGroup = ref(0)
   const evaluatorComment = ref('')
 
   // Track evaluated questions with their mastery levels
-  const evaluatedQuestions = ref<{ [questionId: string]: { masteryLevel: typeof MasteryLevel[keyof typeof MasteryLevel], comment?: string } }>({})
+  const evaluatedQuestions = ref<{ [questionId: string]: { masteryLevel: MasteryLevelType, comment?: string } }>({})
+
+  // Load session and results from IndexedDB
+  const initializeSession = async (id?: string) => {
+    if (!id)
+      return
+    isLoading.value = true
+    error.value = null
+    try {
+      const session = await evaluationStorage.getSession(id)
+      if (session) {
+        currentSession.value = session
+        // Load results into evaluatedQuestions
+        const resultsMap: typeof evaluatedQuestions.value = {}
+        session.results.forEach((result) => {
+          resultsMap[result.questionId] = {
+            masteryLevel: result.masteryLevel,
+            comment: result.comment,
+          }
+        })
+        evaluatedQuestions.value = resultsMap
+      }
+      else {
+        error.value = 'Session not found'
+      }
+    }
+    catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to load session'
+    }
+    finally {
+      isLoading.value = false
+    }
+  }
+
+  // Save evaluation result to session in IndexedDB
+  const saveEvaluationResult = async (questionId: string, masteryLevel: MasteryLevelType, comment?: string) => {
+    if (!currentSession.value)
+      return
+
+    const result: EvaluationResult = {
+      questionId,
+      masteryLevel,
+      comment,
+      evaluatedAt: new Date().toISOString(),
+    }
+
+    // Update or add result
+    const existingIndex = currentSession.value.results.findIndex(r => r.questionId === questionId)
+    if (existingIndex >= 0) {
+      currentSession.value.results[existingIndex] = result
+    }
+    else {
+      currentSession.value.results.push(result)
+    }
+
+    currentSession.value.updatedAt = new Date().toISOString()
+    currentSession.value.isCompleted = currentSession.value.results.length === currentSession.value.items.length
+
+    // Create a plain object copy of the session to avoid proxy cloning issues
+    const sessionToSave = toRaw(currentSession.value)
+    await evaluationStorage.saveSession(sessionToSave)
+  }
+
+  // Use session items as questions
+  const questions = computed(() => currentSession.value?.items || [])
 
   // Group questions by questionID and get ordered groups
   const groupedQuestions = computed(() => {
-    const groups: { [key: string]: typeof QUESTIONS } = {}
-    QUESTIONS.forEach((question) => {
+    const groups: { [key: string]: typeof questions.value } = {}
+    questions.value.forEach((question) => {
       if (!groups[question.questionID]) {
         groups[question.questionID] = []
       }
@@ -69,84 +138,123 @@ export function useEvaluation() {
     return index + currentQuestionIndexInGroup.value
   })
 
-  // Function to evaluate current question and go to next
-  function evaluateAndGoNext(masteryLevel: typeof MasteryLevel[keyof typeof MasteryLevel]) {
+  // Helper functions for navigation logic
+  const canMoveWithinGroup = (direction: 'next' | 'previous') => {
+    if (direction === 'next') {
+      return currentQuestionIndexInGroup.value < currentQuestionGroup.value.length - 1
+    }
+    return currentQuestionIndexInGroup.value > 0
+  }
+
+  const canMoveToGroup = (direction: 'next' | 'previous') => {
+    if (direction === 'next') {
+      return currentQuestionGroupIndex.value < questionGroupKeys.value.length - 1
+    }
+    return currentQuestionGroupIndex.value > 0
+  }
+
+  const saveCurrentComment = async () => {
     if (currentQuestion.value) {
-      evaluatedQuestions.value[currentQuestion.value.id] = { masteryLevel, comment: evaluatorComment.value }
-      // Clear comment for next question
+      const questionId = currentQuestion.value.id
+      // If the question has an existing evaluation (mastery level set)
+      if (evaluatedQuestions.value[questionId]) {
+        // Update the comment in the local cache
+        evaluatedQuestions.value[questionId]!.comment = evaluatorComment.value
+
+        // Persist this change to IndexedDB
+        const masteryLevel = evaluatedQuestions.value[questionId]!.masteryLevel
+        await saveEvaluationResult(questionId, masteryLevel, evaluatorComment.value)
+      }
+      // If the question is not yet evaluated, the comment will be saved
+      // along with the mastery level when evaluateAndGoNext is called.
+    }
+  }
+
+  const loadCommentForCurrentQuestion = () => {
+    if (currentQuestion.value && evaluatedQuestions.value[currentQuestion.value.id]) {
+      evaluatorComment.value = evaluatedQuestions.value[currentQuestion.value.id]?.comment || ''
+    }
+    else {
       evaluatorComment.value = ''
-      if (currentQuestionIndexInGroup.value < currentQuestionGroup.value.length - 1) {
-        currentQuestionIndexInGroup.value++
+    }
+  }
+
+  const moveToNextPosition = () => {
+    if (canMoveWithinGroup('next')) {
+      currentQuestionIndexInGroup.value++
+    }
+    else if (canMoveToGroup('next')) {
+      currentQuestionGroupIndex.value++
+      currentQuestionIndexInGroup.value = 0
+    }
+  }
+
+  const moveToPreviousPosition = () => {
+    if (canMoveWithinGroup('previous')) {
+      currentQuestionIndexInGroup.value--
+    }
+    else if (canMoveToGroup('previous')) {
+      currentQuestionGroupIndex.value--
+      const previousGroupKey = questionGroupKeys.value[currentQuestionGroupIndex.value]
+      if (previousGroupKey) {
+        currentQuestionIndexInGroup.value = (groupedQuestions.value[previousGroupKey]?.length || 1) - 1
       }
-      else {
-        if (currentQuestionGroupIndex.value < questionGroupKeys.value.length - 1) {
-          currentQuestionGroupIndex.value++
-          currentQuestionIndexInGroup.value = 0
-        }
-        // Potentially handle end of evaluation
+    }
+  }
+
+  // Function to evaluate current question and go to next
+  const evaluateAndGoNext = async (masteryLevel: MasteryLevelType) => {
+    if (currentQuestion.value) {
+      evaluatedQuestions.value[currentQuestion.value.id] = {
+        masteryLevel,
+        comment: evaluatorComment.value,
       }
+      await saveEvaluationResult(currentQuestion.value.id, masteryLevel, evaluatorComment.value)
+      evaluatorComment.value = ''
+      moveToNextPosition()
     }
   }
 
   // Function to go to previous question
-  function goToPreviousQuestion() {
-    // Save current comment before navigating
-    if (currentQuestion.value && evaluatorComment.value) {
-      if (evaluatedQuestions.value[currentQuestion.value.id]) {
-        evaluatedQuestions.value[currentQuestion.value.id]!.comment = evaluatorComment.value
-      }
-      else {
-        // This case should ideally not happen if we only allow editing evaluated questions
-        // Or, if we allow commenting before evaluating, we need a different structure
-      }
-    }
-
-    if (currentQuestionIndexInGroup.value > 0) {
-      currentQuestionIndexInGroup.value--
-    }
-    else {
-      if (currentQuestionGroupIndex.value > 0) {
-        currentQuestionGroupIndex.value--
-        const previousGroupKey = questionGroupKeys.value[currentQuestionGroupIndex.value]
-        if (previousGroupKey) {
-          currentQuestionIndexInGroup.value = (groupedQuestions.value[previousGroupKey]?.length || 1) - 1
-        }
-      }
-    }
-    // Load existing comment for the (now current) previous question
-    if (currentQuestion.value && evaluatedQuestions.value[currentQuestion.value.id]) {
-      evaluatorComment.value = evaluatedQuestions.value[currentQuestion.value.id]?.comment || ''
-    }
-    else {
-      evaluatorComment.value = '' // Clear if no comment was stored
-    }
+  const goToPreviousQuestion = async () => {
+    await saveCurrentComment()
+    moveToPreviousPosition()
+    loadCommentForCurrentQuestion()
   }
 
   // Function to go to next question
-  function goToNextQuestion() {
-    // Save current comment before navigating
-    if (currentQuestion.value && evaluatorComment.value) {
-      if (evaluatedQuestions.value[currentQuestion.value.id]) {
-        evaluatedQuestions.value[currentQuestion.value.id]!.comment = evaluatorComment.value
+  const goToNextQuestion = async () => {
+    await saveCurrentComment()
+    moveToNextPosition()
+    loadCommentForCurrentQuestion()
+  }
+
+  // Function to navigate directly to a specific question by absolute index
+  const navigateToQuestion = async (absoluteIndex: number) => {
+    if (absoluteIndex < 0 || absoluteIndex >= questions.value.length)
+      return
+
+    await saveCurrentComment()
+
+    // Find the group and index within group for this absolute index
+    let currentIndex = 0
+    for (let groupIndex = 0; groupIndex < questionGroupKeys.value.length; groupIndex++) {
+      const groupKey = questionGroupKeys.value[groupIndex]
+      if (!groupKey)
+        continue
+
+      const group = groupedQuestions.value[groupKey] || []
+
+      if (currentIndex + group.length > absoluteIndex) {
+        // Found the right group
+        currentQuestionGroupIndex.value = groupIndex
+        currentQuestionIndexInGroup.value = absoluteIndex - currentIndex
+        break
       }
+      currentIndex += group.length
     }
 
-    if (currentQuestionIndexInGroup.value < currentQuestionGroup.value.length - 1) {
-      currentQuestionIndexInGroup.value++
-    }
-    else {
-      if (currentQuestionGroupIndex.value < questionGroupKeys.value.length - 1) {
-        currentQuestionGroupIndex.value++
-        currentQuestionIndexInGroup.value = 0
-      }
-    }
-    // Load existing comment for the (now current) next question
-    if (currentQuestion.value && evaluatedQuestions.value[currentQuestion.value.id]) {
-      evaluatorComment.value = evaluatedQuestions.value[currentQuestion.value.id]?.comment || ''
-    }
-    else {
-      evaluatorComment.value = '' // Clear if no comment was stored or question not yet evaluated
-    }
+    loadCommentForCurrentQuestion()
   }
 
   const isCurrentQuestionEvaluated = computed(() => {
@@ -154,22 +262,28 @@ export function useEvaluation() {
   })
 
   const canGoNext = computed(() => {
-    // Check if there is a next question in the current group
-    if (currentQuestionIndexInGroup.value < currentQuestionGroup.value.length - 1) {
-      return true
-    }
-    // Check if there is a next group
-    if (currentQuestionGroupIndex.value < questionGroupKeys.value.length - 1) {
-      return true
-    }
-    return false
+    return canMoveWithinGroup('next') || canMoveToGroup('next')
+  })
+
+  const canGoPrevious = computed(() => {
+    return canMoveWithinGroup('previous') || canMoveToGroup('previous')
   })
 
   const isEvaluationCompleted = computed(() => {
-    return totalProgress.value === QUESTIONS.length
+    return totalProgress.value === questions.value.length
   })
 
+  // Initialize session if sessionId is provided
+  if (sessionId) {
+    initializeSession(sessionId)
+  }
+
   return {
+    currentSession: readonly(currentSession),
+    isLoading: readonly(isLoading),
+    error: readonly(error),
+    initializeSession,
+    saveEvaluationResult,
     currentQuestionGroupIndex,
     currentQuestionIndexInGroup,
     evaluatorComment,
@@ -183,9 +297,12 @@ export function useEvaluation() {
     currentAbsoluteQuestionIndex,
     evaluateAndGoNext,
     goToPreviousQuestion,
-    goToNextQuestion, // Add this line
-    isCurrentQuestionEvaluated, // Add this line
-    canGoNext, // Add this line
-    isEvaluationCompleted, // Add this line
+    goToNextQuestion,
+    navigateToQuestion,
+    isCurrentQuestionEvaluated,
+    canGoNext,
+    canGoPrevious,
+    isEvaluationCompleted,
+    questions,
   }
 }

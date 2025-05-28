@@ -1,10 +1,34 @@
 {
   "evaluation": {
-    "create": "Create Evaluation",
-    "resumeTitle": "Resume Evaluation",
-    "title": "Evaluation",
-    "answer": "Answer",
-    "learnerAnswer": "Learner's Answer",
+    "actions": {
+      "create": "Create Evaluation",
+      "import": "Import",
+      "export": "Export",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "saveComment": "Confirm Evaluation",
+      "selectMasteryLevel": "Select a mastery level"
+    },
+    "overview": {
+      "resumeTitle": "Resume Evaluation",
+      "noSessions": "No sessions found.",
+      "questions": "Questions",
+      "evaluated": "Evaluated",
+      "progress": "Progress",
+      "updated": "Updated",
+      "completed": "Completed",
+      "continue": "Continue"
+    },
+    "progress": {
+      "current": "Current Question Progress",
+      "total": "Total Progress",
+      "static": "Progress"
+    },
+    "question": {
+      "title": "Question",
+      "answer": "Answer",
+      "learnerAnswer": "Learner's Answer"
+    },
     "mastery": {
       "NOT_ATTAINED": "Not Attained",
       "INSUFFICIENT": "Insufficient",
@@ -17,16 +41,14 @@
       "medium": "Medium",
       "hard": "Hard"
     },
-    "question": {
-      "title": "Question"
+    "navigation": {
+      "previous": "Previous",
+      "next": "Next",
+      "overview": "Question Overview",
+      "evaluated": "Evaluated",
+      "current": "Current",
+      "pending": "Pending"
     },
-    "progress": {
-      "currentQuestion": "Current Question Progress",
-      "total": "Total Progress",
-      "evaluated": "Evaluated Questions"
-    },
-    "previous": "Previous",
-    "next": "Next",
     "evaluator": {
       "comment": "Your Comment",
       "commentPlaceholder": "Write your comment here..."
@@ -36,6 +58,16 @@
       "message": "You have successfully evaluated all questions. What would you like to do next?",
       "review": "Review Evaluations",
       "goHome": "Go to Home"
-    }
+    },
+    "importModal": {
+      "importItems": "Import Items",
+      "selectFile": "Select a file",
+      "importErrors": "Import Errors",
+      "importInstructions": "Instructions for import",
+      "importFormat": "The file must be a JSON array of items.",
+      "importFields": "Each item must have id, questionID, question, referenceAnswer, learnerAnswer, difficulty."
+    },
+    "error": "Error",
+    "title": "Evaluation"
   }
 }

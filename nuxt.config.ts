@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/icon',
     '@nuxtjs/i18n',
-    "@vueuse/nuxt",
+    '@vueuse/nuxt',
   ],
 
   css: ['~/assets/css/main.css'],
@@ -18,11 +18,13 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2024-11-27',
   i18n: {
-    strategy: "no_prefix",
+    strategy: 'no_prefix',
     locales: [
-      { code: "en", iso: "en-US", file: "en.json" },
-      { code: "fr", iso: "fr-FR", file: "fr.json" },
+      { code: 'en', iso: 'en-US', file: 'en.json' },
+      { code: 'fr', iso: 'fr-FR', file: 'fr.json' },
     ],
-    defaultLocale: "fr",
+    defaultLocale: 'fr',
   },
+
+  ssr: false,
 })

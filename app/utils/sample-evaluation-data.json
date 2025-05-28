@@ -1,0 +1,98 @@
+[
+  {
+    "id": "q1-item1",
+    "questionID": "Q1",
+    "question": "What is the capital of France?",
+    "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+    "learnerAnswer": "Paris is the capital of France.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q1-item2",
+    "questionID": "Q1",
+    "question": "What is the capital of France?",
+    "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+    "learnerAnswer": "The capital is Paris, which is a beautiful city in France.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q1-item3",
+    "questionID": "Q1",
+    "question": "What is the capital of France?",
+    "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+    "learnerAnswer": "I think it's Paris but I'm not 100% sure.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q2-item1",
+    "questionID": "Q2",
+    "question": "Explain the process of photosynthesis in plants.",
+    "referenceAnswer": "Photosynthesis is the process by which plants convert light energy, usually from the sun, into chemical energy stored in glucose. The process occurs in chloroplasts and involves two main stages: light-dependent reactions (in thylakoids) and the Calvin cycle (in stroma). The overall equation is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2 + ATP.",
+    "learnerAnswer": "Photosynthesis is when plants use sunlight to make food. They take in carbon dioxide from the air and water from the soil, and with chlorophyll in their leaves, they produce glucose and oxygen.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q2-item2",
+    "questionID": "Q2",
+    "question": "Explain the process of photosynthesis in plants.",
+    "referenceAnswer": "Photosynthesis is the process by which plants convert light energy, usually from the sun, into chemical energy stored in glucose. The process occurs in chloroplasts and involves two main stages: light-dependent reactions (in thylakoids) and the Calvin cycle (in stroma). The overall equation is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2 + ATP.",
+    "learnerAnswer": "Plants use light to make sugar. The chloroplasts in leaves capture sunlight and combine CO2 and H2O to create glucose. This happens in two phases - the light reactions and the Calvin cycle. Oxygen is released as a byproduct.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q3-item1",
+    "questionID": "Q3",
+    "question": "Derive the quadratic formula from the general quadratic equation ax² + bx + c = 0.",
+    "referenceAnswer": "Starting with ax² + bx + c = 0, divide by a: x² + (b/a)x + c/a = 0. Complete the square: x² + (b/a)x + (b/2a)² = (b/2a)² - c/a. This gives (x + b/2a)² = (b² - 4ac)/4a². Taking the square root: x + b/2a = ±√(b² - 4ac)/2a. Therefore: x = (-b ± √(b² - 4ac))/2a.",
+    "learnerAnswer": "To derive the quadratic formula, I start with ax² + bx + c = 0. I'll complete the square by adding and subtracting (b/2a)². After rearranging and taking the square root, I get x = (-b ± √(b² - 4ac))/2a.",
+    "difficulty": "hard"
+  },
+  {
+    "id": "q3-item2",
+    "questionID": "Q3",
+    "question": "Derive the quadratic formula from the general quadratic equation ax² + bx + c = 0.",
+    "referenceAnswer": "Starting with ax² + bx + c = 0, divide by a: x² + (b/a)x + c/a = 0. Complete the square: x² + (b/a)x + (b/2a)² = (b/2a)² - c/a. This gives (x + b/2a)² = (b² - 4ac)/4a². Taking the square root: x + b/2a = ±√(b² - 4ac)/2a. Therefore: x = (-b ± √(b² - 4ac))/2a.",
+    "learnerAnswer": "You use the quadratic formula x = (-b ± √(b² - 4ac))/2a to solve quadratic equations.",
+    "difficulty": "hard"
+  },
+  {
+    "id": "q4-item1",
+    "questionID": "Q4",
+    "question": "What are the main causes of climate change?",
+    "referenceAnswer": "The main causes of climate change include: 1) Greenhouse gas emissions from burning fossil fuels (CO2, methane, nitrous oxide), 2) Deforestation reducing carbon absorption, 3) Industrial processes and manufacturing, 4) Agriculture and livestock farming, 5) Transportation emissions, and 6) Land use changes. The primary driver is the increase in atmospheric CO2 concentrations due to human activities since the Industrial Revolution.",
+    "learnerAnswer": "Climate change is mainly caused by human activities that increase greenhouse gases in the atmosphere. This includes burning fossil fuels like coal and oil, cutting down forests, and industrial pollution. Cars and factories also contribute to the problem.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q4-item2",
+    "questionID": "Q4",
+    "question": "What are the main causes of climate change?",
+    "referenceAnswer": "The main causes of climate change include: 1) Greenhouse gas emissions from burning fossil fuels (CO2, methane, nitrous oxide), 2) Deforestation reducing carbon absorption, 3) Industrial processes and manufacturing, 4) Agriculture and livestock farming, 5) Transportation emissions, and 6) Land use changes. The primary driver is the increase in atmospheric CO2 concentrations due to human activities since the Industrial Revolution.",
+    "learnerAnswer": "The main causes are greenhouse gas emissions from fossil fuels, deforestation, industrial activities, agriculture (especially livestock), transportation, and land use changes. Human activities since the 1800s have dramatically increased CO2, methane, and other greenhouse gases in the atmosphere.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q5-item1",
+    "questionID": "Q5",
+    "question": "What is 2 + 2?",
+    "referenceAnswer": "2 + 2 = 4. This is a basic arithmetic operation involving the addition of two identical numbers.",
+    "learnerAnswer": "4",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q5-item2",
+    "questionID": "Q5",
+    "question": "What is 2 + 2?",
+    "referenceAnswer": "2 + 2 = 4. This is a basic arithmetic operation involving the addition of two identical numbers.",
+    "learnerAnswer": "Two plus two equals four.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q5-item3",
+    "questionID": "Q5",
+    "question": "What is 2 + 2?",
+    "referenceAnswer": "2 + 2 = 4. This is a basic arithmetic operation involving the addition of two identical numbers.",
+    "learnerAnswer": "The answer is 4 because when you add 2 and 2 together you get 4.",
+    "difficulty": "easy"
+  }
+]
