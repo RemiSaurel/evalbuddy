@@ -82,12 +82,14 @@ function confirmEvaluation() {
 
 // Function to get button classes based on selection state
 function getMasteryButtonClasses(level: { value: typeof MasteryLevel[keyof typeof MasteryLevel], color: string }) {
-  const baseClasses = 'h-20 text-lg font-bold uppercase transition-all duration-200'
+  const baseClasses = 'h-20 text-lg text-white font-bold uppercase transition-all duration-200'
   const isSelected = selectedMasteryLevel.value === level.value
+  // Extract color from bg-color-nnn value
+  const color = level.color.replace(/bg-([a-z]+)-\d+/, '$1')
 
   if (isSelected) {
     // Selected state: darker background with border
-    return `${baseClasses} ${level.color} ring-2 ring-blue-600 ring-offset-2 transform scale-105`
+    return `${baseClasses} ${level.color} ring-3 ring-${color}-200 ring-offset-1 transform`
   }
   else {
     // Unselected state: lighter background
