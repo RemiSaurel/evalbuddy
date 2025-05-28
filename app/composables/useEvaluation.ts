@@ -12,8 +12,8 @@ export function useEvaluation(sessionId?: string) {
   const currentQuestionIndexInGroup = ref(0)
   const evaluatorComment = ref('')
 
-  // Track evaluated questions with their mastery levels
-  const evaluatedQuestions = ref<{ [questionId: string]: { masteryLevel: MasteryLevelType, comment?: string } }>({})
+  // Track evaluated questions with their values and comments
+  const evaluatedQuestions = ref<{ [questionId: string]: { value: any, comment?: string } }>({})
 
   // Load session and results from IndexedDB
   const initializeSession = async (id?: string) => {
@@ -29,7 +29,7 @@ export function useEvaluation(sessionId?: string) {
         const resultsMap: typeof evaluatedQuestions.value = {}
         session.results.forEach((result) => {
           resultsMap[result.questionId] = {
-            masteryLevel: result.masteryLevel,
+            value: result.value,
             comment: result.comment,
           }
         })
@@ -48,13 +48,13 @@ export function useEvaluation(sessionId?: string) {
   }
 
   // Save evaluation result to session in IndexedDB
-  const saveEvaluationResult = async (questionId: string, masteryLevel: MasteryLevelType, comment?: string) => {
+  const saveEvaluationResult = async (questionId: string, value: any, comment?: string) => {
     if (!currentSession.value)
       return
 
     const result: EvaluationResult = {
       questionId,
-      masteryLevel,
+      value,
       comment,
       evaluatedAt: new Date().toISOString(),
     }
@@ -162,8 +162,8 @@ export function useEvaluation(sessionId?: string) {
         evaluatedQuestions.value[questionId]!.comment = evaluatorComment.value
 
         // Persist this change to IndexedDB
-        const masteryLevel = evaluatedQuestions.value[questionId]!.masteryLevel
-        await saveEvaluationResult(questionId, masteryLevel, evaluatorComment.value)
+        const evaluationValue = evaluatedQuestions.value[questionId]!.value
+        await saveEvaluationResult(questionId, evaluationValue, evaluatorComment.value)
       }
       // If the question is not yet evaluated, the comment will be saved
       // along with the mastery level when evaluateAndGoNext is called.
@@ -202,16 +202,40 @@ export function useEvaluation(sessionId?: string) {
     }
   }
 
-  // Function to evaluate current question and go to next
+  // Function to evaluate current question and go to next (legacy mastery level)
   const evaluateAndGoNext = async (masteryLevel: MasteryLevelType) => {
     if (currentQuestion.value) {
       evaluatedQuestions.value[currentQuestion.value.id] = {
-        masteryLevel,
+        value: masteryLevel,
         comment: evaluatorComment.value,
       }
       await saveEvaluationResult(currentQuestion.value.id, masteryLevel, evaluatorComment.value)
       evaluatorComment.value = ''
       moveToNextPosition()
+    }
+  }
+
+  // Function to evaluate current question with generic value and go to next
+  const evaluateGenericAndGoNext = async (value: any, comment?: string) => {
+    if (currentQuestion.value) {
+      evaluatedQuestions.value[currentQuestion.value.id] = {
+        value,
+        comment: comment || evaluatorComment.value,
+      }
+      await saveEvaluationResult(currentQuestion.value.id, value, comment || evaluatorComment.value)
+      evaluatorComment.value = ''
+      moveToNextPosition()
+    }
+  }
+
+  // Function to save evaluation without moving (for intermediate saves)
+  const saveEvaluation = async (value: any, comment?: string) => {
+    if (currentQuestion.value) {
+      evaluatedQuestions.value[currentQuestion.value.id] = {
+        value,
+        comment: comment || evaluatorComment.value,
+      }
+      await saveEvaluationResult(currentQuestion.value.id, value, comment || evaluatorComment.value)
     }
   }
 
@@ -296,6 +320,8 @@ export function useEvaluation(sessionId?: string) {
     totalProgress,
     currentAbsoluteQuestionIndex,
     evaluateAndGoNext,
+    evaluateGenericAndGoNext,
+    saveEvaluation,
     goToPreviousQuestion,
     goToNextQuestion,
     navigateToQuestion,

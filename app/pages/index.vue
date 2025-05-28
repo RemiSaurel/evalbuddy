@@ -4,8 +4,10 @@ import { ImportExportService } from '@/utils/importExport'
 import { evaluationStorage } from '@/utils/storage'
 
 const { t } = useI18n()
-
 const router = useRouter()
+
+// Get configurations for selection
+const { configs, loadConfigs } = useEvaluationConfig()
 
 // Session management
 const sessions = ref<EvaluationSession[]>([])
@@ -13,14 +15,37 @@ const isLoading = ref(false)
 const error = ref<string | null>(null)
 
 // Import functionality
-const isImportModalOpen = ref(false)
+const isCreationModalOpen = ref(false)
 const selectedFile = ref<File | null>(null)
 const importErrors = ref<string[]>([])
 const isImporting = ref(false)
+const selectedConfigId = ref<string>('default')
 
-// Load sessions on mount
+// Load sessions and configs on mount
 onMounted(async () => {
-  await loadSessions()
+  await Promise.all([
+    loadSessions(),
+    loadConfigs(), // This will ensure configs are loaded
+  ])
+})
+
+// Computed items for configuration selection
+const configItems = computed(() => {
+  // Ensure configs.value is an array
+  const configArray = Array.isArray(configs.value) ? configs.value : []
+
+  const items = configArray.map(config => ({
+    value: config.id,
+    label: config.name,
+  }))
+
+  // Add default option with a special value instead of empty string
+  items.unshift({
+    value: 'default',
+    label: t('configuration.useDefault'),
+  })
+
+  return items
 })
 
 async function loadSessions() {
@@ -35,11 +60,6 @@ async function loadSessions() {
   finally {
     isLoading.value = false
   }
-}
-
-function createEvaluation() {
-  // Open import modal instead of directly creating evaluation
-  openImportModal()
 }
 
 function openSession(sessionId: string) {
@@ -69,10 +89,13 @@ async function exportSession(session: EvaluationSession) {
   }
 }
 
-function openImportModal() {
-  isImportModalOpen.value = true
+function openCreationEvaluation() {
+  isCreationModalOpen.value = true
   selectedFile.value = null
   importErrors.value = []
+  selectedConfigId.value = 'default'
+  // Force reload configs when opening modal to ensure latest data
+  loadConfigs()
 }
 
 function handleFileSelect(event: Event) {
@@ -80,7 +103,7 @@ function handleFileSelect(event: Event) {
   selectedFile.value = target.files?.[0] || null
 }
 
-async function importItems() {
+async function createEvaluation() {
   if (!selectedFile.value)
     return
 
@@ -98,12 +121,27 @@ async function importItems() {
       }
     }
 
-    // Create new session with imported items
+    // Find selected configuration
+    const selectedConfig = selectedConfigId.value && selectedConfigId.value !== 'default'
+      ? configs.value.find(c => c.id === selectedConfigId.value)
+      : undefined
+
+    // Create a serializable copy of the config to avoid proxy cloning issues
+    const serializableConfig = selectedConfig
+      ? JSON.parse(JSON.stringify(selectedConfig))
+      : undefined
+
+    // Create new session with imported items and selected configuration
     const sessionName = `Imported ${new Date().toLocaleDateString()}`
-    const session = await evaluationStorage.createSessionFromItems(items, sessionName)
+    const session = await evaluationStorage.createSessionFromItems(
+      items,
+      sessionName,
+      undefined, // description
+      serializableConfig,
+    )
 
     await loadSessions()
-    isImportModalOpen.value = false
+    isCreationModalOpen.value = false
 
     // Navigate to the new session
     router.push(`/evaluation/${session.id}`)
@@ -142,7 +180,7 @@ function getDropdownItems(session: EvaluationSession) {
       variant="subtle"
       :title="$t('evaluation.error')"
       :description="error"
-      :close-button="{ icon: 'i-lucide:x', color: 'gray', variant: 'link', padded: false }"
+      :close-button="{ icon: 'i-lucide:x', color: 'neutral', variant: 'link', padded: false }"
       @close="error = null"
     />
 
@@ -193,7 +231,7 @@ function getDropdownItems(session: EvaluationSession) {
           <div class="space-y-2">
             <!-- Stats Row -->
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4 text-sm text-gray-600">
+              <div class="flex items-center gap-4 text-sm text-neutral-600">
                 <div class="flex items-center gap-1">
                   <UIcon name="i-lucide:help-circle" class="w-3 h-3" />
                   <span>{{ session.items.length }}</span>
@@ -204,7 +242,7 @@ function getDropdownItems(session: EvaluationSession) {
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-sm font-medium text-gray-900">
+                <div class="text-sm font-medium text-neutral-900">
                   {{ Math.round((session.results.length / session.items.length) * 100) }}%
                 </div>
               </div>
@@ -221,7 +259,7 @@ function getDropdownItems(session: EvaluationSession) {
         </UCard>
       </div>
 
-      <div v-else class="text-center py-8 text-gray-500">
+      <div v-else class="text-center py-8 text-neutral-500">
         <UIcon name="i-lucide:folder-open" class="text-4xl mb-2" />
         <p>{{ $t('evaluation.overview.noSessions') }}</p>
       </div>
@@ -229,7 +267,7 @@ function getDropdownItems(session: EvaluationSession) {
 
     <!-- Create New Session -->
     <div class="flex justify-center gap-8 mt-12">
-      <BigButton :label="$t('evaluation.actions.create')" @click="createEvaluation()">
+      <BigButton :label="$t('evaluation.actions.create')" @click="openCreationEvaluation()">
         <template #icon>
           <UIcon name="i-lucide:plus" />
         </template>
@@ -237,24 +275,36 @@ function getDropdownItems(session: EvaluationSession) {
     </div>
 
     <!-- Import Modal -->
-    <UModal v-model:open="isImportModalOpen">
+    <UModal v-model:open="isCreationModalOpen" title="Creation Evaluation Modal" description="Creation Evaluation Modal">
       <template #content>
         <UCard>
           <template #header>
             <h3 class="font-semibold text-lg">
-              {{ $t('evaluation.importModal.importItems') }}
+              {{ $t('evaluation.creationModal.createEvaluation') }}
             </h3>
           </template>
 
           <div class="space-y-4">
+            <!-- Configuration Selection -->
             <div>
               <label class="block text-sm font-medium mb-2">
-                {{ $t('evaluation.importModal.selectFile') }}
+                {{ $t('configuration.selectForEvaluation') }}
+              </label>
+              <USelect
+                v-model="selectedConfigId"
+                :items="configItems"
+                :placeholder="$t('configuration.selectForEvaluation')"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2">
+                {{ $t('evaluation.creationModal.selectFile') }}
               </label>
               <input
                 type="file"
                 accept=".json"
-                class="block w-full text-sm text-gray-500
+                class="block w-full text-sm text-neutral-500
                 file:mr-4 file:py-2 file:px-4
                 file:rounded-md file:border-0
                 file:text-sm file:font-medium
@@ -266,7 +316,7 @@ function getDropdownItems(session: EvaluationSession) {
 
             <div v-if="importErrors.length > 0" class="bg-red-50 border border-red-200 rounded-md p-3">
               <h4 class="font-medium text-red-800 mb-2">
-                {{ $t('evaluation.importModal.importErrors') }}:
+                {{ $t('evaluation.creationModal.importErrors') }}:
               </h4>
               <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
                 <li v-for="err in importErrors" :key="err">
@@ -275,13 +325,13 @@ function getDropdownItems(session: EvaluationSession) {
               </ul>
             </div>
 
-            <div class="text-sm text-gray-600">
+            <div class="text-sm text-neutral-600">
               <p class="mb-2">
-                {{ $t('evaluation.importModal.importInstructions') }}:
+                {{ $t('evaluation.creationModal.importInstructions') }}:
               </p>
               <ul class="list-disc list-inside space-y-1 ml-4">
-                <li>{{ $t('evaluation.importModal.importFormat') }}</li>
-                <li>{{ $t('evaluation.importModal.importFields') }}</li>
+                <li>{{ $t('evaluation.creationModal.importFormat') }}</li>
+                <li>{{ $t('evaluation.creationModal.importFields') }}</li>
               </ul>
             </div>
           </div>
@@ -290,14 +340,14 @@ function getDropdownItems(session: EvaluationSession) {
             <div class="flex justify-end gap-3">
               <UButton
                 variant="ghost"
-                @click="isImportModalOpen = false"
+                @click="isCreationModalOpen = false"
               >
                 {{ $t('evaluation.actions.cancel') }}
               </UButton>
               <UButton
                 :disabled="!selectedFile || isImporting"
                 :loading="isImporting"
-                @click="importItems"
+                @click="createEvaluation"
               >
                 {{ $t('evaluation.actions.import') }}
               </UButton>

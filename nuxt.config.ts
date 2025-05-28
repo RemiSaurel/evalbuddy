@@ -26,5 +26,9 @@ export default defineNuxtConfig({
     defaultLocale: 'fr',
   },
 
+  ui: {
+    colorMode: false,
+  },
+
   ssr: false,
 })

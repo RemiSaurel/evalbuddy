@@ -1,8 +1,10 @@
-import type { EvaluatedItem, EvaluationSession } from '@/models/index'
+import type { EvaluatedItem, EvaluationConfig, EvaluationSession } from '@/models/index'
+import { DEFAULT_MASTERY_CONFIG } from '@/models/index'
 
 const DB_NAME = 'EvalBuddyDB'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const SESSIONS_STORE = 'sessions'
+const CONFIGS_STORE = 'configs'
 
 class EvaluationStorage {
   private db: IDBDatabase | null = null
@@ -29,6 +31,14 @@ class EvaluationStorage {
           sessionsStore.createIndex('createdAt', 'createdAt', { unique: false })
           sessionsStore.createIndex('name', 'name', { unique: false })
         }
+
+        // Create configs store
+        if (!db.objectStoreNames.contains(CONFIGS_STORE)) {
+          const configsStore = db.createObjectStore(CONFIGS_STORE, { keyPath: 'id' })
+          configsStore.createIndex('createdAt', 'createdAt', { unique: false })
+          configsStore.createIndex('name', 'name', { unique: false })
+          configsStore.createIndex('type', 'type', { unique: false })
+        }
       }
     })
   }
@@ -53,10 +63,11 @@ class EvaluationStorage {
       })),
       results: session.results.map(result => ({
         questionId: result.questionId,
-        masteryLevel: result.masteryLevel,
+        value: result.value,
         comment: result.comment,
         evaluatedAt: result.evaluatedAt,
       })),
+      config: session.config,
       createdAt: session.createdAt,
       updatedAt: session.updatedAt,
       evaluatorName: session.evaluatorName,
@@ -106,13 +117,28 @@ class EvaluationStorage {
     })
   }
 
-  async createSessionFromItems(items: EvaluatedItem[], name: string, description?: string): Promise<EvaluationSession> {
+  async createSessionFromItems(items: EvaluatedItem[], name: string, description?: string, config?: EvaluationConfig): Promise<EvaluationSession> {
+    // If no config provided, create a default mastery configuration
+    const defaultConfig: EvaluationConfig = config || {
+      id: crypto.randomUUID(),
+      name: 'Default Mastery Configuration',
+      type: 'mastery',
+      settings: {
+        allowComments: true,
+        requireComments: false,
+        masterySettings: DEFAULT_MASTERY_CONFIG,
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
     const session: EvaluationSession = {
       id: crypto.randomUUID(),
       name,
       description,
       items,
       results: [],
+      config: defaultConfig,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       isCompleted: false,
@@ -120,6 +146,64 @@ class EvaluationStorage {
 
     await this.saveSession(session)
     return session
+  }
+
+  // Configuration management methods
+  async saveConfig(config: EvaluationConfig): Promise<void> {
+    const db = await this.initDB()
+    const transaction = db.transaction([CONFIGS_STORE], 'readwrite')
+    const store = transaction.objectStore(CONFIGS_STORE)
+
+    const plainConfig: EvaluationConfig = {
+      id: config.id,
+      name: config.name,
+      type: config.type,
+      settings: JSON.parse(JSON.stringify(config.settings)),
+      createdAt: config.createdAt,
+      updatedAt: config.updatedAt,
+    }
+
+    return new Promise((resolve, reject) => {
+      const request = store.put(plainConfig)
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  async getConfig(id: string): Promise<EvaluationConfig | null> {
+    const db = await this.initDB()
+    const transaction = db.transaction([CONFIGS_STORE], 'readonly')
+    const store = transaction.objectStore(CONFIGS_STORE)
+
+    return new Promise((resolve, reject) => {
+      const request = store.get(id)
+      request.onsuccess = () => resolve(request.result || null)
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  async getAllConfigs(): Promise<EvaluationConfig[]> {
+    const db = await this.initDB()
+    const transaction = db.transaction([CONFIGS_STORE], 'readonly')
+    const store = transaction.objectStore(CONFIGS_STORE)
+
+    return new Promise((resolve, reject) => {
+      const request = store.getAll()
+      request.onsuccess = () => resolve(request.result || [])
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  async deleteConfig(id: string): Promise<void> {
+    const db = await this.initDB()
+    const transaction = db.transaction([CONFIGS_STORE], 'readwrite')
+    const store = transaction.objectStore(CONFIGS_STORE)
+
+    return new Promise((resolve, reject) => {
+      const request = store.delete(id)
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
   }
 }
 

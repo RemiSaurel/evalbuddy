@@ -8,6 +8,7 @@ const router = useRouter()
 
 const sessionId = route.params.uuid as string
 const {
+  currentSession,
   currentQuestionGroup,
   currentQuestionGroupProgress,
   totalProgress,
@@ -15,12 +16,24 @@ const {
   currentAbsoluteQuestionIndex,
   evaluatorComment,
   evaluateAndGoNext,
+  evaluateGenericAndGoNext,
   navigateToQuestion,
   isEvaluationCompleted,
   questions,
   evaluatedQuestions,
 } = useEvaluation(sessionId)
 
+// Determine evaluation mode
+const evaluationConfig = computed(() => {
+  // Check if the session has an evaluation configuration
+  return currentSession.value?.config || null
+})
+
+const isGenericEvaluation = computed(() => {
+  return !!evaluationConfig.value
+})
+
+// Legacy mastery level colors for backward compatibility
 const colors = {
   [MasteryLevel.NOT_ATTAINED]: 'bg-red-300 text-red-800 hover:bg-red-400',
   [MasteryLevel.INSUFFICIENT]: 'bg-orange-300 text-orange-800 hover:bg-orange-400',
@@ -49,8 +62,6 @@ function goToHomePage() {
 
 function reviewEvaluations() {
   isCompletionModalOpen.value = false
-  // For now, just go to the first question to review
-  // In a real app, you might want to implement a review mode
 }
 </script>
 
@@ -78,20 +89,22 @@ function reviewEvaluations() {
         :on-navigate="navigateToQuestion"
       />
 
-      <EvaluationCard
+      <HybridEvaluationCard
         v-if="currentQuestion"
         :current-question="currentQuestion"
         :current-absolute-question-index="currentAbsoluteQuestionIndex"
         :evaluator-comment="evaluatorComment"
-        :mastery-levels="masteryLevels"
-        :evaluate-and-go-next="evaluateAndGoNext"
         :evaluated-questions="evaluatedQuestions"
+        :mastery-levels="isGenericEvaluation ? undefined : masteryLevels"
+        :evaluate-and-go-next="isGenericEvaluation ? undefined : evaluateAndGoNext"
+        :evaluation-config="evaluationConfig || undefined"
+        :evaluate-generic-and-go-next="isGenericEvaluation ? evaluateGenericAndGoNext : undefined"
         @update:evaluator-comment="evaluatorComment = $event"
       />
     </div>
 
     <!-- Completion Modal -->
-    <UModal v-model:open="isCompletionModalOpen">
+    <UModal v-model:open="isCompletionModalOpen" title="Evalaution Completed Modal" description="Evaluation Completed Modal">
       <template #content>
         <UCard>
           <template #header>

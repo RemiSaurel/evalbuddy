@@ -1,4 +1,100 @@
 {
+  "navigation": {
+    "home": "Accueil",
+    "evaluations": "Évaluations",
+    "configurations": "Configurations"
+  },
+  "configuration": {
+    "title": "Configurations d'évaluation",
+    "subtitle": "Créez et gérez différents configurations pour vos évaluations",
+    "new": "Nouvelle configuration",
+    "noConfigurations": "Aucune configuration trouvée",
+    "noConfigurationsMessage": "Créez votre première configuration d'évaluation pour commencer.",
+    "noSearchResults": "Aucune configuration ne correspond à votre recherche.",
+    "created": "Créé",
+    "updated": "Mis à jour",
+    "comments": "Commentaires",
+    "optional": "Optionnel",
+    "required": "Obligatoire",
+    "disabled": "Désactivé",
+    "levels": "Niveaux",
+    "options": "Options",
+    "range": "Plage",
+    "modal": {
+      "title": {
+        "create": "Créer une nouvelle configuration d'évaluation",
+        "edit": "Modifier la configuration d'évaluation"
+      },
+      "chooseType": "Choisir le type d'évaluation",
+      "tabs": {
+        "basic": "Paramètres",
+        "evaluation": "Options",
+        "comments": "Commentaires"
+      },
+      "types": {
+        "mastery": {
+          "label": "Niveaux de maîtrise",
+          "description": "Évaluation multi-niveaux (ex. : Non atteint, Insuffisant, Suffisant, Total)"
+        },
+        "boolean": {
+          "label": "Correct/Incorrect",
+          "description": "Évaluation binaire simple"
+        },
+        "score": {
+          "label": "Score numérique",
+          "description": "Notation numérique avec plage et score de passage"
+        }
+      },
+      "fields": {
+        "configurationName": "Nom de la configuration",
+        "configurationNamePlaceholder": "Entrez le nom de la configuration",
+        "masteryLevels": "Niveaux de maîtrise",
+        "levelName": "Nom du niveau",
+        "level": "Niveau",
+        "levelDescription": "Description (optionnel)",
+        "booleanLabels": "Étiquettes booléennes",
+        "trueLabel": "Étiquette vraie",
+        "trueLabelPlaceholder": "ex. : Correct",
+        "falseLabel": "Étiquette fausse",
+        "falseLabelPlaceholder": "ex. : Incorrect",
+        "scoreSettings": "Paramètres de score",
+        "minimumValue": "Valeur minimale",
+        "maximumValue": "Valeur maximale",
+        "step": "Pas",
+        "unit": "Unité (optionnel)",
+        "unitPlaceholder": "ex. : %, pts",
+        "passingScore": "Score de passage (optionnel)",
+        "passingScorePlaceholder": "ex. : 60",
+        "commentSettings": "Paramètres des commentaires",
+        "allowComments": "Autoriser les commentaires",
+        "requireComments": "Exiger des commentaires"
+      },
+      "buttons": {
+        "addLevel": "Ajouter un niveau",
+        "cancel": "Annuler",
+        "save": "Enregistrer la configuration"
+      },
+      "validation": {
+        "title": "Veuillez corriger les erreurs suivantes :"
+      },
+      "configurationSuffix": "Configuration"
+    },
+    "actions": {
+      "edit": "Modifier",
+      "clone": "Cloner",
+      "delete": "Supprimer",
+      "cancel": "Annuler"
+    },
+    "deleteModal": {
+      "title": "Supprimer la configuration",
+      "message": "Êtes-vous sûr de vouloir supprimer la configuration \"{name}\" ?",
+      "warning": "Cette action ne peut pas être annulée."
+    },
+    "selectForEvaluation": "Sélectionner une configuration pour l'évaluation",
+    "useDefault": "Par défaut (Niveau de maîtrise)",
+    "defaultMastery": "Évaluation par niveau de maîtrise par défaut",
+    "defaultIfNone": "Utilisera la configuration de maîtrise par défaut si aucune n'est sélectionnée"
+  },
   "evaluation": {
     "actions": {
       "create": "Créer une évaluation",
@@ -6,6 +102,7 @@
       "export": "Exporter",
       "delete": "Supprimer",
       "cancel": "Annuler",
+      "confirm": "Confirmer",
       "saveComment": "Confirmer l'évaluation",
       "selectMasteryLevel": "Sélectionnez un niveau de maîtrise"
     },
@@ -51,7 +148,8 @@
     },
     "evaluator": {
       "comment": "Votre commentaire",
-      "commentPlaceholder": "Écrivez votre commentaire ici..."
+      "commentPlaceholder": "Écrivez votre commentaire ici...",
+      "commentRequired": "Les commentaires sont obligatoires pour cette évaluation"
     },
     "completion": {
       "title": "Évaluation terminée !",
@@ -59,8 +157,8 @@
       "review": "Revoir les évaluations",
       "goHome": "Retour à l'accueil"
     },
-    "importModal": {
-      "importItems": "Importer des items",
+    "creationModal": {
+      "createEvaluation": "Créer une évaluation",
       "selectFile": "Sélectionner un fichier",
       "importErrors": "Erreurs d'import",
       "importInstructions": "Instructions pour l'import",

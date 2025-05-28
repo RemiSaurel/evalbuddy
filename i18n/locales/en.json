@@ -1,4 +1,100 @@
 {
+  "navigation": {
+    "home": "Home",
+    "evaluations": "Evaluations",
+    "configurations": "Configurations"
+  },
+  "configuration": {
+    "title": "Evaluation Configurations",
+    "subtitle": "Create and manage different configurations for your evaluations",
+    "new": "New Configuration",
+    "noConfigurations": "No configurations found",
+    "noConfigurationsMessage": "Create your first evaluation configuration to get started.",
+    "noSearchResults": "No configurations match your search.",
+    "created": "Created",
+    "updated": "Updated",
+    "comments": "Comments",
+    "optional": "Optional",
+    "required": "Required",
+    "disabled": "Disabled",
+    "levels": "Levels",
+    "options": "Options",
+    "range": "Range",
+    "modal": {
+      "title": {
+        "create": "Create New Evaluation Configuration",
+        "edit": "Edit Evaluation Configuration"
+      },
+      "chooseType": "Choose Evaluation Type",
+      "tabs": {
+        "basic": "Basic Settings",
+        "evaluation": "Evaluation Options",
+        "comments": "Comments"
+      },
+      "types": {
+        "mastery": {
+          "label": "Mastery Levels",
+          "description": "Multi-level evaluation (e.g., Not Attained, Insufficient, Sufficient, Total)"
+        },
+        "boolean": {
+          "label": "Correct/Incorrect",
+          "description": "Simple binary evaluation"
+        },
+        "score": {
+          "label": "Numeric Score",
+          "description": "Numeric scoring with range and passing score"
+        }
+      },
+      "fields": {
+        "configurationName": "Configuration Name",
+        "configurationNamePlaceholder": "Enter configuration name",
+        "masteryLevels": "Mastery Levels",
+        "levelName": "Level name",
+        "level": "Level",
+        "levelDescription": "Description (optional)",
+        "booleanLabels": "Boolean Labels",
+        "trueLabel": "True Label",
+        "trueLabelPlaceholder": "e.g., Correct",
+        "falseLabel": "False Label",
+        "falseLabelPlaceholder": "e.g., Incorrect",
+        "scoreSettings": "Score Settings",
+        "minimumValue": "Minimum Value",
+        "maximumValue": "Maximum Value",
+        "step": "Step",
+        "unit": "Unit (optional)",
+        "unitPlaceholder": "e.g., %, pts",
+        "passingScore": "Passing Score (optional)",
+        "passingScorePlaceholder": "e.g., 60",
+        "commentSettings": "Comment Settings",
+        "allowComments": "Allow comments",
+        "requireComments": "Require comments"
+      },
+      "buttons": {
+        "addLevel": "Add Level",
+        "cancel": "Cancel",
+        "save": "Save Configuration"
+      },
+      "validation": {
+        "title": "Please fix the following errors:"
+      },
+      "configurationSuffix": "Configuration"
+    },
+    "actions": {
+      "edit": "Edit",
+      "clone": "Clone",
+      "delete": "Delete",
+      "cancel": "Cancel"
+    },
+    "deleteModal": {
+      "title": "Delete Configuration",
+      "message": "Are you sure you want to delete the configuration \"{name}\"?",
+      "warning": "This action cannot be undone."
+    },
+    "selectForEvaluation": "Select Configuration for Evaluation",
+    "useDefault": "Use Default (Mastery Level)",
+    "defaultMastery": "Default mastery level evaluation",
+    "defaultIfNone": "Will use default mastery configuration if none selected"
+  },
   "evaluation": {
     "actions": {
       "create": "Create Evaluation",
@@ -6,6 +102,7 @@
       "export": "Export",
       "delete": "Delete",
       "cancel": "Cancel",
+      "confirm": "Confirm",
       "saveComment": "Confirm Evaluation",
       "selectMasteryLevel": "Select a mastery level"
     },
@@ -51,7 +148,8 @@
     },
     "evaluator": {
       "comment": "Your Comment",
-      "commentPlaceholder": "Write your comment here..."
+      "commentPlaceholder": "Write your comment here...",
+      "commentRequired": "Comments are required for this evaluation"
     },
     "completion": {
       "title": "Evaluation Completed!",
@@ -59,8 +157,8 @@
       "review": "Review Evaluations",
       "goHome": "Go to Home"
     },
-    "importModal": {
-      "importItems": "Import Items",
+    "creationModal": {
+      "createEvaluation": "Create Evaluation",
       "selectFile": "Select a file",
       "importErrors": "Import Errors",
       "importInstructions": "Instructions for import",
