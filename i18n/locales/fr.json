@@ -67,7 +67,7 @@
         "passingScorePlaceholder": "ex. : 60",
         "commentSettings": "Paramètres des commentaires",
         "allowComments": "Autoriser les commentaires",
-        "requireComments": "Exiger des commentaires"
+        "requireComments": "Commentaires obligatoires"
       },
       "buttons": {
         "addLevel": "Ajouter un niveau",
