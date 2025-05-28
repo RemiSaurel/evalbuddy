@@ -28,13 +28,6 @@ export interface EvaluationSession {
 
 export interface ExportData {
   session: EvaluationSession
-  statistics: {
-    totalQuestions: number
-    evaluatedQuestions: number
-    completionRate: number
-    masteryDistribution: Record<MasteryLevelType, number>
-    difficultyBreakdown: Record<Difficulty, { total: number, evaluated: number }>
-  }
   exportedAt: string
   version: string
 }

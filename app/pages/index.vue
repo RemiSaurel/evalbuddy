@@ -116,17 +116,17 @@ async function importItems() {
   }
 }
 
-function dropdownItems(session: EvaluationSession) {
+function getDropdownItems(session: EvaluationSession) {
   return [
     {
       label: t('evaluation.actions.export'),
       icon: 'i-lucide:download',
-      click: () => exportSession(session),
+      onSelect: () => exportSession(session),
     },
     {
       label: t('evaluation.actions.delete'),
       icon: 'i-lucide:trash-2',
-      click: () => deleteSession(session.id),
+      onSelect: () => deleteSession(session.id),
     },
   ]
 }
@@ -177,7 +177,7 @@ function dropdownItems(session: EvaluationSession) {
                 </h3>
               </div>
               <UDropdownMenu
-                :items="dropdownItems(session)"
+                :items="getDropdownItems(session)"
               >
                 <UButton
                   icon="i-lucide:more-vertical"

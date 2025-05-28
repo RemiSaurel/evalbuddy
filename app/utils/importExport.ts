@@ -74,64 +74,14 @@ export class ImportExportService {
       throw new Error('Session not found')
     }
 
-    const statistics = this.calculateStatistics(session)
-
     const exportData: ExportData = {
       session,
-      statistics,
       exportedAt: new Date().toISOString(),
       version: '1.0',
     }
 
     const jsonString = JSON.stringify(exportData, null, 2)
     return new Blob([jsonString], { type: 'application/json' })
-  }
-
-  /**
-   * Calculate comprehensive statistics for a session
-   */
-  private static calculateStatistics(session: EvaluationSession) {
-    const totalQuestions = session.items.length
-    const evaluatedQuestions = session.results.length
-    const completionRate = totalQuestions > 0 ? (evaluatedQuestions / totalQuestions) * 100 : 0
-
-    // Mastery level distribution
-    const masteryDistribution: Record<MasteryLevelType, number> = {
-      NOT_ATTAINED: 0,
-      INSUFFICIENT: 0,
-      SUFFICIENT: 0,
-      TOTAL: 0,
-    }
-
-    session.results.forEach((result) => {
-      masteryDistribution[result.masteryLevel]++
-    })
-
-    // Difficulty breakdown
-    const difficultyBreakdown: Record<Difficulty, { total: number, evaluated: number }> = {
-      easy: { total: 0, evaluated: 0 },
-      medium: { total: 0, evaluated: 0 },
-      hard: { total: 0, evaluated: 0 },
-    }
-
-    session.items.forEach((item) => {
-      difficultyBreakdown[item.difficulty].total++
-    })
-
-    session.results.forEach((result) => {
-      const item = session.items.find(i => i.id === result.questionId)
-      if (item) {
-        difficultyBreakdown[item.difficulty].evaluated++
-      }
-    })
-
-    return {
-      totalQuestions,
-      evaluatedQuestions,
-      completionRate: Math.round(completionRate * 100) / 100,
-      masteryDistribution,
-      difficultyBreakdown,
-    }
   }
 
   /**
