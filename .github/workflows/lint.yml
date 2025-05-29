@@ -4,10 +4,10 @@ on:
   pull_request:
     branches:
       - main
-      
+
 jobs:
   lint:
-    name: "Run ESLint"
+    name: Run ESLint
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: npm
 
       - name: Install dependencies
         run: npm install
