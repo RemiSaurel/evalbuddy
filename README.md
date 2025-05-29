@@ -4,36 +4,7 @@ A modern, flexible evaluation platform for educational assessments and question 
 
 ## 📋 Overview
 
-Evalbuddy is a web-based application built with Nuxt 3 that provides educators with a comprehensive tool for evaluating responses to questions. The platform supports multiple evaluation methodologies, from simple binary assessments to complex mastery-level evaluations with custom scoring systems.
-
-## ✨ Features
-
-### 🔧 Flexible Evaluation Configurations
-- **Mastery Levels**: Multi-level evaluation system (e.g., Not Attained, Insufficient, Sufficient, Total)
-- **Boolean Evaluation**: Simple correct/incorrect assessments
-- **Numeric Scoring**: Customizable score ranges with passing thresholds
-- **Custom Labels**: Personalized evaluation criteria and descriptions
-
-### 📊 Evaluation Sessions
-- **Question Management**: Import questions via JSON files
-- **Progress Tracking**: Visual progress indicators for both current group and overall completion
-- **Question Navigation**: Interactive question navigator with evaluation status indicators
-- **Grouped Questions**: Organize related questions for structured evaluation
-
-### 💬 Comment System
-- **Flexible Comments**: Optional or required evaluator comments
-- **Per-Question Comments**: Individual feedback for each question
-- **Comment Persistence**: Comments are saved and can be edited during evaluation
-
-### 📤 Import/Export Capabilities
-- **Configuration Export/Import**: Share evaluation configurations across sessions
-- **Session Export**: Export complete evaluation sessions with results
-- **JSON Format**: Standard JSON format for easy integration
-
-### 💾 Data Persistence
-- **IndexedDB Storage**: Client-side data persistence
-- **Session Management**: Automatic saving of evaluation progress
-- **Offline Capability**: Works without internet connection and 100% local
+Evalbuddy is a web-based application built with Nuxt 3 that provides educators with a comprehensive tool for evaluating responses to questions. The platform supports multiple evaluation methodologies, from simple binary assessments to complex mastery-level evaluations with custom scoring systems. The tool uses [IndexedDB](https://developer.mozilla.org/fr/docs/Web/API/IndexedDB_API/Using_IndexedDB) for local data storage, ensuring fast and reliable performance with 100% local data handling.
 
 ## 🚀 Getting Started
 
