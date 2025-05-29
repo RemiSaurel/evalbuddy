@@ -9,6 +9,7 @@ import {
   DEFAULT_SCORE_CONFIG,
   EVALUATION_TYPE_META,
 } from '@/models/index'
+import { ImportExportService } from '@/utils/importExport'
 import { evaluationStorage } from '@/utils/storage'
 
 export function useEvaluationConfig() {
@@ -294,6 +295,53 @@ export function useEvaluationConfig() {
     }))
   }
 
+  // Export configuration to file
+  const exportConfig = (config: EvaluationConfig): void => {
+    try {
+      const blob = ImportExportService.exportConfig(config)
+      const filename = ImportExportService.generateConfigExportFilename(config.name)
+      ImportExportService.downloadBlob(blob, filename)
+    }
+    catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to export configuration'
+      throw err
+    }
+  }
+
+  // Import configuration from file
+  const importConfigFromFile = async (file: File): Promise<EvaluationConfig | null> => {
+    try {
+      const { config: importedConfig, errors } = await ImportExportService.importConfigFromFile(file)
+
+      if (errors.length > 0) {
+        error.value = `Import errors: ${errors.join(', ')}`
+        return null
+      }
+
+      if (!importedConfig) {
+        error.value = 'No configuration found in file'
+        return null
+      }
+
+      // Check if a configuration with the same name already exists
+      const existingConfig = configs.value.find(c => c.name === importedConfig.name)
+      if (existingConfig) {
+        // Append a suffix to make the name unique
+        importedConfig.name = `${importedConfig.name} (Imported)`
+      }
+
+      // Save the imported configuration
+      await evaluationStorage.saveConfig(importedConfig)
+      configs.value.push(importedConfig)
+
+      return importedConfig
+    }
+    catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to import configuration'
+      throw err
+    }
+  }
+
   return {
     // State
     configs,
@@ -317,5 +365,7 @@ export function useEvaluationConfig() {
     formatEvaluationValue,
     getAvailableTypes,
     loadConfigs, // Export loadConfigs so it can be called manually
+    exportConfig,
+    importConfigFromFile,
   }
 }

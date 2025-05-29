@@ -83,12 +83,22 @@
       "edit": "Edit",
       "clone": "Clone",
       "delete": "Delete",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "export": "Export",
+      "import": "Import"
     },
     "deleteModal": {
       "title": "Delete Configuration",
       "message": "Are you sure you want to delete the configuration \"{name}\"?",
       "warning": "This action cannot be undone."
+    },
+    "importModal": {
+      "title": "Import Configuration",
+      "selectFile": "Select Configuration File",
+      "importErrors": "Import Errors",
+      "importInstructions": "Import Instructions",
+      "importFormat": "Select a .conf file exported from EvalBuddy",
+      "importVersion": "The configuration will be imported with a new ID and current timestamp"
     },
     "selectForEvaluation": "Select Configuration for Evaluation",
     "useDefault": "Use Default (Mastery Level)",
@@ -166,6 +176,7 @@
       "importFields": "Each item must have id, questionID, question, referenceAnswer, learnerAnswer, difficulty."
     },
     "error": "Error",
-    "title": "Evaluation"
+    "title": "Evaluation",
+    "subtitle": "Evaluate answers and resume sessions whenever you want"
   }
 }

@@ -9,6 +9,8 @@ const {
   deleteConfig,
   cloneConfig,
   getEvaluationTypeMeta,
+  exportConfig,
+  importConfigFromFile,
 } = useEvaluationConfig()
 
 // State
@@ -17,6 +19,12 @@ const isConfigModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const configToDelete = ref<EvaluationConfig | null>(null)
 const searchQuery = ref('')
+
+// Import functionality
+const isImportModalOpen = ref(false)
+const selectedImportFile = ref<File | null>(null)
+const importErrors = ref<string[]>([])
+const isImporting = ref(false)
 
 // Computed
 const filteredConfigs = computed(() => {
@@ -60,7 +68,6 @@ async function handleConfigSave(config: EvaluationConfig) {
   }
   catch (error) {
     console.error('Failed to save configuration:', error)
-    // TODO: Show error toast/notification
   }
 }
 
@@ -127,6 +134,11 @@ function getConfigActions(config: EvaluationConfig) {
         icon: 'i-lucide:copy',
         onSelect: () => handleClone(serializableConfig),
       },
+      {
+        label: t('configuration.actions.export'),
+        icon: 'i-lucide:download',
+        onSelect: () => handleExport(serializableConfig),
+      },
     ],
     [
       {
@@ -137,12 +149,60 @@ function getConfigActions(config: EvaluationConfig) {
     ],
   ]
 }
+
+// Handle configuration export
+function handleExport(config: EvaluationConfig) {
+  try {
+    exportConfig(config)
+  }
+  catch (error) {
+    console.error('Failed to export configuration:', error)
+    // TODO: Show error toast/notification
+  }
+}
+
+// Import functionality
+function openImportModal() {
+  isImportModalOpen.value = true
+  selectedImportFile.value = null
+  importErrors.value = []
+}
+
+function handleImportFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  selectedImportFile.value = target.files?.[0] || null
+}
+
+async function handleImport() {
+  if (!selectedImportFile.value)
+    return
+
+  isImporting.value = true
+  importErrors.value = []
+
+  try {
+    const importedConfig = await importConfigFromFile(selectedImportFile.value)
+
+    if (importedConfig) {
+      isImportModalOpen.value = false
+      selectedImportFile.value = null
+      // TODO: Show success toast/notification
+    }
+  }
+  catch (error) {
+    console.error('Failed to import configuration:', error)
+    importErrors.value = [error instanceof Error ? error.message : 'Failed to import configuration']
+  }
+  finally {
+    isImporting.value = false
+  }
+}
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto p-6">
+  <div class="max-w-6xl mx-auto mt-8">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-4">
       <div>
         <h1 class="text-3xl font-bold text-neutral-900">
           {{ t('configuration.title') }}
@@ -152,13 +212,23 @@ function getConfigActions(config: EvaluationConfig) {
         </p>
       </div>
 
-      <UButton
-        icon="i-lucide:plus"
-        size="lg"
-        @click="openCreateModal"
-      >
-        {{ t('configuration.new') }}
-      </UButton>
+      <div class="flex gap-3">
+        <UButton
+          icon="i-lucide:upload"
+          variant="outline"
+          size="lg"
+          @click="openImportModal"
+        >
+          {{ t('configuration.actions.import') }}
+        </UButton>
+        <UButton
+          icon="i-lucide:plus"
+          size="lg"
+          @click="openCreateModal"
+        >
+          {{ t('configuration.new') }}
+        </UButton>
+      </div>
     </div>
 
     <!-- Empty State -->
@@ -207,54 +277,132 @@ function getConfigActions(config: EvaluationConfig) {
           </UDropdownMenu>
         </div>
       </div>
+    </div>
 
-      <!-- Configuration Modal -->
-      <EvaluationConfigModal
-        v-model="selectedConfig"
-        v-model:open="isConfigModalOpen"
-        @save="handleConfigSave"
-        @update:open="value => { if (!value) handleConfigModalClose() }"
-      />
+    <!-- Configuration Modal -->
+    <EvaluationConfigModal
+      v-model="selectedConfig"
+      v-model:open="isConfigModalOpen"
+      @save="handleConfigSave"
+      @update:open="value => { if (!value) handleConfigModalClose() }"
+    />
 
-      <!-- Delete Confirmation Modal -->
-      <UModal v-model:open="isDeleteModalOpen" title="Delete Configuration Modal" description="Delete Configuration Modal">
-        <template #content>
-          <UCard>
-            <template #header>
-              <h3 class="text-lg font-semibold">
-                {{ t('configuration.deleteModal.title') }}
-              </h3>
-            </template>
+    <!-- Delete Confirmation Modal -->
+    <UModal v-model:open="isDeleteModalOpen" title="Delete Configuration Modal" description="Delete Configuration Modal">
+      <template #content>
+        <UCard>
+          <template #header>
+            <h3 class="text-lg font-semibold">
+              {{ t('configuration.deleteModal.title') }}
+            </h3>
+          </template>
 
-            <div class="space-y-4">
-              <p class="text-neutral-600">
-                {{ t('configuration.deleteModal.message', { name: configToDelete?.name }) }}
-              </p>
-              <p class="text-sm text-error">
-                {{ t('configuration.deleteModal.warning') }}
-              </p>
+          <div class="space-y-4">
+            <p class="text-neutral-600">
+              {{ t('configuration.deleteModal.message', { name: configToDelete?.name }) }}
+            </p>
+            <p class="text-sm text-error">
+              {{ t('configuration.deleteModal.warning') }}
+            </p>
+          </div>
+
+          <template #footer>
+            <div class="flex justify-end gap-3">
+              <UButton
+                color="neutral"
+                variant="outline"
+                @click="isDeleteModalOpen = false"
+              >
+                {{ t('configuration.actions.cancel') }}
+              </UButton>
+              <UButton
+                color="error"
+                @click="handleDelete"
+              >
+                {{ t('configuration.actions.delete') }}
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
+    </UModal>
+
+    <!-- Import Configuration Modal -->
+    <UModal v-model:open="isImportModalOpen" title="Import Configuration Modal" description="Import Configuration Modal">
+      <template #content>
+        <UCard>
+          <template #header>
+            <h3 class="text-lg font-semibold">
+              {{ t('configuration.importModal.title') }}
+            </h3>
+          </template>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">
+                {{ t('configuration.importModal.selectFile') }}
+              </label>
+              <input
+                type="file"
+                accept=".conf,.json"
+                class="block w-full text-sm text-neutral-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-lg file:border-0
+                file:text-sm file:font-medium
+                file:bg-primary-50 file:text-primary-700
+                hover:file:bg-primary-100"
+                @change="handleImportFileSelect"
+              >
             </div>
 
-            <template #footer>
-              <div class="flex justify-end gap-3">
-                <UButton
-                  color="neutral"
-                  variant="outline"
-                  @click="isDeleteModalOpen = false"
-                >
-                  {{ t('configuration.actions.cancel') }}
-                </UButton>
-                <UButton
-                  color="error"
-                  @click="handleDelete"
-                >
-                  {{ t('configuration.actions.delete') }}
-                </UButton>
-              </div>
-            </template>
-          </UCard>
-        </template>
-      </UModal>
-    </div>
+            <!-- Import Errors -->
+            <UAlert
+              v-if="importErrors.length > 0"
+              icon="i-lucide:alert-circle"
+              color="error"
+              variant="subtle"
+              :title="t('configuration.importModal.importErrors')"
+            >
+              <template #description>
+                <ul class="list-disc list-inside space-y-1">
+                  <li v-for="error in importErrors" :key="error">
+                    {{ error }}
+                  </li>
+                </ul>
+              </template>
+            </UAlert>
+
+            <!-- Import Instructions -->
+            <div class="text-sm text-neutral-600">
+              <h4 class="font-medium mb-2">
+                {{ t('configuration.importModal.importInstructions') }}
+              </h4>
+              <ul class="list-disc list-inside space-y-1">
+                <li>{{ t('configuration.importModal.importFormat') }}</li>
+                <li>{{ t('configuration.importModal.importVersion') }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <template #footer>
+            <div class="flex justify-end gap-3">
+              <UButton
+                variant="ghost"
+                @click="isImportModalOpen = false"
+              >
+                {{ t('configuration.actions.cancel') }}
+              </UButton>
+              <UButton
+                :disabled="!selectedImportFile || isImporting"
+                :loading="isImporting"
+                @click="handleImport"
+              >
+                {{ t('configuration.actions.import') }}
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
+    </UModal>
   </div>
 </template>

@@ -184,23 +184,31 @@ function getDropdownItems(session: EvaluationSession) {
       @close="error = null"
     />
 
+    <!-- Header -->
+    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-neutral-900">
+          {{ t('evaluation.title') }}
+        </h1>
+        <p class="text-neutral-600 mt-2">
+          {{ t('evaluation.subtitle') }}
+        </p>
+      </div>
+
+      <div class="flex gap-3">
+        <UButton
+          icon="i-lucide:plus"
+          size="lg"
+          @click="openCreationEvaluation()"
+        >
+          {{ t('evaluation.actions.create') }}
+        </UButton>
+      </div>
+    </div>
+
     <!-- Existing Sessions -->
     <div class="flex flex-col gap-4">
-      <div class="flex justify-between items-center">
-        <span class="text-neutral-800 font-semibold">
-          {{ $t('evaluation.overview.resumeTitle') }}
-        </span>
-      </div>
-
-      <div v-if="isLoading" class="flex gap-4 flex-wrap">
-        <USkeleton
-          v-for="i in 3"
-          :key="i"
-          class="min-w-64 h-32"
-        />
-      </div>
-
-      <div v-else-if="sessions.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div v-if="sessions.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <UCard
           v-for="session in sessions"
           :key="session.id"
@@ -209,10 +217,13 @@ function getDropdownItems(session: EvaluationSession) {
         >
           <template #header>
             <div class="flex justify-between items-start">
-              <div class="flex-1 min-w-0">
+              <div class="flex flex-col gap-1">
                 <h3 class="font-semibold text-base truncate text-neutral-900  transition-colors">
                   {{ session.name }}
                 </h3>
+                <div class="text-sm text-neutral-500 truncate">
+                  {{ session.config.name }}
+                </div>
               </div>
               <UDropdownMenu
                 :items="getDropdownItems(session)"
@@ -263,15 +274,6 @@ function getDropdownItems(session: EvaluationSession) {
         <UIcon name="i-lucide:folder-open" class="text-4xl mb-2" />
         <p>{{ $t('evaluation.overview.noSessions') }}</p>
       </div>
-    </div>
-
-    <!-- Create New Session -->
-    <div class="flex justify-center gap-8 mt-12">
-      <BigButton :label="$t('evaluation.actions.create')" @click="openCreationEvaluation()">
-        <template #icon>
-          <UIcon name="i-lucide:plus" />
-        </template>
-      </BigButton>
     </div>
 
     <!-- Import Modal -->

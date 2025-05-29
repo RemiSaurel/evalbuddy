@@ -83,12 +83,22 @@
       "edit": "Modifier",
       "clone": "Cloner",
       "delete": "Supprimer",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "export": "Exporter",
+      "import": "Importer"
     },
     "deleteModal": {
       "title": "Supprimer la configuration",
       "message": "Êtes-vous sûr de vouloir supprimer la configuration \"{name}\" ?",
       "warning": "Cette action ne peut pas être annulée."
+    },
+    "importModal": {
+      "title": "Importer une configuration",
+      "selectFile": "Sélectionner un fichier de configuration",
+      "importErrors": "Erreurs d'importation",
+      "importInstructions": "Instructions d'importation",
+      "importFormat": "Sélectionnez un fichier .conf exporté depuis EvalBuddy",
+      "importVersion": "La configuration sera importée avec un nouvel ID et l'horodatage actuel"
     },
     "selectForEvaluation": "Sélectionner une configuration pour l'évaluation",
     "useDefault": "Par défaut (Niveau de maîtrise)",
@@ -166,6 +176,7 @@
       "importFields": "Chaque item doit avoir id, questionID, question, referenceAnswer, learnerAnswer, difficulty."
     },
     "error": "Erreur",
-    "title": "Évaluation"
+    "title": "Évaluation",
+    "subtitle": "Évaluez les réponses et reprenez les sessions quand vous le souhaitez"
   }
 }
