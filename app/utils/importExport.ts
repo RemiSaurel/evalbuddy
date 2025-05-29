@@ -56,7 +56,7 @@ export class ImportExportService {
       return `Item at index ${index}: Must be an object`
     }
 
-    const required = ['id', 'questionID', 'question', 'referenceAnswer', 'learnerAnswer', 'difficulty']
+    const required = ['id', 'questionID', 'question', 'referenceAnswer', 'submittedAnswer', 'difficulty']
 
     for (const field of required) {
       if (!item[field] || typeof item[field] !== 'string') {

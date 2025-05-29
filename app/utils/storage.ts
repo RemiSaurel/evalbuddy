@@ -58,7 +58,7 @@ class EvaluationStorage {
         questionID: item.questionID,
         question: item.question,
         referenceAnswer: item.referenceAnswer,
-        learnerAnswer: item.learnerAnswer,
+        submittedAnswer: item.submittedAnswer,
         difficulty: item.difficulty,
       })),
       results: session.results.map(result => ({

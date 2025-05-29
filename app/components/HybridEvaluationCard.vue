@@ -213,9 +213,9 @@ function getMasteryButtonClasses(level: { value: MasteryLevelType, color: string
 
     <div class="flex flex-col gap-4">
       <div class="text-neutral-800 text-sm font-semibold">
-        {{ $t('evaluation.question.learnerAnswer') }}
+        {{ $t('evaluation.question.submittedAnswer') }}
       </div>
-      {{ currentQuestion.learnerAnswer }}
+      {{ currentQuestion.submittedAnswer }}
     </div>
 
     <template #footer>

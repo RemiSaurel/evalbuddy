@@ -134,7 +134,7 @@
     "question": {
       "title": "Question",
       "answer": "Répondre",
-      "learnerAnswer": "Réponse de l'apprenant"
+      "submittedAnswer": "Réponse soumise"
     },
     "mastery": {
       "NOT_ATTAINED": "Non atteint",
@@ -173,7 +173,7 @@
       "importErrors": "Erreurs d'import",
       "importInstructions": "Instructions pour l'import",
       "importFormat": "Le fichier doit être un tableau JSON d'items.",
-      "importFields": "Chaque item doit avoir id, questionID, question, referenceAnswer, learnerAnswer, difficulty."
+      "importFields": "Chaque item doit avoir id, questionID, question, referenceAnswer, submittedAnswer, difficulty."
     },
     "error": "Erreur",
     "title": "Évaluation",

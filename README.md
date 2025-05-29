@@ -1,3 +1,154 @@
 # 🧑‍🏫 Evalbuddy
 
-Easy evaluation.
+A modern, flexible evaluation platform for educational assessments and question grading.
+
+## 📋 Overview
+
+Evalbuddy is a web-based application built with Nuxt 3 that provides educators with a comprehensive tool for evaluating responses to questions. The platform supports multiple evaluation methodologies, from simple binary assessments to complex mastery-level evaluations with custom scoring systems.
+
+## ✨ Features
+
+### 🔧 Flexible Evaluation Configurations
+- **Mastery Levels**: Multi-level evaluation system (e.g., Not Attained, Insufficient, Sufficient, Total)
+- **Boolean Evaluation**: Simple correct/incorrect assessments
+- **Numeric Scoring**: Customizable score ranges with passing thresholds
+- **Custom Labels**: Personalized evaluation criteria and descriptions
+
+### 📊 Evaluation Sessions
+- **Question Management**: Import questions via JSON files
+- **Progress Tracking**: Visual progress indicators for both current group and overall completion
+- **Question Navigation**: Interactive question navigator with evaluation status indicators
+- **Grouped Questions**: Organize related questions for structured evaluation
+
+### 💬 Comment System
+- **Flexible Comments**: Optional or required evaluator comments
+- **Per-Question Comments**: Individual feedback for each question
+- **Comment Persistence**: Comments are saved and can be edited during evaluation
+
+### 📤 Import/Export Capabilities
+- **Configuration Export/Import**: Share evaluation configurations across sessions
+- **Session Export**: Export complete evaluation sessions with results
+- **JSON Format**: Standard JSON format for easy integration
+
+### 💾 Data Persistence
+- **IndexedDB Storage**: Client-side data persistence
+- **Session Management**: Automatic saving of evaluation progress
+- **Offline Capability**: Works without internet connection and 100% local
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn package manager
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd evalbuddy
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Access the application**
+   Open your browser to `http://localhost:3000`
+
+### Building for Production
+
+```bash
+# Build for production
+npm run build
+
+# Generate static files
+npm run generate
+
+# Preview production build
+npm run preview
+```
+
+## 📖 Usage Guide
+
+### Creating Evaluation Configurations
+
+1. Navigate to the **Configurations** page
+2. Click **New Configuration**
+3. Choose your evaluation type:
+   - **Mastery Levels**: For competency-based assessment
+   - **Correct/Incorrect**: For simple binary evaluation
+   - **Numeric Score**: For point-based grading
+4. Configure settings specific to your chosen type
+5. Set comment requirements (optional/required/disabled)
+
+### Setting Up an Evaluation Session
+
+1. From the home page, click **Create Evaluation**
+2. Select an evaluation configuration (or use default)
+3. Import a JSON file containing your questions
+4. The session will be created and ready for evaluation
+
+### Question File Format
+
+Questions should be provided as a JSON array with the following structure:
+
+```json
+[
+  {
+    "id": "1",
+    "questionID": "Q1",
+    "question": "What is the capital of France?",
+    "referenceAnswer": "Paris",
+    "submittedAnswer": "Paris",
+    "difficulty": "easy"
+  }
+]
+```
+
+**Required fields:**
+- `id`: Unique identifier for the question instance
+- `questionID`: Groups related questions together
+- `question`: The question text
+- `referenceAnswer`: The correct/expected answer
+- `submittedAnswer`: The submitted answer
+- `difficulty`: One of "easy", "medium", or "hard"
+
+### Evaluating Questions
+
+1. Open an evaluation session
+2. Review each question and the submitted answer
+3. Select your evaluation (mastery level, score, or boolean)
+4. Add comments if enabled
+5. Navigate between questions using the question navigator
+6. Track progress with the built-in progress indicators
+
+## 🌍 Internationalization
+
+The application supports multiple languages through Vue I18n:
+
+- **English** (`en`): Complete translation
+- **French** (`fr`): Complete translation (default)
+
+To add a new language:
+1. Create a new locale file in `i18n/locales/`
+2. Add the locale configuration in `nuxt.config.ts`
+3. Translate all required keys
+
+## 📄 License
+
+This project is licensed under the terms specified in the LICENSE file.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📧 Support
+
+For questions or support, please open an issue in the repository.

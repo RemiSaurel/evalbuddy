@@ -6,7 +6,7 @@ export const QUESTIONS: EvaluatedItem[] = [
     questionID: '1',
     question: 'Quelle est la capitale de la France?',
     referenceAnswer: 'Paris',
-    learnerAnswer: 'Paris',
+    submittedAnswer: 'Paris',
     difficulty: 'easy',
   },
   {
@@ -14,7 +14,7 @@ export const QUESTIONS: EvaluatedItem[] = [
     questionID: '2',
     question: 'Quelle est la plus grande planète de notre système solaire?',
     referenceAnswer: 'Jupiter',
-    learnerAnswer: 'Jupiter',
+    submittedAnswer: 'Jupiter',
     difficulty: 'medium',
   },
   {
@@ -22,7 +22,7 @@ export const QUESTIONS: EvaluatedItem[] = [
     questionID: '3',
     question: 'Quel est le symbole chimique de l\'or?',
     referenceAnswer: 'Au',
-    learnerAnswer: 'Au',
+    submittedAnswer: 'Au',
     difficulty: 'hard',
   },
   {
@@ -30,7 +30,7 @@ export const QUESTIONS: EvaluatedItem[] = [
     questionID: '1',
     question: 'Quelle est la capitale de la France?',
     referenceAnswer: 'Paris',
-    learnerAnswer: 'Berlin',
+    submittedAnswer: 'Berlin',
     difficulty: 'easy',
   },
   {
@@ -38,7 +38,7 @@ export const QUESTIONS: EvaluatedItem[] = [
     questionID: '2',
     question: 'Quelle est la plus grande planète de notre système solaire?',
     referenceAnswer: 'Jupiter',
-    learnerAnswer: 'Saturne',
+    submittedAnswer: 'Saturne',
     difficulty: 'medium',
   },
   {
@@ -46,7 +46,7 @@ export const QUESTIONS: EvaluatedItem[] = [
     questionID: '3',
     question: 'Quel est le symbole chimique de l\'or?',
     referenceAnswer: 'Au',
-    learnerAnswer: 'Ag',
+    submittedAnswer: 'Ag',
     difficulty: 'hard',
   },
 ]

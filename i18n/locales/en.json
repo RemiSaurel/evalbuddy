@@ -134,7 +134,7 @@
     "question": {
       "title": "Question",
       "answer": "Answer",
-      "learnerAnswer": "Learner's Answer"
+      "submittedAnswer": "Submitted Answer"
     },
     "mastery": {
       "NOT_ATTAINED": "Not Attained",
@@ -173,7 +173,7 @@
       "importErrors": "Import Errors",
       "importInstructions": "Instructions for import",
       "importFormat": "The file must be a JSON array of items.",
-      "importFields": "Each item must have id, questionID, question, referenceAnswer, learnerAnswer, difficulty."
+      "importFields": "Each item must have id, questionID, question, referenceAnswer, submittedAnswer, difficulty."
     },
     "error": "Error",
     "title": "Evaluation",

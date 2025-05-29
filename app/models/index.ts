@@ -3,7 +3,7 @@ export interface EvaluatedItem {
   questionID: string
   question: string
   referenceAnswer: string
-  learnerAnswer: string
+  submittedAnswer: string
   difficulty: Difficulty
 }
 
