@@ -9,7 +9,7 @@ Evalbuddy is a web-based application built with Nuxt 3 that provides educators w
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn package manager
 
 ### Installation
