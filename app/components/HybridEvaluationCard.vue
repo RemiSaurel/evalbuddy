@@ -227,13 +227,14 @@ function confirmEvaluation() {
             </div>
           </div>
 
-          <!-- Option-based Evaluation (Boolean, Score, etc.) -->
+          <!-- Option-based Evaluation (Mastery, Boolean, etc.) -->
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <UButton
               v-for="option in evaluationOptions"
               :key="option.id"
               :class="[option.color || '', {
                 'ring-2 ring-offset-1': selectedValue === option.value,
+                'opacity-70': selectedValue !== null && selectedValue !== option.value,
               }]"
               size="lg"
               block

@@ -105,6 +105,22 @@ class EvaluationStorage {
     })
   }
 
+  async updateSession(sessionId: string, updates: Partial<Pick<EvaluationSession, 'name' | 'description'>>): Promise<void> {
+    const session = await this.getSession(sessionId)
+
+    if (!session) {
+      throw new Error('Session not found')
+    }
+
+    const updatedSession: EvaluationSession = {
+      ...session,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    }
+
+    await this.saveSession(updatedSession)
+  }
+
   async deleteSession(id: string): Promise<void> {
     const db = await this.initDB()
     const transaction = db.transaction([SESSIONS_STORE], 'readwrite')

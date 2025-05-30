@@ -20,10 +20,16 @@ const selectedFile = ref<File | null>(null)
 const importErrors = ref<string[]>([])
 const isImporting = ref(false)
 const selectedConfigId = ref<string>('default')
+const sessionName = ref<string>('')
 
 // Delete functionality
 const isDeleteModalOpen = ref(false)
 const sessionToDelete = ref<EvaluationSession | null>(null)
+
+// Edit functionality
+const isEditModalOpen = ref(false)
+const sessionToEdit = ref<EvaluationSession | null>(null)
+const editSessionName = ref<string>('')
 
 // Load sessions and configs on mount
 onMounted(async () => {
@@ -52,6 +58,13 @@ const configItems = computed(() => {
   return items
 })
 
+// Computed sorted sessions - most recent first
+const sortedSessions = computed(() => {
+  return [...sessions.value].sort((a, b) => {
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  })
+})
+
 async function loadSessions() {
   isLoading.value = true
   error.value = null
@@ -75,6 +88,31 @@ function openSession(sessionId: string) {
 function confirmDelete(session: EvaluationSession) {
   sessionToDelete.value = session
   isDeleteModalOpen.value = true
+}
+
+function openEditModal(session: EvaluationSession) {
+  sessionToEdit.value = session
+  editSessionName.value = session.name
+  isEditModalOpen.value = true
+}
+
+async function updateSessionName() {
+  if (!sessionToEdit.value || !editSessionName.value.trim()) {
+    return
+  }
+
+  try {
+    await evaluationStorage.updateSession(sessionToEdit.value.id, {
+      name: editSessionName.value.trim(),
+    })
+    await loadSessions()
+    isEditModalOpen.value = false
+    sessionToEdit.value = null
+    editSessionName.value = ''
+  }
+  catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to update session'
+  }
 }
 
 async function handleDelete() {
@@ -107,6 +145,7 @@ function openCreationEvaluation() {
   selectedFile.value = null
   importErrors.value = []
   selectedConfigId.value = 'default'
+  sessionName.value = ''
   // Force reload configs when opening modal to ensure latest data
   loadConfigs()
 }
@@ -145,10 +184,10 @@ async function createEvaluation() {
       : undefined
 
     // Create new session with imported items and selected configuration
-    const sessionName = `Imported ${new Date().toLocaleDateString()}`
+    const finalSessionName = sessionName.value.trim() || `Imported ${new Date().toLocaleDateString()}`
     const session = await evaluationStorage.createSessionFromItems(
       items,
-      sessionName,
+      finalSessionName,
       undefined, // description
       serializableConfig,
     )
@@ -169,6 +208,11 @@ async function createEvaluation() {
 
 function getDropdownItems(session: EvaluationSession) {
   return [
+    {
+      label: t('evaluation.actions.edit'),
+      icon: 'i-lucide:edit',
+      onSelect: () => openEditModal(session),
+    },
     {
       label: t('evaluation.actions.export'),
       icon: 'i-lucide:download',
@@ -221,9 +265,9 @@ function getDropdownItems(session: EvaluationSession) {
 
     <!-- Existing Sessions -->
     <div class="flex flex-col gap-4">
-      <div v-if="sessions.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div v-if="sortedSessions.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <UCard
-          v-for="session in sessions"
+          v-for="session in sortedSessions"
           :key="session.id"
           class="cursor-pointer hover:shadow-lg transition-all duration-200"
           @click="openSession(session.id)"
@@ -236,6 +280,9 @@ function getDropdownItems(session: EvaluationSession) {
                 </h3>
                 <div class="text-sm text-neutral-500 truncate">
                   {{ session.config.name }}
+                </div>
+                <div class="text-xs text-neutral-400">
+                  {{ t('evaluation.overview.updated') }}: {{ new Date(session.updatedAt).toLocaleDateString() }}
                 </div>
               </div>
               <UDropdownMenu
@@ -300,6 +347,17 @@ function getDropdownItems(session: EvaluationSession) {
           </template>
 
           <div class="space-y-4">
+            <!-- Session Name Input -->
+            <div>
+              <label class="block text-sm font-medium mb-2">
+                {{ $t('evaluation.creationModal.sessionName') }}
+              </label>
+              <UInput
+                v-model="sessionName"
+                :placeholder="$t('evaluation.creationModal.sessionNamePlaceholder')"
+              />
+            </div>
+
             <!-- Configuration Selection -->
             <div>
               <label class="block text-sm font-medium mb-2">
@@ -365,6 +423,48 @@ function getDropdownItems(session: EvaluationSession) {
                 @click="createEvaluation"
               >
                 {{ $t('evaluation.actions.import') }}
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
+    </UModal>
+
+    <!-- Edit Session Modal -->
+    <UModal v-model:open="isEditModalOpen" title="Edit Evaluation Session Modal" description="Edit Evaluation Session Modal">
+      <template #content>
+        <UCard>
+          <template #header>
+            <h3 class="text-lg font-semibold">
+              {{ t('evaluation.editModal.title') }}
+            </h3>
+          </template>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">
+                {{ $t('evaluation.editModal.sessionName') }}
+              </label>
+              <UInput
+                v-model="editSessionName"
+                :placeholder="$t('evaluation.editModal.sessionNamePlaceholder')"
+              />
+            </div>
+          </div>
+
+          <template #footer>
+            <div class="flex justify-end gap-3">
+              <UButton
+                variant="ghost"
+                @click="isEditModalOpen = false"
+              >
+                {{ t('evaluation.actions.cancel') }}
+              </UButton>
+              <UButton
+                :disabled="!editSessionName.trim()"
+                @click="updateSessionName"
+              >
+                {{ t('evaluation.actions.save') }}
               </UButton>
             </div>
           </template>

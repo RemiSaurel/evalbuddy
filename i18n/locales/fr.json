@@ -112,8 +112,10 @@
       "import": "Importer",
       "export": "Exporter",
       "delete": "Supprimer",
+      "edit": "Modifier",
       "cancel": "Annuler",
       "confirm": "Confirmer",
+      "save": "Enregistrer",
       "saveComment": "Confirmer l'évaluation",
       "selectMasteryLevel": "Sélectionnez un niveau de maîtrise"
     },
@@ -171,10 +173,17 @@
     "creationModal": {
       "createEvaluation": "Créer une évaluation",
       "selectFile": "Sélectionner un fichier",
+      "sessionName": "Nom de la session",
+      "sessionNamePlaceholder": "Entrez le nom de la session",
       "importErrors": "Erreurs d'import",
       "importInstructions": "Instructions pour l'import",
       "importFormat": "Le fichier doit être un tableau JSON d'items.",
       "importFields": "Chaque item doit avoir id, questionID, question, referenceAnswer, submittedAnswer, difficulty."
+    },
+    "editModal": {
+      "title": "Modifier la session d'évaluation",
+      "sessionName": "Nom de la session",
+      "sessionNamePlaceholder": "Entrez le nom de la session"
     },
     "deleteModal": {
       "title": "Supprimer l'évaluation",

@@ -50,6 +50,13 @@ watch(() => props.currentIndex, (newIndex) => {
   })
 })
 
+// Check if a question is evaluated by looking for the specific item ID
+function isQuestionEvaluated(question: EvaluatedItem) {
+  // Check only for this specific item ID
+  const evaluated = props.evaluatedQuestions[question.id]
+  return evaluated && (evaluated.value !== undefined || evaluated.masteryLevel !== undefined)
+}
+
 // Auto-scroll to current question on mount
 onMounted(() => {
   scrollToActiveQuestion(props.currentIndex)
@@ -101,8 +108,8 @@ defineShortcuts({
         class="size-14 min-w-14 rounded-full text-xs font-medium transition-all duration-200 flex flex-col items-center justify-center gap-1 hover:shadow-md"
         :class="{
           'ring-2 ring-blue-700 ring-offset-2': questionIndex === currentIndex,
-          'bg-neutral-600 text-white': evaluatedQuestions[question.id]?.value !== undefined || evaluatedQuestions[question.id]?.masteryLevel !== undefined,
-          'bg-neutral-200 text-neutral-500': !evaluatedQuestions[question.id]?.value && !evaluatedQuestions[question.id]?.masteryLevel,
+          'bg-neutral-600 text-white': isQuestionEvaluated(question),
+          'bg-neutral-200 text-neutral-500': !isQuestionEvaluated(question),
         }"
         @click="() => handleNavigation(questionIndex)"
       >
