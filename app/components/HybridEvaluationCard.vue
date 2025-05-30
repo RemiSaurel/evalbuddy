@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import type { EvaluationConfig, MasteryLevelType } from '@/models/index'
+import type { EvaluationConfig } from '@/models/index'
 
 interface Props {
   currentQuestion: any
   currentAbsoluteQuestionIndex: number
   evaluatorComment: string
   evaluatedQuestions: { [questionId: string]: { value?: any, masteryLevel?: any, comment?: string } }
-
-  // Legacy mastery-based evaluation
-  masteryLevels?: Array<{ label: string, value: MasteryLevelType, color: string }>
-  evaluateAndGoNext?: (masteryLevel: MasteryLevelType) => void
 
   // New generic evaluation
   evaluationConfig?: EvaluationConfig | any // Allow any to handle readonly versions
@@ -25,15 +21,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const { getEvaluationOptions, isScoreType, getScoreSettings } = useEvaluationConfig()
-
-// Determine if we're using the new generic system or legacy mastery system
-const isGenericEvaluation = computed(() => {
-  return !!(props.evaluationConfig && props.evaluateGenericAndGoNext)
-})
-
-const isLegacyMastery = computed(() => {
-  return !!(props.masteryLevels && props.evaluateAndGoNext)
-})
 
 // State for selected evaluation value
 const selectedValue = ref<any>(null)
@@ -59,13 +46,12 @@ function loadEvaluationForCurrentQuestion() {
   if (props.currentQuestion) {
     const existingEvaluation = props.evaluatedQuestions[props.currentQuestion.id]
     if (existingEvaluation) {
-      // Support both legacy masteryLevel and new value properties
       selectedValue.value = existingEvaluation.value ?? existingEvaluation.masteryLevel ?? null
       localComment.value = existingEvaluation.comment || ''
     }
     else {
       // For score evaluations, set default value to minValue for better UX
-      if (isGenericEvaluation.value && props.evaluationConfig && isScoreType(props.evaluationConfig)) {
+      if (props.evaluationConfig && isScoreType(props.evaluationConfig)) {
         const settings = getScoreSettings(props.evaluationConfig)
         selectedValue.value = settings?.minValue ?? null
       }
@@ -83,38 +69,38 @@ function loadEvaluationForCurrentQuestion() {
 
 // Generic evaluation helpers
 const evaluationOptions = computed(() => {
-  if (isGenericEvaluation.value && props.evaluationConfig) {
+  if (props.evaluationConfig) {
     return getEvaluationOptions(props.evaluationConfig)
   }
   return []
 })
 
 const scoreSettings = computed(() => {
-  if (isGenericEvaluation.value && props.evaluationConfig) {
+  if (props.evaluationConfig) {
     return getScoreSettings(props.evaluationConfig)
   }
   return null
 })
 
 const isScoreEvaluation = computed(() => {
-  if (isGenericEvaluation.value && props.evaluationConfig) {
+  if (props.evaluationConfig) {
     return isScoreType(props.evaluationConfig)
   }
   return false
 })
 
 const commentsAllowed = computed(() => {
-  if (isGenericEvaluation.value && props.evaluationConfig) {
+  if (props.evaluationConfig) {
     return props.evaluationConfig.settings.allowComments
   }
-  return true // Default for legacy system
+  return true
 })
 
 const commentsRequired = computed(() => {
-  if (isGenericEvaluation.value && props.evaluationConfig) {
+  if (props.evaluationConfig) {
     return props.evaluationConfig.settings.requireComments
   }
-  return false // Default for legacy system
+  return false
 })
 
 // Difficulty badge helpers
@@ -157,35 +143,15 @@ function confirmEvaluation() {
   if (!canConfirmEvaluation.value)
     return
 
-  if (isGenericEvaluation.value && props.evaluateGenericAndGoNext) {
+  if (props.evaluateGenericAndGoNext) {
     // Use new generic evaluation
     const comment = commentsAllowed.value ? localComment.value : undefined
     props.evaluateGenericAndGoNext(selectedValue.value, comment)
-  }
-  else if (isLegacyMastery.value && props.evaluateAndGoNext) {
-    // Use legacy mastery evaluation
-    props.evaluateAndGoNext(selectedValue.value as MasteryLevelType)
   }
 
   // Reset selection for next question
   selectedValue.value = null
   localComment.value = ''
-}
-
-// Function to get button classes for legacy mastery levels
-function getMasteryButtonClasses(level: { value: MasteryLevelType, color: string }) {
-  const baseClasses = 'h-20 text-lg text-white font-bold uppercase transition-all duration-200'
-  const isSelected = selectedValue.value === level.value
-
-  // Extract color from bg-color-nnn value
-  const color = level.color.replace(/bg-([a-z]+)-\d+/, '$1')
-
-  if (isSelected) {
-    return `${baseClasses} ${level.color} ring-3 ring-${color}-200 ring-offset-1 transform`
-  }
-  else {
-    return `${baseClasses} ${level.color} opacity-70 hover:opacity-100`
-  }
 }
 </script>
 
@@ -225,27 +191,13 @@ function getMasteryButtonClasses(level: { value: MasteryLevelType, color: string
           <div class="text-neutral-800 text-sm font-semibold">
             {{ $t('evaluation.title') }}
           </div>
-          <div v-if="isGenericEvaluation && evaluationConfig" class="text-xs text-neutral-500">
+          <div v-if="evaluationConfig" class="text-xs text-neutral-500">
             {{ evaluationConfig.name }} ({{ evaluationConfig.type }})
           </div>
         </div>
 
-        <!-- Legacy Mastery Level Buttons -->
-        <div v-if="isLegacyMastery" class="flex flex-col-reverse gap-4 justify-between items-center md:flex-row">
-          <UButton
-            v-for="level in masteryLevels"
-            :key="level.value"
-            :label="level.label"
-            :value="level.value"
-            :class="getMasteryButtonClasses(level)"
-            size="lg"
-            block
-            @click="selectValue(level.value)"
-          />
-        </div>
-
         <!-- Generic Evaluation Options -->
-        <div v-else-if="isGenericEvaluation">
+        <div>
           <!-- Score-based Evaluation -->
           <div v-if="isScoreEvaluation && scoreSettings" class="space-y-3">
             <label class="block text-sm font-medium text-neutral-700">

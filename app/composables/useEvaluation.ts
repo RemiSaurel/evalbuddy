@@ -1,4 +1,4 @@
-import type { EvaluationResult, EvaluationSession, MasteryLevelType } from '@/models/index'
+import type { EvaluationResult, EvaluationSession } from '@/models/index'
 import { evaluationStorage } from '@/utils/storage'
 
 export function useEvaluation(sessionId?: string) {
@@ -202,19 +202,6 @@ export function useEvaluation(sessionId?: string) {
     }
   }
 
-  // Function to evaluate current question and go to next (legacy mastery level)
-  const evaluateAndGoNext = async (masteryLevel: MasteryLevelType) => {
-    if (currentQuestion.value) {
-      evaluatedQuestions.value[currentQuestion.value.id] = {
-        value: masteryLevel,
-        comment: evaluatorComment.value,
-      }
-      await saveEvaluationResult(currentQuestion.value.id, masteryLevel, evaluatorComment.value)
-      evaluatorComment.value = ''
-      moveToNextPosition()
-    }
-  }
-
   // Function to evaluate current question with generic value and go to next
   const evaluateGenericAndGoNext = async (value: any, comment?: string) => {
     if (currentQuestion.value) {
@@ -319,7 +306,6 @@ export function useEvaluation(sessionId?: string) {
     currentQuestionGroupProgress,
     totalProgress,
     currentAbsoluteQuestionIndex,
-    evaluateAndGoNext,
     evaluateGenericAndGoNext,
     saveEvaluation,
     goToPreviousQuestion,
