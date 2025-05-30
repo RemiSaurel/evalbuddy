@@ -156,11 +156,6 @@ export function useEvaluationConfig() {
     return configs.value.find(c => c.id === id)
   }
 
-  // Set current working configuration
-  const setCurrentConfig = (config: EvaluationConfig | null): void => {
-    currentConfig.value = config
-  }
-
   // Validate configuration
   const validateConfig = (config: EvaluationConfig): string[] => {
     const errors: string[] = []
@@ -219,16 +214,16 @@ export function useEvaluationConfig() {
         return boolSettings
           ? [
               {
-                id: 'true',
-                label: boolSettings.trueLabel,
-                value: true,
-                color: boolSettings.trueColor,
-              },
-              {
                 id: 'false',
                 label: boolSettings.falseLabel,
                 value: false,
                 color: boolSettings.falseColor,
+              },
+              {
+                id: 'true',
+                label: boolSettings.trueLabel,
+                value: true,
+                color: boolSettings.trueColor,
               },
             ]
           : []
@@ -263,36 +258,6 @@ export function useEvaluationConfig() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
-  }
-
-  // Format evaluation value for display
-  const formatEvaluationValue = (config: EvaluationConfig, value: any): string => {
-    switch (config.type) {
-      case 'mastery': {
-        const level = config.settings.masterySettings?.levels?.find(l => l.id === value)
-        return level?.label || String(value)
-      }
-      case 'boolean': {
-        const boolSettings = config.settings.booleanSettings
-        return value === true
-          ? (boolSettings?.trueLabel || 'True')
-          : (boolSettings?.falseLabel || 'False')
-      }
-      case 'score': {
-        const scoreSettings = config.settings.scoreSettings
-        return `${value}${scoreSettings?.unit || ''}`
-      }
-      default:
-        return String(value)
-    }
-  }
-
-  // Get all available evaluation types
-  const getAvailableTypes = (): Array<{ value: EvaluationType, meta: typeof EVALUATION_TYPE_META[EvaluationType] }> => {
-    return Object.entries(EVALUATION_TYPE_META).map(([type, meta]) => ({
-      value: type as EvaluationType,
-      meta,
-    }))
   }
 
   // Export configuration to file
@@ -354,7 +319,6 @@ export function useEvaluationConfig() {
     updateConfig,
     deleteConfig,
     getConfig,
-    setCurrentConfig,
     getDefaultConfig,
     validateConfig,
     getEvaluationOptions,
@@ -362,9 +326,7 @@ export function useEvaluationConfig() {
     getScoreSettings,
     getEvaluationTypeMeta,
     cloneConfig,
-    formatEvaluationValue,
-    getAvailableTypes,
-    loadConfigs, // Export loadConfigs so it can be called manually
+    loadConfigs,
     exportConfig,
     importConfigFromFile,
   }

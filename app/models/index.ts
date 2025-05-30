@@ -132,10 +132,10 @@ export const DEFAULT_BOOLEAN_CONFIG: BooleanSettings = {
 // Default score configuration
 export const DEFAULT_SCORE_CONFIG: ScoreSettings = {
   minValue: 0,
-  maxValue: 100,
+  maxValue: 5,
   step: 1,
-  unit: '%',
-  passingScore: 60,
+  unit: '',
+  passingScore: 3,
 }
 
 // Evaluation type metadata for UI display

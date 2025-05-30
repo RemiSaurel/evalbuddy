@@ -21,6 +21,10 @@ const importErrors = ref<string[]>([])
 const isImporting = ref(false)
 const selectedConfigId = ref<string>('default')
 
+// Delete functionality
+const isDeleteModalOpen = ref(false)
+const sessionToDelete = ref<EvaluationSession | null>(null)
+
 // Load sessions and configs on mount
 onMounted(async () => {
   await Promise.all([
@@ -68,10 +72,19 @@ function openSession(sessionId: string) {
   })
 }
 
-async function deleteSession(sessionId: string) {
+function confirmDelete(session: EvaluationSession) {
+  sessionToDelete.value = session
+  isDeleteModalOpen.value = true
+}
+
+async function handleDelete() {
   try {
-    await evaluationStorage.deleteSession(sessionId)
-    await loadSessions()
+    if (sessionToDelete.value) {
+      await evaluationStorage.deleteSession(sessionToDelete.value.id)
+      await loadSessions()
+    }
+    sessionToDelete.value = null
+    isDeleteModalOpen.value = false
   }
   catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to delete session'
@@ -164,7 +177,7 @@ function getDropdownItems(session: EvaluationSession) {
     {
       label: t('evaluation.actions.delete'),
       icon: 'i-lucide:trash-2',
-      onSelect: () => deleteSession(session.id),
+      onSelect: () => confirmDelete(session),
     },
   ]
 }
@@ -352,6 +365,46 @@ function getDropdownItems(session: EvaluationSession) {
                 @click="createEvaluation"
               >
                 {{ $t('evaluation.actions.import') }}
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
+    </UModal>
+
+    <!-- Delete Confirmation Modal -->
+    <UModal v-model:open="isDeleteModalOpen" title="Delete Evaluation Session Modal" description="Delete Evaluation Session Modal">
+      <template #content>
+        <UCard>
+          <template #header>
+            <h3 class="text-lg font-semibold">
+              {{ t('evaluation.deleteModal.title') }}
+            </h3>
+          </template>
+
+          <div class="space-y-4">
+            <p class="text-neutral-600">
+              {{ t('evaluation.deleteModal.message', { name: sessionToDelete?.name }) }}
+            </p>
+            <p class="text-sm text-error">
+              {{ t('evaluation.deleteModal.warning') }}
+            </p>
+          </div>
+
+          <template #footer>
+            <div class="flex justify-end gap-3">
+              <UButton
+                color="neutral"
+                variant="outline"
+                @click="isDeleteModalOpen = false"
+              >
+                {{ t('evaluation.actions.cancel') }}
+              </UButton>
+              <UButton
+                color="error"
+                @click="handleDelete"
+              >
+                {{ t('evaluation.actions.delete') }}
               </UButton>
             </div>
           </template>

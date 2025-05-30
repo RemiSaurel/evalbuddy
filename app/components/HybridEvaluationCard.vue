@@ -232,17 +232,18 @@ function confirmEvaluation() {
             <UButton
               v-for="option in evaluationOptions"
               :key="option.id"
-              :variant="selectedValue === option.value ? 'solid' : 'outline'"
-              :color="selectedValue === option.value ? 'primary' : 'neutral'"
+              :class="[option.color || '', {
+                'ring-2 ring-offset-1': selectedValue === option.value,
+              }]"
               size="lg"
               block
               @click="selectValue(option.value)"
             >
               <div class="text-left w-full">
-                <div class="font-medium">
+                <div class="font-semibold">
                   {{ option.label }}
                 </div>
-                <div v-if="'description' in option && option.description" class="text-xs opacity-75 mt-1">
+                <div v-if="'description' in option && option.description" class="text-xs opacity-75 mt-0.5">
                   {{ option.description }}
                 </div>
               </div>

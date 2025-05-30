@@ -175,6 +175,11 @@
       "importFormat": "The file must be a JSON array of items.",
       "importFields": "Each item must have id, questionID, question, referenceAnswer, submittedAnswer, difficulty."
     },
+    "deleteModal": {
+      "title": "Delete Evaluation Session",
+      "message": "Are you sure you want to delete the evaluation session \"{name}\"?",
+      "warning": "This action cannot be undone. All evaluation progress will be lost."
+    },
     "error": "Error",
     "title": "Evaluation",
     "subtitle": "Evaluate answers and resume sessions whenever you want"
