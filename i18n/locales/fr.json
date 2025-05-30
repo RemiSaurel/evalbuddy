@@ -106,6 +106,7 @@
     "defaultIfNone": "Utilisera la configuration de maîtrise par défaut si aucune n'est sélectionnée"
   },
   "evaluation": {
+    "passingScore": "Score de réussite",
     "actions": {
       "create": "Créer une évaluation",
       "import": "Importer",

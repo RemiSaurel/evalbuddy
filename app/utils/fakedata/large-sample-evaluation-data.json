@@ -1,0 +1,506 @@
+[
+  {
+    "id": "q1-item1",
+    "questionID": "Q1",
+    "question": "What is the capital of France?",
+    "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+    "submittedAnswer": "Paris is the capital of France.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q1-item2",
+    "questionID": "Q1",
+    "question": "What is the capital of France?",
+    "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+    "submittedAnswer": "The capital is Paris, which is a beautiful city in France.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q1-item3",
+    "questionID": "Q1",
+    "question": "What is the capital of France?",
+    "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+    "submittedAnswer": "I think it's Paris but I'm not 100% sure.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q1-item4",
+    "questionID": "Q1",
+    "question": "What is the capital of France?",
+    "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+    "submittedAnswer": "Paris.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q1-item5",
+    "questionID": "Q1",
+    "question": "What is the capital of France?",
+    "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+    "submittedAnswer": "The answer is Paris, France's most important city.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q2-item1",
+    "questionID": "Q2",
+    "question": "Explain the process of photosynthesis in plants.",
+    "referenceAnswer": "Photosynthesis is the process by which plants convert light energy, usually from the sun, into chemical energy stored in glucose. The process occurs in chloroplasts and involves two main stages: light-dependent reactions (in thylakoids) and the Calvin cycle (in stroma). The overall equation is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2 + ATP.",
+    "submittedAnswer": "Photosynthesis is when plants use sunlight to make food. They take in carbon dioxide from the air and water from the soil, and with chlorophyll in their leaves, they produce glucose and oxygen.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q2-item2",
+    "questionID": "Q2",
+    "question": "Explain the process of photosynthesis in plants.",
+    "referenceAnswer": "Photosynthesis is the process by which plants convert light energy, usually from the sun, into chemical energy stored in glucose. The process occurs in chloroplasts and involves two main stages: light-dependent reactions (in thylakoids) and the Calvin cycle (in stroma). The overall equation is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2 + ATP.",
+    "submittedAnswer": "Plants use light to make sugar. The chloroplasts in leaves capture sunlight and combine CO2 and H2O to create glucose. This happens in two phases - the light reactions and the Calvin cycle. Oxygen is released as a byproduct.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q2-item3",
+    "questionID": "Q2",
+    "question": "Explain the process of photosynthesis in plants.",
+    "referenceAnswer": "Photosynthesis is the process by which plants convert light energy, usually from the sun, into chemical energy stored in glucose. The process occurs in chloroplasts and involves two main stages: light-dependent reactions (in thylakoids) and the Calvin cycle (in stroma). The overall equation is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2 + ATP.",
+    "submittedAnswer": "Plants make their own food using sunlight. They need carbon dioxide and water to do this.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q2-item4",
+    "questionID": "Q2",
+    "question": "Explain the process of photosynthesis in plants.",
+    "referenceAnswer": "Photosynthesis is the process by which plants convert light energy, usually from the sun, into chemical energy stored in glucose. The process occurs in chloroplasts and involves two main stages: light-dependent reactions (in thylakoids) and the Calvin cycle (in stroma). The overall equation is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2 + ATP.",
+    "submittedAnswer": "Photosynthesis involves chloroplasts converting light energy into chemical energy. The process includes light-dependent reactions in thylakoids and the Calvin cycle in stroma, producing glucose and releasing oxygen.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q3-item1",
+    "questionID": "Q3",
+    "question": "Derive the quadratic formula from the general quadratic equation ax² + bx + c = 0.",
+    "referenceAnswer": "Starting with ax² + bx + c = 0, divide by a: x² + (b/a)x + c/a = 0. Complete the square: x² + (b/a)x + (b/2a)² = (b/2a)² - c/a. This gives (x + b/2a)² = (b² - 4ac)/4a². Taking the square root: x + b/2a = ±√(b² - 4ac)/2a. Therefore: x = (-b ± √(b² - 4ac))/2a.",
+    "submittedAnswer": "To derive the quadratic formula, I start with ax² + bx + c = 0. I'll complete the square by adding and subtracting (b/2a)². After rearranging and taking the square root, I get x = (-b ± √(b² - 4ac))/2a.",
+    "difficulty": "hard"
+  },
+  {
+    "id": "q3-item2",
+    "questionID": "Q3",
+    "question": "Derive the quadratic formula from the general quadratic equation ax² + bx + c = 0.",
+    "referenceAnswer": "Starting with ax² + bx + c = 0, divide by a: x² + (b/a)x + c/a = 0. Complete the square: x² + (b/a)x + (b/2a)² = (b/2a)² - c/a. This gives (x + b/2a)² = (b² - 4ac)/4a². Taking the square root: x + b/2a = ±√(b² - 4ac)/2a. Therefore: x = (-b ± √(b² - 4ac))/2a.",
+    "submittedAnswer": "You use the quadratic formula x = (-b ± √(b² - 4ac))/2a to solve quadratic equations.",
+    "difficulty": "hard"
+  },
+  {
+    "id": "q3-item3",
+    "questionID": "Q3",
+    "question": "Derive the quadratic formula from the general quadratic equation ax² + bx + c = 0.",
+    "referenceAnswer": "Starting with ax² + bx + c = 0, divide by a: x² + (b/a)x + c/a = 0. Complete the square: x² + (b/a)x + (b/2a)² = (b/2a)² - c/a. This gives (x + b/2a)² = (b² - 4ac)/4a². Taking the square root: x + b/2a = ±√(b² - 4ac)/2a. Therefore: x = (-b ± √(b² - 4ac))/2a.",
+    "submittedAnswer": "Starting with ax² + bx + c = 0, divide everything by a, then complete the square to get the formula.",
+    "difficulty": "hard"
+  },
+  {
+    "id": "q4-item1",
+    "questionID": "Q4",
+    "question": "What are the main causes of climate change?",
+    "referenceAnswer": "The main causes of climate change include: 1) Greenhouse gas emissions from burning fossil fuels (CO2, methane, nitrous oxide), 2) Deforestation reducing carbon absorption, 3) Industrial processes and manufacturing, 4) Agriculture and livestock farming, 5) Transportation emissions, and 6) Land use changes. The primary driver is the increase in atmospheric CO2 concentrations due to human activities since the Industrial Revolution.",
+    "submittedAnswer": "Climate change is mainly caused by human activities that increase greenhouse gases in the atmosphere. This includes burning fossil fuels like coal and oil, cutting down forests, and industrial pollution. Cars and factories also contribute to the problem.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q4-item2",
+    "questionID": "Q4",
+    "question": "What are the main causes of climate change?",
+    "referenceAnswer": "The main causes of climate change include: 1) Greenhouse gas emissions from burning fossil fuels (CO2, methane, nitrous oxide), 2) Deforestation reducing carbon absorption, 3) Industrial processes and manufacturing, 4) Agriculture and livestock farming, 5) Transportation emissions, and 6) Land use changes. The primary driver is the increase in atmospheric CO2 concentrations due to human activities since the Industrial Revolution.",
+    "submittedAnswer": "The main causes are greenhouse gas emissions from fossil fuels, deforestation, industrial activities, agriculture (especially livestock), transportation, and land use changes. Human activities since the 1800s have dramatically increased CO2, methane, and other greenhouse gases in the atmosphere.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q4-item3",
+    "questionID": "Q4",
+    "question": "What are the main causes of climate change?",
+    "referenceAnswer": "The main causes of climate change include: 1) Greenhouse gas emissions from burning fossil fuels (CO2, methane, nitrous oxide), 2) Deforestation reducing carbon absorption, 3) Industrial processes and manufacturing, 4) Agriculture and livestock farming, 5) Transportation emissions, and 6) Land use changes. The primary driver is the increase in atmospheric CO2 concentrations due to human activities since the Industrial Revolution.",
+    "submittedAnswer": "Burning fossil fuels and cutting down trees are the biggest problems for climate change.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q5-item1",
+    "questionID": "Q5",
+    "question": "What is 2 + 2?",
+    "referenceAnswer": "2 + 2 = 4. This is a basic arithmetic operation involving the addition of two identical numbers.",
+    "submittedAnswer": "4",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q5-item2",
+    "questionID": "Q5",
+    "question": "What is 2 + 2?",
+    "referenceAnswer": "2 + 2 = 4. This is a basic arithmetic operation involving the addition of two identical numbers.",
+    "submittedAnswer": "Two plus two equals four.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q5-item3",
+    "questionID": "Q5",
+    "question": "What is 2 + 2?",
+    "referenceAnswer": "2 + 2 = 4. This is a basic arithmetic operation involving the addition of two identical numbers.",
+    "submittedAnswer": "The answer is 4 because when you add 2 and 2 together you get 4.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q6-item1",
+    "questionID": "Q6",
+    "question": "What is the speed of light in vacuum?",
+    "referenceAnswer": "The speed of light in vacuum is approximately 299,792,458 meters per second or about 186,282 miles per second. This is denoted by the constant 'c' in physics and is a fundamental constant of nature.",
+    "submittedAnswer": "The speed of light is about 300,000 km/s or 186,000 miles per second.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q6-item2",
+    "questionID": "Q6",
+    "question": "What is the speed of light in vacuum?",
+    "referenceAnswer": "The speed of light in vacuum is approximately 299,792,458 meters per second or about 186,282 miles per second. This is denoted by the constant 'c' in physics and is a fundamental constant of nature.",
+    "submittedAnswer": "299,792,458 m/s",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q6-item3",
+    "questionID": "Q6",
+    "question": "What is the speed of light in vacuum?",
+    "referenceAnswer": "The speed of light in vacuum is approximately 299,792,458 meters per second or about 186,282 miles per second. This is denoted by the constant 'c' in physics and is a fundamental constant of nature.",
+    "submittedAnswer": "Light travels really fast, about 300 million meters per second.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q7-item1",
+    "questionID": "Q7",
+    "question": "Explain the difference between DNA and RNA.",
+    "referenceAnswer": "DNA (Deoxyribonucleic acid) and RNA (Ribonucleic acid) differ in several ways: 1) Structure: DNA is double-stranded, RNA is single-stranded; 2) Sugar: DNA contains deoxyribose, RNA contains ribose; 3) Bases: DNA has A, T, G, C while RNA has A, U, G, C (uracil instead of thymine); 4) Function: DNA stores genetic information, RNA is involved in protein synthesis and gene expression; 5) Location: DNA is mainly in the nucleus, RNA is found throughout the cell.",
+    "submittedAnswer": "DNA is double-stranded and stores genetic information, while RNA is single-stranded and helps make proteins. DNA has thymine, but RNA has uracil instead.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q7-item2",
+    "questionID": "Q7",
+    "question": "Explain the difference between DNA and RNA.",
+    "referenceAnswer": "DNA (Deoxyribonucleic acid) and RNA (Ribonucleic acid) differ in several ways: 1) Structure: DNA is double-stranded, RNA is single-stranded; 2) Sugar: DNA contains deoxyribose, RNA contains ribose; 3) Bases: DNA has A, T, G, C while RNA has A, U, G, C (uracil instead of thymine); 4) Function: DNA stores genetic information, RNA is involved in protein synthesis and gene expression; 5) Location: DNA is mainly in the nucleus, RNA is found throughout the cell.",
+    "submittedAnswer": "DNA and RNA are both nucleic acids but have different structures and functions. DNA is the blueprint for life stored in the nucleus, while RNA helps translate that information into proteins.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q7-item3",
+    "questionID": "Q7",
+    "question": "Explain the difference between DNA and RNA.",
+    "referenceAnswer": "DNA (Deoxyribonucleic acid) and RNA (Ribonucleic acid) differ in several ways: 1) Structure: DNA is double-stranded, RNA is single-stranded; 2) Sugar: DNA contains deoxyribose, RNA contains ribose; 3) Bases: DNA has A, T, G, C while RNA has A, U, G, C (uracil instead of thymine); 4) Function: DNA stores genetic information, RNA is involved in protein synthesis and gene expression; 5) Location: DNA is mainly in the nucleus, RNA is found throughout the cell.",
+    "submittedAnswer": "DNA has two strands and RNA has one. DNA stores information and RNA makes proteins.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q8-item1",
+    "questionID": "Q8",
+    "question": "What is the Pythagorean theorem?",
+    "referenceAnswer": "The Pythagorean theorem states that in a right triangle, the square of the length of the hypotenuse (the side opposite the right angle) is equal to the sum of squares of the lengths of the other two sides. Mathematically: a² + b² = c², where c is the hypotenuse and a and b are the other two sides.",
+    "submittedAnswer": "The Pythagorean theorem says that a² + b² = c² for right triangles, where c is the longest side.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q8-item2",
+    "questionID": "Q8",
+    "question": "What is the Pythagorean theorem?",
+    "referenceAnswer": "The Pythagorean theorem states that in a right triangle, the square of the length of the hypotenuse (the side opposite the right angle) is equal to the sum of squares of the lengths of the other two sides. Mathematically: a² + b² = c², where c is the hypotenuse and a and b are the other two sides.",
+    "submittedAnswer": "In right triangles, the square of the hypotenuse equals the sum of squares of the other two sides: a² + b² = c².",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q8-item3",
+    "questionID": "Q8",
+    "question": "What is the Pythagorean theorem?",
+    "referenceAnswer": "The Pythagorean theorem states that in a right triangle, the square of the length of the hypotenuse (the side opposite the right angle) is equal to the sum of squares of the lengths of the other two sides. Mathematically: a² + b² = c², where c is the hypotenuse and a and b are the other two sides.",
+    "submittedAnswer": "It's a math rule about triangles with right angles.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q9-item1",
+    "questionID": "Q9",
+    "question": "Explain Newton's first law of motion.",
+    "referenceAnswer": "Newton's first law of motion, also known as the law of inertia, states that an object at rest stays at rest and an object in motion stays in motion with the same speed and in the same direction unless acted upon by an unbalanced force. This law describes the tendency of objects to resist changes in their state of motion.",
+    "submittedAnswer": "Newton's first law says that objects at rest stay at rest and objects in motion stay in motion unless a force acts on them. This is called inertia.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q9-item2",
+    "questionID": "Q9",
+    "question": "Explain Newton's first law of motion.",
+    "referenceAnswer": "Newton's first law of motion, also known as the law of inertia, states that an object at rest stays at rest and an object in motion stays in motion with the same speed and in the same direction unless acted upon by an unbalanced force. This law describes the tendency of objects to resist changes in their state of motion.",
+    "submittedAnswer": "The law of inertia states that objects resist changes to their motion. A moving object continues moving and a stationary object stays still unless forces act on them.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q9-item3",
+    "questionID": "Q9",
+    "question": "Explain Newton's first law of motion.",
+    "referenceAnswer": "Newton's first law of motion, also known as the law of inertia, states that an object at rest stays at rest and an object in motion stays in motion with the same speed and in the same direction unless acted upon by an unbalanced force. This law describes the tendency of objects to resist changes in their state of motion.",
+    "submittedAnswer": "Things don't move unless something pushes them, and moving things keep moving unless something stops them.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q10-item1",
+    "questionID": "Q10",
+    "question": "What is the chemical formula for water?",
+    "referenceAnswer": "The chemical formula for water is H₂O, which means each water molecule consists of two hydrogen atoms and one oxygen atom bonded together. This is one of the most important and well-known chemical formulas.",
+    "submittedAnswer": "H2O",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q10-item2",
+    "questionID": "Q10",
+    "question": "What is the chemical formula for water?",
+    "referenceAnswer": "The chemical formula for water is H₂O, which means each water molecule consists of two hydrogen atoms and one oxygen atom bonded together. This is one of the most important and well-known chemical formulas.",
+    "submittedAnswer": "Water is H₂O - two hydrogen atoms and one oxygen atom.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q10-item3",
+    "questionID": "Q10",
+    "question": "What is the chemical formula for water?",
+    "referenceAnswer": "The chemical formula for water is H₂O, which means each water molecule consists of two hydrogen atoms and one oxygen atom bonded together. This is one of the most important and well-known chemical formulas.",
+    "submittedAnswer": "The formula is H2O, which shows water has hydrogen and oxygen.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q11-item1",
+    "questionID": "Q11",
+    "question": "What is mitosis?",
+    "referenceAnswer": "Mitosis is the process of cell division where a single cell divides to produce two identical daughter cells, each with the same number of chromosomes as the parent cell. It consists of several phases: prophase, metaphase, anaphase, and telophase, followed by cytokinesis. This process is essential for growth, repair, and asexual reproduction in organisms.",
+    "submittedAnswer": "Mitosis is when cells divide to make two identical cells. It helps organisms grow and repair damaged tissues.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q11-item2",
+    "questionID": "Q11",
+    "question": "What is mitosis?",
+    "referenceAnswer": "Mitosis is the process of cell division where a single cell divides to produce two identical daughter cells, each with the same number of chromosomes as the parent cell. It consists of several phases: prophase, metaphase, anaphase, and telophase, followed by cytokinesis. This process is essential for growth, repair, and asexual reproduction in organisms.",
+    "submittedAnswer": "Mitosis is cell division that produces two genetically identical daughter cells. It involves phases like prophase, metaphase, anaphase, and telophase.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q11-item3",
+    "questionID": "Q11",
+    "question": "What is mitosis?",
+    "referenceAnswer": "Mitosis is the process of cell division where a single cell divides to produce two identical daughter cells, each with the same number of chromosomes as the parent cell. It consists of several phases: prophase, metaphase, anaphase, and telophase, followed by cytokinesis. This process is essential for growth, repair, and asexual reproduction in organisms.",
+    "submittedAnswer": "It's how cells copy themselves to make new cells.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q12-item1",
+    "questionID": "Q12",
+    "question": "What is the difference between weather and climate?",
+    "referenceAnswer": "Weather refers to short-term atmospheric conditions in a specific place at a specific time (temperature, humidity, precipitation, wind). Climate refers to long-term patterns of weather in a region over extended periods (typically 30+ years). Weather can change daily or hourly, while climate describes average conditions and seasonal patterns over decades.",
+    "submittedAnswer": "Weather is what happens day to day, like if it's sunny or rainy. Climate is the long-term pattern of weather in a place over many years.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q12-item2",
+    "questionID": "Q12",
+    "question": "What is the difference between weather and climate?",
+    "referenceAnswer": "Weather refers to short-term atmospheric conditions in a specific place at a specific time (temperature, humidity, precipitation, wind). Climate refers to long-term patterns of weather in a region over extended periods (typically 30+ years). Weather can change daily or hourly, while climate describes average conditions and seasonal patterns over decades.",
+    "submittedAnswer": "Weather is short-term atmospheric conditions, while climate is the long-term average of weather patterns over decades.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q12-item3",
+    "questionID": "Q12",
+    "question": "What is the difference between weather and climate?",
+    "referenceAnswer": "Weather refers to short-term atmospheric conditions in a specific place at a specific time (temperature, humidity, precipitation, wind). Climate refers to long-term patterns of weather in a region over extended periods (typically 30+ years). Weather can change daily or hourly, while climate describes average conditions and seasonal patterns over decades.",
+    "submittedAnswer": "Weather changes quickly but climate is more stable over time.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q13-item1",
+    "questionID": "Q13",
+    "question": "What is the atomic number of carbon?",
+    "referenceAnswer": "The atomic number of carbon is 6. This means that every carbon atom has 6 protons in its nucleus. The atomic number uniquely identifies each element on the periodic table.",
+    "submittedAnswer": "6",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q13-item2",
+    "questionID": "Q13",
+    "question": "What is the atomic number of carbon?",
+    "referenceAnswer": "The atomic number of carbon is 6. This means that every carbon atom has 6 protons in its nucleus. The atomic number uniquely identifies each element on the periodic table.",
+    "submittedAnswer": "Carbon has an atomic number of 6, meaning it has 6 protons.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q13-item3",
+    "questionID": "Q13",
+    "question": "What is the atomic number of carbon?",
+    "referenceAnswer": "The atomic number of carbon is 6. This means that every carbon atom has 6 protons in its nucleus. The atomic number uniquely identifies each element on the periodic table.",
+    "submittedAnswer": "The atomic number is 6.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q14-item1",
+    "questionID": "Q14",
+    "question": "Explain the concept of supply and demand in economics.",
+    "referenceAnswer": "Supply and demand is a fundamental economic principle that describes the relationship between the availability of a product (supply) and the desire for that product (demand). When demand exceeds supply, prices tend to rise. When supply exceeds demand, prices tend to fall. The point where supply and demand curves intersect is called the equilibrium price, where the market clears.",
+    "submittedAnswer": "Supply and demand explains how prices are set. When more people want something than is available, prices go up. When there's more available than people want, prices go down.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q14-item2",
+    "questionID": "Q14",
+    "question": "Explain the concept of supply and demand in economics.",
+    "referenceAnswer": "Supply and demand is a fundamental economic principle that describes the relationship between the availability of a product (supply) and the desire for that product (demand). When demand exceeds supply, prices tend to rise. When supply exceeds demand, prices tend to fall. The point where supply and demand curves intersect is called the equilibrium price, where the market clears.",
+    "submittedAnswer": "Supply is how much of something is available, demand is how much people want it. The interaction between these forces determines market prices and quantities sold.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q14-item3",
+    "questionID": "Q14",
+    "question": "Explain the concept of supply and demand in economics.",
+    "referenceAnswer": "Supply and demand is a fundamental economic principle that describes the relationship between the availability of a product (supply) and the desire for that product (demand). When demand exceeds supply, prices tend to rise. When supply exceeds demand, prices tend to fall. The point where supply and demand curves intersect is called the equilibrium price, where the market clears.",
+    "submittedAnswer": "It's about how much stuff is for sale and how many people want to buy it.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q15-item1",
+    "questionID": "Q15",
+    "question": "What is the largest planet in our solar system?",
+    "referenceAnswer": "Jupiter is the largest planet in our solar system. It is a gas giant with a mass greater than all other planets combined and has a diameter of about 142,984 kilometers (88,846 miles), which is about 11 times the diameter of Earth.",
+    "submittedAnswer": "Jupiter is the largest planet in our solar system.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q15-item2",
+    "questionID": "Q15",
+    "question": "What is the largest planet in our solar system?",
+    "referenceAnswer": "Jupiter is the largest planet in our solar system. It is a gas giant with a mass greater than all other planets combined and has a diameter of about 142,984 kilometers (88,846 miles), which is about 11 times the diameter of Earth.",
+    "submittedAnswer": "The answer is Jupiter, which is a gas giant much larger than Earth.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q15-item3",
+    "questionID": "Q15",
+    "question": "What is the largest planet in our solar system?",
+    "referenceAnswer": "Jupiter is the largest planet in our solar system. It is a gas giant with a mass greater than all other planets combined and has a diameter of about 142,984 kilometers (88,846 miles), which is about 11 times the diameter of Earth.",
+    "submittedAnswer": "Jupiter.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q16-item1",
+    "questionID": "Q16",
+    "question": "What is the derivative of x²?",
+    "referenceAnswer": "The derivative of x² is 2x. This follows from the power rule of differentiation, which states that d/dx(xⁿ) = nxⁿ⁻¹. For x², n=2, so the derivative is 2x²⁻¹ = 2x¹ = 2x.",
+    "submittedAnswer": "2x",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q16-item2",
+    "questionID": "Q16",
+    "question": "What is the derivative of x²?",
+    "referenceAnswer": "The derivative of x² is 2x. This follows from the power rule of differentiation, which states that d/dx(xⁿ) = nxⁿ⁻¹. For x², n=2, so the derivative is 2x²⁻¹ = 2x¹ = 2x.",
+    "submittedAnswer": "The derivative is 2x, using the power rule.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q16-item3",
+    "questionID": "Q16",
+    "question": "What is the derivative of x²?",
+    "referenceAnswer": "The derivative of x² is 2x. This follows from the power rule of differentiation, which states that d/dx(xⁿ) = nxⁿ⁻¹. For x², n=2, so the derivative is 2x²⁻¹ = 2x¹ = 2x.",
+    "submittedAnswer": "Using the power rule, d/dx(x²) = 2x.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q17-item1",
+    "questionID": "Q17",
+    "question": "What is the pH scale?",
+    "referenceAnswer": "The pH scale is a measure of how acidic or basic (alkaline) a solution is. It ranges from 0 to 14, where 7 is neutral (pure water), values below 7 are acidic, and values above 7 are basic. Each unit represents a 10-fold change in acidity. pH stands for 'potential of Hydrogen' and is calculated as the negative logarithm of hydrogen ion concentration.",
+    "submittedAnswer": "The pH scale measures how acidic or basic something is, from 0 to 14. 7 is neutral, below 7 is acidic, and above 7 is basic.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q17-item2",
+    "questionID": "Q17",
+    "question": "What is the pH scale?",
+    "referenceAnswer": "The pH scale is a measure of how acidic or basic (alkaline) a solution is. It ranges from 0 to 14, where 7 is neutral (pure water), values below 7 are acidic, and values above 7 are basic. Each unit represents a 10-fold change in acidity. pH stands for 'potential of Hydrogen' and is calculated as the negative logarithm of hydrogen ion concentration.",
+    "submittedAnswer": "pH measures acidity and alkalinity on a scale of 0-14. It's based on hydrogen ion concentration in solutions.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q17-item3",
+    "questionID": "Q17",
+    "question": "What is the pH scale?",
+    "referenceAnswer": "The pH scale is a measure of how acidic or basic (alkaline) a solution is. It ranges from 0 to 14, where 7 is neutral (pure water), values below 7 are acidic, and values above 7 are basic. Each unit represents a 10-fold change in acidity. pH stands for 'potential of Hydrogen' and is calculated as the negative logarithm of hydrogen ion concentration.",
+    "submittedAnswer": "It tells you if something is acidic or not.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q18-item1",
+    "questionID": "Q18",
+    "question": "What causes earthquakes?",
+    "referenceAnswer": "Earthquakes are primarily caused by the sudden release of energy stored in Earth's crust due to tectonic plate movements. When plates slide past, collide with, or separate from each other, stress builds up along fault lines. When this stress exceeds the strength of the rocks, they break suddenly, releasing energy as seismic waves that we feel as earthquakes.",
+    "submittedAnswer": "Earthquakes happen when tectonic plates move and create pressure that suddenly releases, causing the ground to shake.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q18-item2",
+    "questionID": "Q18",
+    "question": "What causes earthquakes?",
+    "referenceAnswer": "Earthquakes are primarily caused by the sudden release of energy stored in Earth's crust due to tectonic plate movements. When plates slide past, collide with, or separate from each other, stress builds up along fault lines. When this stress exceeds the strength of the rocks, they break suddenly, releasing energy as seismic waves that we feel as earthquakes.",
+    "submittedAnswer": "Earthquakes are caused by tectonic plate movements that build up stress along fault lines until rocks break and release energy as seismic waves.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q18-item3",
+    "questionID": "Q18",
+    "question": "What causes earthquakes?",
+    "referenceAnswer": "Earthquakes are primarily caused by the sudden release of energy stored in Earth's crust due to tectonic plate movements. When plates slide past, collide with, or separate from each other, stress builds up along fault lines. When this stress exceeds the strength of the rocks, they break suddenly, releasing energy as seismic waves that we feel as earthquakes.",
+    "submittedAnswer": "Moving rocks under the ground cause earthquakes.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q19-item1",
+    "questionID": "Q19",
+    "question": "What is photosynthesis equation?",
+    "referenceAnswer": "The photosynthesis equation is: 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂. This shows that six molecules of carbon dioxide and six molecules of water, in the presence of light energy (usually sunlight), produce one molecule of glucose and six molecules of oxygen.",
+    "submittedAnswer": "6CO2 + 6H2O + light → C6H12O6 + 6O2",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q19-item2",
+    "questionID": "Q19",
+    "question": "What is photosynthesis equation?",
+    "referenceAnswer": "The photosynthesis equation is: 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂. This shows that six molecules of carbon dioxide and six molecules of water, in the presence of light energy (usually sunlight), produce one molecule of glucose and six molecules of oxygen.",
+    "submittedAnswer": "The equation is 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂, showing how plants make glucose and oxygen from carbon dioxide and water using light.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q19-item3",
+    "questionID": "Q19",
+    "question": "What is photosynthesis equation?",
+    "referenceAnswer": "The photosynthesis equation is: 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂. This shows that six molecules of carbon dioxide and six molecules of water, in the presence of light energy (usually sunlight), produce one molecule of glucose and six molecules of oxygen.",
+    "submittedAnswer": "Carbon dioxide plus water plus light makes sugar and oxygen.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q20-item1",
+    "questionID": "Q20",
+    "question": "What is the difference between a virus and bacteria?",
+    "referenceAnswer": "Viruses and bacteria differ in several key ways: 1) Size: Viruses are much smaller than bacteria; 2) Structure: Bacteria are single-celled organisms with cell walls, while viruses are not cells but rather genetic material (DNA or RNA) surrounded by a protein coat; 3) Reproduction: Bacteria reproduce independently, viruses need host cells to replicate; 4) Treatment: Bacterial infections can be treated with antibiotics, viral infections cannot; 5) Living status: Bacteria are considered living organisms, viruses are not technically alive.",
+    "submittedAnswer": "Bacteria are living single-celled organisms that can reproduce on their own, while viruses are smaller and need host cells to replicate. Antibiotics work against bacteria but not viruses.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q20-item2",
+    "questionID": "Q20",
+    "question": "What is the difference between a virus and bacteria?",
+    "referenceAnswer": "Viruses and bacteria differ in several key ways: 1) Size: Viruses are much smaller than bacteria; 2) Structure: Bacteria are single-celled organisms with cell walls, while viruses are not cells but rather genetic material (DNA or RNA) surrounded by a protein coat; 3) Reproduction: Bacteria reproduce independently, viruses need host cells to replicate; 4) Treatment: Bacterial infections can be treated with antibiotics, viral infections cannot; 5) Living status: Bacteria are considered living organisms, viruses are not technically alive.",
+    "submittedAnswer": "Bacteria are complete cells that live independently, while viruses are just genetic material in a protein shell that must infect other cells to reproduce.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q20-item3",
+    "questionID": "Q20",
+    "question": "What is the difference between a virus and bacteria?",
+    "referenceAnswer": "Viruses and bacteria differ in several key ways: 1) Size: Viruses are much smaller than bacteria; 2) Structure: Bacteria are single-celled organisms with cell walls, while viruses are not cells but rather genetic material (DNA or RNA) surrounded by a protein coat; 3) Reproduction: Bacteria reproduce independently, viruses need host cells to replicate; 4) Treatment: Bacterial infections can be treated with antibiotics, viral infections cannot; 5) Living status: Bacteria are considered living organisms, viruses are not technically alive.",
+    "submittedAnswer": "Bacteria are bigger and can live by themselves. Viruses are smaller and need other cells to survive.",
+    "difficulty": "medium"
+  }
+]

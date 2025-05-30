@@ -106,6 +106,7 @@
     "defaultIfNone": "Will use default mastery configuration if none selected"
   },
   "evaluation": {
+    "passingScore": "Passing Score",
     "actions": {
       "create": "Create Evaluation",
       "import": "Import",

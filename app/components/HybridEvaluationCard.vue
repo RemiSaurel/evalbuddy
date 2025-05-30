@@ -223,7 +223,7 @@ function confirmEvaluation() {
 
             <!-- Passing score indicator -->
             <div v-if="scoreSettings.passingScore" class="text-xs text-neutral-500">
-              Passing score: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
+              {{ $t('evaluation.passingScore') }}: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
             </div>
           </div>
 
