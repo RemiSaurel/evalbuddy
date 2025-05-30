@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { MasteryLevel } from '@/models/index'
-
-const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
@@ -15,7 +11,6 @@ const {
   currentQuestion,
   currentAbsoluteQuestionIndex,
   evaluatorComment,
-  evaluateAndGoNext,
   evaluateGenericAndGoNext,
   navigateToQuestion,
   isEvaluationCompleted,
@@ -32,20 +27,6 @@ const evaluationConfig = computed(() => {
 const isGenericEvaluation = computed(() => {
   return !!evaluationConfig.value
 })
-
-// Legacy mastery level colors for backward compatibility
-const colors = {
-  [MasteryLevel.NOT_ATTAINED]: 'bg-red-300 text-red-800 hover:bg-red-400',
-  [MasteryLevel.INSUFFICIENT]: 'bg-orange-300 text-orange-800 hover:bg-orange-400',
-  [MasteryLevel.SUFFICIENT]: 'bg-yellow-300 text-yellow-800 hover:bg-yellow-400',
-  [MasteryLevel.TOTAL]: 'bg-green-300 text-green-800 hover:bg-green-400',
-}
-
-const masteryLevels = computed(() => Object.values(MasteryLevel).map(level => ({
-  label: t(`evaluation.mastery.${level}`),
-  value: level,
-  color: colors[level],
-})))
 
 const isCompletionModalOpen = ref(false)
 
@@ -95,8 +76,6 @@ function reviewEvaluations() {
         :current-absolute-question-index="currentAbsoluteQuestionIndex"
         :evaluator-comment="evaluatorComment"
         :evaluated-questions="evaluatedQuestions"
-        :mastery-levels="isGenericEvaluation ? undefined : masteryLevels"
-        :evaluate-and-go-next="isGenericEvaluation ? undefined : evaluateAndGoNext"
         :evaluation-config="evaluationConfig || undefined"
         :evaluate-generic-and-go-next="isGenericEvaluation ? evaluateGenericAndGoNext : undefined"
         @update:evaluator-comment="evaluatorComment = $event"

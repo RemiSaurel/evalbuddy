@@ -87,16 +87,6 @@ export interface ExportData {
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
-// Legacy mastery level support (for backward compatibility)
-export const MasteryLevel = {
-  NOT_ATTAINED: 'NOT_ATTAINED',
-  INSUFFICIENT: 'INSUFFICIENT',
-  SUFFICIENT: 'SUFFICIENT',
-  TOTAL: 'TOTAL',
-} as const
-
-export type MasteryLevelType = typeof MasteryLevel[keyof typeof MasteryLevel]
-
 // Default mastery level configuration
 export const DEFAULT_MASTERY_CONFIG: MasterySettings = {
   levels: [
