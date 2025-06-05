@@ -93,7 +93,12 @@ export function useEvaluation(sessionId?: string) {
 
   // Get array of question group keys in order
   const questionGroupKeys = computed(() => {
-    return Object.keys(groupedQuestions.value).sort()
+    return Object.keys(groupedQuestions.value).sort((a, b) => {
+      // Extract numeric part from questionID (e.g., "Q1" -> 1, "Q10" -> 10)
+      const numA = Number.parseInt(a.replace(/\D/g, ''), 10) || 0
+      const numB = Number.parseInt(b.replace(/\D/g, ''), 10) || 0
+      return numA - numB
+    })
   })
 
   // Current question group being evaluated
