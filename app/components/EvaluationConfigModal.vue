@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { EvaluationConfig, EvaluationType } from '@/models/index'
+import type { EvaluationConfig, EvaluationType, MasteryLevelDefinition } from '@/models/index'
+import { useSortable } from '@vueuse/integrations/useSortable'
 
 const props = defineProps<{
   modelValue: EvaluationConfig | null
@@ -158,6 +159,17 @@ function swapMasteryLevels(index1: number, index2: number) {
 // Swap mastery levels with drag-and-drop
 const dragAndDropHandle = 'grip'
 const masteryLevelsList = useTemplateRef<HTMLElement>('masteryLevels')
+onMounted(() => {
+  // FIXME not working at all
+  useSortable<MasteryLevelDefinition>(
+    masteryLevelsList,
+    currentMasteryLevels,
+    {
+      animation: 200,
+      handle: `.${dragAndDropHandle}`, // allow dragging only with the handle
+    },
+  )
+})
 </script>
 
 <template>
@@ -209,7 +221,11 @@ const masteryLevelsList = useTemplateRef<HTMLElement>('masteryLevels')
               <template #basic>
                 <div class="space-y-4 mt-4">
                   <UFormField :label="t('configuration.modal.fields.configurationName')">
-                    <UInput v-model="localConfig.name" :placeholder="t('configuration.modal.fields.configurationNamePlaceholder')" class="w-full" />
+                    <UInput
+                      v-model="localConfig.name"
+                      :placeholder="t('configuration.modal.fields.configurationNamePlaceholder')"
+                      class="w-full"
+                    />
                   </UFormField>
                 </div>
               </template>
@@ -234,12 +250,11 @@ const masteryLevelsList = useTemplateRef<HTMLElement>('masteryLevels')
                       </UButton>
                     </div>
 
-                    <div class="space-y-3">
+                    <ul ref="masteryLevels" class="space-y-3">
                       <!-- TODO fix modal height with scroll when too much elements -->
-                      <div
-                        v-for="(level, index) in localConfig.settings.masterySettings.levels"
+                      <li
+                        v-for="(level, index) in currentMasteryLevels"
                         :key="level.id"
-                        ref="masteryLevels"
                         class="flex flex-col gap-0 items-center"
                       >
                         <div class="flex w-full gap-3">
@@ -256,13 +271,13 @@ const masteryLevelsList = useTemplateRef<HTMLElement>('masteryLevels')
                         </div>
 
                         <UButton
-                          v-if="index < localConfig.settings.masterySettings.levels.length - 1"
+                          v-if="index < currentMasteryLevels.length - 1"
                           class="mt-2" size="lg" variant="ghost"
                           icon="i-lucide:arrow-up-down"
                           @click="swapMasteryLevels(index, index + 1)"
                         />
-                      </div>
-                    </div>
+                      </li>
+                    </ul>
                   </div>
 
                   <!-- Boolean Configuration -->
