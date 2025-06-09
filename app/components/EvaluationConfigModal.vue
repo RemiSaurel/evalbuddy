@@ -47,6 +47,10 @@ watch(isOpen, (isOpenNow) => {
   }
 })
 
+const currentMasteryLevels = computed(() =>
+  localConfig.value?.settings.masterySettings?.levels ?? [],
+)
+
 // Evaluation type options
 const evaluationTypes: ComputedRef<Array<{ value: EvaluationType, label: string, description: string }>> = computed(() => [
   {
@@ -150,6 +154,10 @@ function swapMasteryLevels(index1: number, index2: number) {
   }
   swapOrders(localConfig.value.settings.masterySettings.levels, index1, index2)
 }
+
+// Swap mastery levels with drag-and-drop
+const dragAndDropHandle = 'grip'
+const masteryLevelsList = useTemplateRef<HTMLElement>('masteryLevels')
 </script>
 
 <template>
@@ -227,25 +235,23 @@ function swapMasteryLevels(index1: number, index2: number) {
                     </div>
 
                     <div class="space-y-3">
+                      <!-- TODO fix modal height with scroll when too much elements -->
                       <div
                         v-for="(level, index) in localConfig.settings.masterySettings.levels"
-                        :key="level.id" class="flex flex-col gap-0 items-center"
+                        :key="level.id"
+                        ref="masteryLevels"
+                        class="flex flex-col gap-0 items-center"
                       >
-                        <div class="w-full">
-                          <div class="flex items-center gap-3 mb-2">
-                            <UInput
-                              v-model="level.label" :placeholder="t('configuration.modal.fields.levelName')"
-                              class="flex-1"
-                            />
-                            <UButton
-                              icon="i-lucide:trash-2" color="error" variant="ghost"
-                              size="sm" @click="removeMasteryLevel(index)"
-                            />
-                          </div>
-
-                          <UTextarea
-                            v-model="level.description" :rows="1"
-                            :placeholder="t('configuration.modal.fields.levelDescription')" class="w-full"
+                        <div class="flex w-full gap-3">
+                          <span class="mt-1.5">
+                            {{ index + 1 }}.
+                          </span>
+                          <EvaluationConfigMasteryLevelOption
+                            v-model:label="level.label"
+                            v-model:description="level.description"
+                            :handle-class="dragAndDropHandle"
+                            class="flex-1"
+                            @remove="removeMasteryLevel(index)"
                           />
                         </div>
 
