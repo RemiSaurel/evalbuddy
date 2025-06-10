@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EvaluationConfig, EvaluationType, MasteryLevelDefinition } from '@/models/index'
+import type { EvaluationConfig, EvaluationType, MasteryLevelDefinition } from '~/models'
 import { useSortable } from '@vueuse/integrations/useSortable'
 
 const props = defineProps<{
