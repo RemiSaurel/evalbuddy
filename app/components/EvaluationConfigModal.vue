@@ -37,21 +37,6 @@ watch(() => props.modelValue, (newConfig) => {
   }
 }, { immediate: true, deep: true })
 
-// Reset state when modal closes
-watch(isOpen, (isOpenNow) => {
-  if (!isOpenNow) {
-    // Reset all state when modal is closed
-    localConfig.value = null
-    validationErrors.value = []
-    isSaving.value = false
-    activeTab.value = 'basic'
-  }
-})
-
-const currentMasteryLevels = computed(() =>
-  localConfig.value?.settings.masterySettings?.levels ?? [],
-)
-
 // Evaluation type options
 const evaluationTypes: ComputedRef<Array<{ value: EvaluationType, label: string, description: string }>> = computed(() => [
   {
@@ -127,48 +112,33 @@ function removeMasteryLevel(index: number) {
   localConfig.value.settings.masterySettings.levels.splice(index, 1)
 }
 
-function swapOrders(levels: Array<{ order: number }>, index1: number, index2: number) {
-  if (index1 < 0 || index2 < 0 || index1 >= levels.length || index2 >= levels.length) {
-    return
-  }
-
-  const level1 = levels[index1]
-  const level2 = levels[index2]
-
-  if (!level1 || !level2) {
-    return
-  }
-
-  // Swap the order values
-  const temp = level1.order
-  level1.order = level2.order
-  level2.order = temp
-
-  // Sort the array by order to reflect the new positions
-  levels.sort((a, b) => a.order - b.order)
-}
-
-// Swap mastery levels
-function swapMasteryLevels(index1: number, index2: number) {
-  if (!localConfig.value?.settings.masterySettings?.levels) {
-    return
-  }
-  swapOrders(localConfig.value.settings.masterySettings.levels, index1, index2)
-}
-
 // Swap mastery levels with drag-and-drop
 const dragAndDropHandle = 'grip'
 const masteryLevelsList = useTemplateRef<HTMLElement>('masteryLevels')
-onMounted(() => {
-  // FIXME not working at all
-  useSortable<MasteryLevelDefinition>(
-    masteryLevelsList,
-    currentMasteryLevels,
-    {
-      animation: 200,
-      handle: `.${dragAndDropHandle}`, // allow dragging only with the handle
-    },
-  )
+const sortableInstance = ref<ReturnType<typeof useSortable> | null>(null)
+
+watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
+  if (isOpenNow && list) { // list initialized after DOM rendering
+    await nextTick()
+
+    // Initialize drag-and-drop swapping
+    sortableInstance.value = useSortable<MasteryLevelDefinition>(
+      list,
+      localConfig.value?.settings.masterySettings?.levels ?? [],
+      {
+        animation: 200,
+        handle: `.${dragAndDropHandle}`, // allow dragging only with the handle
+      },
+    )
+  }
+  else {
+    // Reset all state when modal is closed
+    localConfig.value = null
+    validationErrors.value = []
+    isSaving.value = false
+    activeTab.value = 'basic'
+    sortableInstance.value = null
+  }
 })
 </script>
 
@@ -253,9 +223,8 @@ onMounted(() => {
                     <ul ref="masteryLevels" class="space-y-3">
                       <!-- TODO fix modal height with scroll when too much elements -->
                       <li
-                        v-for="(level, index) in currentMasteryLevels"
+                        v-for="(level, index) in localConfig.settings.masterySettings.levels"
                         :key="level.id"
-                        class="flex flex-col gap-0 items-center"
                       >
                         <div class="flex w-full gap-3">
                           <span class="mt-1.5">
@@ -269,13 +238,6 @@ onMounted(() => {
                             @remove="removeMasteryLevel(index)"
                           />
                         </div>
-
-                        <UButton
-                          v-if="index < currentMasteryLevels.length - 1"
-                          class="mt-2" size="lg" variant="ghost"
-                          icon="i-lucide:arrow-up-down"
-                          @click="swapMasteryLevels(index, index + 1)"
-                        />
                       </li>
                     </ul>
                   </div>
