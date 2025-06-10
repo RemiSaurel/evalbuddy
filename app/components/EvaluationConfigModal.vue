@@ -220,8 +220,7 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
                       </UButton>
                     </div>
 
-                    <ul ref="masteryLevels" class="space-y-3">
-                      <!-- TODO fix modal height with scroll when too much elements -->
+                    <ul ref="masteryLevels" class="space-y-3 max-h-[50vh] overflow-y-auto">
                       <li
                         v-for="(level, index) in localConfig.settings.masterySettings.levels"
                         :key="level.id"
