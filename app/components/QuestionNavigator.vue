@@ -22,16 +22,11 @@ function scrollToActiveQuestion(questionIndex: number) {
   if (!button)
     return
 
-  // Calculate the position to center the button
-  const containerWidth = scrollContainer.value.clientWidth
-  const buttonLeft = button.offsetLeft
-  const buttonWidth = button.offsetWidth
-  const scrollLeft = buttonLeft - (containerWidth / 2) + (buttonWidth / 2)
-
-  // Smooth scroll to center the button
-  scrollContainer.value.scrollTo({
-    left: Math.max(0, scrollLeft),
+  // Use scrollIntoView with block: 'nearest' and inline: 'center' for better centering
+  button.scrollIntoView({
     behavior: 'smooth',
+    block: 'nearest',
+    inline: 'center',
   })
 }
 
