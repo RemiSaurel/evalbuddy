@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   app: {
     head: {
-      title: '🧑‍🏫 Evalbuddy',
+      title: '🧑‍🏫 EvalBuddy',
     },
   },
   devtools: { enabled: true },

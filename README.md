@@ -1,10 +1,10 @@
-# 🧑‍🏫 Evalbuddy
+# 🧑‍🏫 EvalBuddy
 
 A modern, flexible evaluation platform for educational assessments and question grading.
 
 ## 📋 Overview
 
-Evalbuddy is a web-based application built with Nuxt 3 that provides educators with a comprehensive tool for evaluating responses to questions. The platform supports multiple evaluation methodologies, from simple binary assessments to complex mastery-level evaluations with custom scoring systems. The tool uses [IndexedDB](https://developer.mozilla.org/fr/docs/Web/API/IndexedDB_API/Using_IndexedDB) for local data storage, ensuring fast and reliable performance with 100% local data handling.
+EvalBuddy is a web-based application built with Nuxt 3 that provides educators with a comprehensive tool for evaluating responses to questions. The platform supports multiple evaluation methodologies, from simple binary assessments to complex mastery-level evaluations with custom scoring systems. The tool uses [IndexedDB](https://developer.mozilla.org/fr/docs/Web/API/IndexedDB_API/Using_IndexedDB) for local data storage, ensuring fast and reliable performance with 100% local data handling.
 
 ## 🚀 Getting Started
 
