@@ -1,5 +1,6 @@
 {
   "name": "evalbuddy",
+  "packageManager": "npm@10.9.2",
   "scripts": {
     "dev": "docus dev",
     "build": "docus build"
