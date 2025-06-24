@@ -1,24 +1,48 @@
 <script setup lang="ts">
-import type { EvaluatedItem } from '@/models/index'
+import type { EvaluatedItem } from '~/models'
 
 const props = defineProps<{
+  groupedQuestions: { [key: string]: EvaluatedItem[] }
   questions: EvaluatedItem[]
+  currentQuestionGroup: EvaluatedItem[]
+  currentAbsoluteQuestionIndex: number
+  currentQuestionIndexInGroup: number
   currentIndex: number
-  evaluatedQuestions: { [questionId: string]: { value?: any, masteryLevel?: string, comment?: string } }
+  evaluatedQuestions: {
+    [questionId: string]: { value?: any, masteryLevel?: string, comment?: string }
+  }
   onNavigate: (index: number) => void
 }>()
 
 const { t } = useI18n()
 
-// Reference to the scrollable container
-const scrollContainer = ref<HTMLElement>()
+// Check if all question groups include only one question
+const isSingleEvaluation = computed(() =>
+  Object.values(props.groupedQuestions)
+    .every((group: EvaluatedItem[]) => group.length === 1),
+)
 
-// Function to scroll the active question into view
+// Reference to the scrollable containers
+const questionScrollContainer = ref<HTMLElement>()
+const questionGroupScrollContainer = ref<HTMLElement>()
+
 function scrollToActiveQuestion(questionIndex: number) {
-  if (!scrollContainer.value)
+  scrollToActiveItem(questionScrollContainer, questionIndex)
+}
+
+function scrollToActiveQuestionGroup(groupIndex: number) {
+  scrollToActiveItem(questionGroupScrollContainer, groupIndex)
+}
+
+// Function to scroll the active item into view
+function scrollToActiveItem(
+  container: Ref<HTMLElement | undefined>,
+  itemIndex: number,
+) {
+  if (!container.value)
     return
 
-  const button = scrollContainer.value.children[questionIndex] as HTMLElement
+  const button = container.value.children[itemIndex] as HTMLElement
   if (!button)
     return
 
@@ -31,10 +55,13 @@ function scrollToActiveQuestion(questionIndex: number) {
 }
 
 // Handle navigation and auto-scroll
-function handleNavigation(index: number) {
-  props.onNavigate(index)
+function handleNavigation(questionIndex: number, groupIndex?: number) {
+  props.onNavigate(questionIndex)
   nextTick(() => {
-    scrollToActiveQuestion(index)
+    scrollToActiveQuestion(questionIndex)
+    if (!isSingleEvaluation.value && groupIndex !== undefined) {
+      scrollToActiveQuestionGroup(groupIndex)
+    }
   })
 }
 
@@ -70,6 +97,21 @@ defineShortcuts({
     }
   },
 })
+
+function getFirstGroupQuestionAbsoluteIndex(groupName: string) {
+  const questionGroupKeys
+  = computed(() => Object.keys(props.groupedQuestions))
+  let index = 0
+
+  for (let groupIndex = 0; groupIndex < questionGroupKeys.value.length; groupIndex++) {
+    const groupKey = questionGroupKeys.value[groupIndex]
+    if (groupKey === groupName) {
+      return { index, groupIndex }
+    }
+    index += groupKey ? props.groupedQuestions[groupKey]?.length || 0 : 0
+  }
+  return { index: -1, groupIndex: -1 } // not found
+}
 </script>
 
 <template>
@@ -95,22 +137,66 @@ defineShortcuts({
       </div>
     </div>
 
-    <!-- Single Line Question Navigation -->
-    <div ref="scrollContainer" class="flex overflow-auto gap-2 p-1">
-      <button
-        v-for="(question, questionIndex) in questions"
-        :key="question.id"
-        class="size-14 min-w-14 rounded-full text-xs font-medium transition-all duration-200 flex flex-col items-center justify-center gap-1 hover:shadow-md"
-        :class="{
-          'ring-2 ring-blue-700 ring-offset-2': questionIndex === currentIndex,
-          'bg-neutral-600 text-white': isQuestionEvaluated(question),
-          'bg-neutral-200 text-neutral-500': !isQuestionEvaluated(question),
-        }"
-        @click="() => handleNavigation(questionIndex)"
+    <div class="flex flex-col gap-1">
+      <!-- Group navigation -->
+      <div
+        v-if="!isSingleEvaluation"
+        ref="questionGroupScrollContainer"
+        class="flex overflow-auto gap-2 p-1"
       >
-        <span class="font-bold text-lg leading-none">{{ questionIndex + 1 }}</span>
-        <span class="text-xs leading-none">{{ question.questionID }}</span>
-      </button>
+        <!-- TODO component for item button (or simplify UI) -->
+        <button
+          v-for="(group, groupName) in groupedQuestions"
+          :key="groupName"
+          class="size-14 min-w-14 rounded-full text-xs font-medium transition-all
+          duration-200 flex flex-col items-center justify-center gap-1 hover:shadow-md"
+          :class="{
+            'ring-2 ring-blue-700 ring-offset-2':
+              groupName === currentQuestionGroup[0]?.questionID,
+            'bg-neutral-600 text-white': group.every(isQuestionEvaluated),
+            'bg-neutral-200 text-neutral-500': !group.every(isQuestionEvaluated),
+          }"
+          @click="() => {
+            const { index, groupIndex }
+              = getFirstGroupQuestionAbsoluteIndex(groupName as string)
+
+            handleNavigation(index, groupIndex)
+          }"
+        >
+          <span class="font-bold text-lg leading-none">{{ groupName }}</span>
+        </button>
+      </div>
+
+      <!-- Question navigation on a single line -->
+      <div ref="questionScrollContainer" class="flex overflow-auto gap-2 p-1">
+        <button
+          v-for="(question, questionIndex) in (
+            isSingleEvaluation ? questions : currentQuestionGroup
+          )"
+          :key="question.id"
+          class="rounded-full text-xs font-medium transition-all duration-200 flex
+          flex-col items-center justify-center gap-1 hover:shadow-md"
+          :class="{
+            'ring-2 ring-blue-700 ring-offset-2':
+              questionIndex === (isSingleEvaluation ? currentIndex : currentQuestionIndexInGroup),
+            'bg-neutral-600 text-white': isQuestionEvaluated(question),
+            'bg-neutral-200 text-neutral-500': !isQuestionEvaluated(question),
+            'size-14 min-w-14': isSingleEvaluation,
+            'size-12 min-w-12': !isSingleEvaluation,
+          }"
+          @click="() => handleNavigation(
+            isSingleEvaluation
+              ? questionIndex
+              : currentAbsoluteQuestionIndex - currentQuestionIndexInGroup // first question in group
+                + questionIndex,
+          )"
+        >
+          <span class="font-bold text-lg leading-none">{{ questionIndex + 1 }}</span>
+          <span v-if="isSingleEvaluation" class="text-xs leading-none">
+            {{ question.questionID }}
+          </span>
+        </button>
+      </div>
     </div>
   </div>
 </template>

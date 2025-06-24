@@ -10,11 +10,13 @@ const {
   totalProgress,
   currentQuestion,
   currentAbsoluteQuestionIndex,
+  currentQuestionIndexInGroup,
   evaluatorComment,
   evaluateGenericAndGoNext,
   navigateToQuestion,
   isEvaluationCompleted,
   questions,
+  groupedQuestions,
   evaluatedQuestions,
 } = useEvaluation(sessionId)
 
@@ -64,7 +66,11 @@ function reviewEvaluations() {
 
       <!-- Question Navigator replacing Previous/Next buttons -->
       <QuestionNavigator
+        :grouped-questions="groupedQuestions"
         :questions="questions"
+        :current-question-group="currentQuestionGroup"
+        :current-absolute-question-index="currentAbsoluteQuestionIndex"
+        :current-question-index-in-group="currentQuestionIndexInGroup"
         :current-index="currentAbsoluteQuestionIndex"
         :evaluated-questions="evaluatedQuestions"
         :on-navigate="navigateToQuestion"
