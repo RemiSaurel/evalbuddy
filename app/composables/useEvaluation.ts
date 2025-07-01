@@ -1,4 +1,4 @@
-import type { EvaluationResult, EvaluationSession } from '@/models/index'
+import type { EvaluatedItem, EvaluationResult, EvaluationSession } from '~/models'
 import { evaluationStorage } from '@/utils/storage'
 
 export function useEvaluation(sessionId?: string) {
@@ -108,7 +108,7 @@ export function useEvaluation(sessionId?: string) {
   })
 
   // Current question being displayed
-  const currentQuestion = computed(() => {
+  const currentQuestion = computed<EvaluatedItem | undefined>(() => {
     const q = currentQuestionGroup.value[currentQuestionIndexInGroup.value]
     if (q && evaluatedQuestions.value[q.id]) {
       evaluatorComment.value = evaluatedQuestions.value[q.id]?.comment || ''
@@ -120,10 +120,9 @@ export function useEvaluation(sessionId?: string) {
   const currentQuestionGroupProgress = computed(() => {
     if (!currentQuestionGroup.value || currentQuestionGroup.value.length === 0)
       return 0
-    const evaluatedInGroup = currentQuestionGroup.value.filter(q =>
+    return currentQuestionGroup.value.filter(q =>
       evaluatedQuestions.value[q.id] !== undefined,
     ).length
-    return evaluatedInGroup
   })
 
   // Total progress across all questions (only count evaluated questions)
@@ -289,6 +288,12 @@ export function useEvaluation(sessionId?: string) {
     return totalProgress.value === questions.value.length
   })
 
+  // Check if all question groups include only one question
+  const isSingleEvaluation = computed(() =>
+    Object.values(groupedQuestions.value)
+      .every((group: EvaluatedItem[]) => group.length === 1),
+  )
+
   // Initialize session if sessionId is provided
   if (sessionId) {
     initializeSession(sessionId)
@@ -320,6 +325,7 @@ export function useEvaluation(sessionId?: string) {
     canGoNext,
     canGoPrevious,
     isEvaluationCompleted,
+    isSingleEvaluation,
     questions,
   }
 }

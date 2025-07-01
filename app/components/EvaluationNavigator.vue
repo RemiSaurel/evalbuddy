@@ -6,6 +6,8 @@ const props = defineProps<{
   groupedQuestions: { [key: string]: EvaluatedItem[] }
   questions: EvaluatedItem[]
   currentQuestionGroup: EvaluatedItem[]
+  currentAbsoluteQuestionIndex: number
+  currentQuestionIndexInGroup: number
   currentIndex: number
   evaluatedQuestions: {
     [questionId: string]: { value?: any, masteryLevel?: string, comment?: string }
@@ -15,24 +17,18 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-// Reference to the scrollable containers
+// Reference to the scrollable container
 const questionScrollContainer = ref<HTMLElement>()
-const questionGroupScrollContainer = ref<HTMLElement>()
 
 function scrollToActiveQuestion(questionIndex: number) {
   useScrollToListItem(questionScrollContainer, questionIndex)
 }
 
 // Handle navigation and auto-scroll
-function handleNavigation(questionIndex: number, groupIndex?: number) {
+function handleNavigation(questionIndex: number) {
   props.onNavigate(questionIndex)
   nextTick(() => {
     scrollToActiveQuestion(questionIndex)
-
-    // scroll to the active question group
-    if (!props.isSingleEvaluation && groupIndex !== undefined) {
-      useScrollToListItem(questionGroupScrollContainer, groupIndex)
-    }
   })
 }
 
@@ -55,28 +51,28 @@ onMounted(() => {
   scrollToActiveQuestion(props.currentIndex)
 })
 
-function getFirstGroupQuestionAbsoluteIndex(groupName: string) {
-  const questionGroupKeys
-  = computed(() => Object.keys(props.groupedQuestions))
-  let index = 0
-
-  for (let groupIndex = 0; groupIndex < questionGroupKeys.value.length; groupIndex++) {
-    const groupKey = questionGroupKeys.value[groupIndex]
-    if (groupKey === groupName) {
-      return { index, groupIndex }
+// Shortcuts with arrow keys to navigate
+defineShortcuts({
+  ArrowLeft: () => {
+    if (props.currentIndex > 0) {
+      handleNavigation(props.currentIndex - 1)
     }
-    index += groupKey ? props.groupedQuestions[groupKey]?.length || 0 : 0
-  }
-  return { index: -1, groupIndex: -1 } // not found
-}
+  },
+  ArrowRight: () => {
+    if (props.currentIndex < props.questions.length - 1) {
+      handleNavigation(props.currentIndex + 1)
+    }
+  },
+})
 </script>
 
 <template>
-  <div class="w-full overflow-x-auto">
+  <!-- Evaluation navigation if there is more than one evaluation per question -->
+  <div v-if="!isSingleEvaluation" class="w-full overflow-x-auto">
     <!-- Legend -->
     <div class="flex items-center justify-between mb-2">
       <h3 class="text-sm font-medium text-neutral-900">
-        {{ t('evaluation.navigation.overviewQuestions') }}
+        {{ t('evaluation.navigation.overviewAnswers') }}
       </h3>
       <div class="flex items-center gap-4 text-xs">
         <div class="flex items-center gap-1.5">
@@ -94,40 +90,20 @@ function getFirstGroupQuestionAbsoluteIndex(groupName: string) {
       </div>
     </div>
 
+    <!-- Navigation -->
     <div class="flex flex-col gap-1">
-      <!-- Question navigation on a single line if every question have one evaluation -->
-      <div
-        v-if="isSingleEvaluation"
-        ref="questionScrollContainer"
-        class="flex overflow-auto gap-2 p-1"
-      >
+      <div ref="questionScrollContainer" class="flex overflow-auto gap-2 p-1">
         <NavigatorItem
-          v-for="(question, questionIndex) in questions"
+          v-for="(question, questionIndex) in currentQuestionGroup"
           :key="question.id"
-          button-size="sm"
+          button-size="xs"
           :item-index="(questionIndex + 1).toString()"
-          :sub-item-index="question.questionID"
-          :is-current-item="questionIndex === currentIndex"
+          :is-current-item="questionIndex === currentQuestionIndexInGroup"
           :is-item-evaluated="isQuestionEvaluated(question) ?? false"
-          @click="() => handleNavigation(questionIndex)"
-        />
-      </div>
-
-      <!-- Group navigation otherwise -->
-      <div v-else ref="questionGroupScrollContainer" class="flex overflow-auto gap-2 p-1">
-        <NavigatorItem
-          v-for="(group, groupName) in groupedQuestions"
-          :key="groupName"
-          button-size="sm"
-          :item-index="groupName.toString()"
-          :is-current-item="groupName === currentQuestionGroup[0]?.questionID"
-          :is-item-evaluated="group.every(isQuestionEvaluated)"
-          @click="() => {
-            const { index, groupIndex }
-              = getFirstGroupQuestionAbsoluteIndex(groupName as string)
-
-            handleNavigation(index, groupIndex)
-          }"
+          @click="() => handleNavigation(
+            currentAbsoluteQuestionIndex - currentQuestionIndexInGroup // first question in group
+              + questionIndex,
+          )"
         />
       </div>
     </div>

@@ -154,7 +154,8 @@
     "navigation": {
       "previous": "Précédent",
       "next": "Suivant",
-      "overview": "Aperçu des questions",
+      "overviewQuestions": "Questions",
+      "overviewAnswers": "Réponses à évaluer",
       "evaluated": "Évaluées",
       "current": "Actuelle",
       "pending": "En attente"
