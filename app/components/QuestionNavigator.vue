@@ -74,24 +74,12 @@ function getFirstGroupQuestionAbsoluteIndex(groupName: string) {
 <template>
   <div class="w-full overflow-x-auto">
     <!-- Legend -->
-    <div class="flex items-center justify-between mb-2">
-      <h3 class="text-sm font-medium text-neutral-900">
+    <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900">
+      <h3>
         {{ t('evaluation.navigation.overviewQuestions') }}
       </h3>
-      <div class="flex items-center gap-4 text-xs">
-        <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-full bg-neutral-600" />
-          <span>{{ t('evaluation.navigation.evaluated') }}</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-full bg-blue-700" />
-          <span>{{ t('evaluation.navigation.current') }}</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-full bg-neutral-200" />
-          <span>{{ t('evaluation.navigation.pending') }}</span>
-        </div>
-      </div>
+
+      <NavigatorHelp />
     </div>
 
     <div class="flex flex-col gap-1">
