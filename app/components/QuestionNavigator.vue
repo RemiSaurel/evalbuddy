@@ -14,24 +14,28 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const { scrollToItem, scrollToActiveQuestion } = useScrollToListItem()
 
 // Reference to the scrollable containers
 const questionScrollContainer = ref<HTMLElement>()
 const questionGroupScrollContainer = ref<HTMLElement>()
 
-function scrollToActiveQuestion(questionIndex: number) {
-  useScrollToListItem(questionScrollContainer, questionIndex)
-}
-
 // Handle navigation and auto-scroll
 function handleNavigation(questionIndex: number, groupIndex?: number) {
   props.onNavigate(questionIndex)
   nextTick(() => {
-    scrollToActiveQuestion(questionIndex)
+    scrollToActiveQuestion(
+      props.isSingleEvaluation,
+      questionScrollContainer,
+      questionGroupScrollContainer,
+      questionIndex,
+      props.currentQuestionGroup,
+      props.groupedQuestions,
+    )
 
-    // scroll to the active question group
+    // scroll to the active question group for grouped evaluations
     if (!props.isSingleEvaluation && groupIndex !== undefined) {
-      useScrollToListItem(questionGroupScrollContainer, groupIndex)
+      scrollToItem(questionGroupScrollContainer, groupIndex)
     }
   })
 }
@@ -39,9 +43,12 @@ function handleNavigation(questionIndex: number, groupIndex?: number) {
 // Watch for currentIndex changes to auto-scroll when navigation happens externally
 watch(() => props.currentIndex, (newIndex) => {
   nextTick(() => {
-    scrollToActiveQuestion(newIndex)
+    scrollToItem(
+      props.isSingleEvaluation ? questionScrollContainer : questionGroupScrollContainer,
+      props.isSingleEvaluation ? newIndex : getGroupIndexForQuestion(newIndex),
+    )
   })
-})
+}, { immediate: false })
 
 // Check if a question is evaluated by looking for the specific item ID
 function isQuestionEvaluated(question: EvaluatedItem) {
@@ -50,10 +57,15 @@ function isQuestionEvaluated(question: EvaluatedItem) {
   return evaluated && (evaluated.value !== undefined || evaluated.masteryLevel !== undefined)
 }
 
-// Auto-scroll to current question on mount
-onMounted(() => {
-  scrollToActiveQuestion(props.currentIndex)
-})
+// Helper function to get group index for a given question index
+function getGroupIndexForQuestion(_questionIndex: number) {
+  const currentGroup = props.currentQuestionGroup[0]?.questionID
+  if (currentGroup) {
+    const groupNames = Object.keys(props.groupedQuestions)
+    return groupNames.indexOf(currentGroup)
+  }
+  return 0
+}
 
 function getFirstGroupQuestionAbsoluteIndex(groupName: string) {
   const questionGroupKeys
@@ -69,6 +81,16 @@ function getFirstGroupQuestionAbsoluteIndex(groupName: string) {
   }
   return { index: -1, groupIndex: -1 } // not found
 }
+
+// Auto-scroll to current question on mount
+onMounted(() => {
+  nextTick(() => {
+    scrollToItem(
+      props.isSingleEvaluation ? questionScrollContainer : questionGroupScrollContainer,
+      props.isSingleEvaluation ? props.currentIndex : getGroupIndexForQuestion(props.currentIndex),
+    )
+  })
+})
 </script>
 
 <template>
