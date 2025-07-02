@@ -10,11 +10,14 @@ const {
   totalProgress,
   currentQuestion,
   currentAbsoluteQuestionIndex,
+  currentQuestionIndexInGroup,
   evaluatorComment,
   evaluateGenericAndGoNext,
   navigateToQuestion,
   isEvaluationCompleted,
+  isSingleEvaluation,
   questions,
+  groupedQuestions,
   evaluatedQuestions,
 } = useEvaluation(sessionId)
 
@@ -62,24 +65,45 @@ function reviewEvaluations() {
         />
       </div>
 
-      <!-- Question Navigator replacing Previous/Next buttons -->
-      <QuestionNavigator
-        :questions="questions"
-        :current-index="currentAbsoluteQuestionIndex"
-        :evaluated-questions="evaluatedQuestions"
-        :on-navigate="navigateToQuestion"
-      />
+      <!-- Question navigation and context header -->
+      <div class="flex flex-col gap-3">
+        <QuestionNavigator
+          :is-single-evaluation="isSingleEvaluation"
+          :grouped-questions="groupedQuestions"
+          :questions="questions"
+          :current-question-group="currentQuestionGroup"
+          :current-index="currentAbsoluteQuestionIndex"
+          :evaluated-questions="evaluatedQuestions"
+          :on-navigate="navigateToQuestion"
+        />
 
-      <HybridEvaluationCard
-        v-if="currentQuestion"
-        :current-question="currentQuestion"
-        :current-absolute-question-index="currentAbsoluteQuestionIndex"
-        :evaluator-comment="evaluatorComment"
-        :evaluated-questions="evaluatedQuestions"
-        :evaluation-config="evaluationConfig || undefined"
-        :evaluate-generic-and-go-next="isGenericEvaluation ? evaluateGenericAndGoNext : undefined"
-        @update:evaluator-comment="evaluatorComment = $event"
-      />
+        <QuestionCard v-if="currentQuestion" :current-question="currentQuestion" />
+      </div>
+
+      <!-- Evaluation navigation and card -->
+      <div class="flex flex-col gap-3">
+        <EvaluationNavigator
+          :is-single-evaluation="isSingleEvaluation"
+          :grouped-questions="groupedQuestions"
+          :questions="questions"
+          :current-question-group="currentQuestionGroup"
+          :current-absolute-question-index="currentAbsoluteQuestionIndex"
+          :current-question-index-in-group="currentQuestionIndexInGroup"
+          :current-index="currentAbsoluteQuestionIndex"
+          :evaluated-questions="evaluatedQuestions"
+          :on-navigate="navigateToQuestion"
+        />
+
+        <HybridEvaluationCard
+          v-if="currentQuestion"
+          :current-question="currentQuestion"
+          :evaluator-comment="evaluatorComment"
+          :evaluated-questions="evaluatedQuestions"
+          :evaluation-config="evaluationConfig || undefined"
+          :evaluate-generic-and-go-next="isGenericEvaluation ? evaluateGenericAndGoNext : undefined"
+          @update:evaluator-comment="evaluatorComment = $event"
+        />
+      </div>
     </div>
 
     <!-- Completion Modal -->

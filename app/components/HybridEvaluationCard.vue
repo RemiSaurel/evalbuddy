@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { EvaluationConfig } from '@/models/index'
+import type { EvaluatedItem, EvaluationConfig } from '~/models'
 
 interface Props {
-  currentQuestion: any
-  currentAbsoluteQuestionIndex: number
+  currentQuestion: EvaluatedItem
   evaluatorComment: string
   evaluatedQuestions: { [questionId: string]: { value?: any, masteryLevel?: any, comment?: string } }
 
@@ -103,21 +102,6 @@ const commentsRequired = computed(() => {
   return false
 })
 
-// Difficulty badge helpers
-const difficultyLevels: { [key: string]: string } = {
-  easy: 'bg-blue-200 text-blue-900',
-  medium: 'bg-purple-300 text-purple-800',
-  hard: 'bg-pink-200 text-pink-800',
-}
-
-const difficultyLabel = computed(() =>
-  props.currentQuestion?.difficulty ? t(`evaluation.difficultyLevels.${props.currentQuestion.difficulty}`) : '',
-)
-
-const difficultyClass = computed(() =>
-  props.currentQuestion?.difficulty ? difficultyLevels[props.currentQuestion.difficulty] : '',
-)
-
 // Validation
 const canConfirmEvaluation = computed(() => {
   const hasValue = selectedValue.value !== null && selectedValue.value !== undefined
@@ -156,30 +140,10 @@ function confirmEvaluation() {
 </script>
 
 <template>
-  <UCard v-if="currentQuestion">
-    <template #header>
-      <div class="flex flex-col gap-4">
-        <div class="flex justify-between items-center">
-          <div class="text-neutral-800 text-sm font-semibold">
-            Question {{ currentQuestion.questionID }}
-          </div>
-          <div v-if="currentQuestion.difficulty">
-            <UBadge
-              :label="difficultyLabel"
-              class="text-xs"
-              :class="difficultyClass"
-            />
-          </div>
-        </div>
-        <div>
-          {{ currentQuestion.question }}
-        </div>
-      </div>
-    </template>
-
+  <UCard>
     <div class="flex flex-col gap-4">
       <div class="text-neutral-800 text-sm font-semibold">
-        {{ $t('evaluation.question.submittedAnswer') }}
+        {{ t('evaluation.question.submittedAnswer') }}
       </div>
       {{ currentQuestion.submittedAnswer }}
     </div>
@@ -189,7 +153,7 @@ function confirmEvaluation() {
         <!-- Evaluation Type Header -->
         <div class="flex justify-between items-center">
           <div class="text-neutral-800 text-sm font-semibold">
-            {{ $t('evaluation.title') }}
+            {{ t('evaluation.title') }}
           </div>
           <div v-if="evaluationConfig" class="text-xs text-neutral-500">
             {{ evaluationConfig.name }} ({{ evaluationConfig.type }})
@@ -223,7 +187,7 @@ function confirmEvaluation() {
 
             <!-- Passing score indicator -->
             <div v-if="scoreSettings.passingScore" class="text-xs text-neutral-500">
-              {{ $t('evaluation.passingScore') }}: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
+              {{ t('evaluation.passingScore') }}: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
             </div>
           </div>
 
@@ -255,12 +219,12 @@ function confirmEvaluation() {
         <!-- Comments Section -->
         <div v-if="commentsAllowed" class="flex flex-col gap-1">
           <div class="text-neutral-800 text-sm font-semibold">
-            {{ $t('evaluation.evaluator.comment') }}
+            {{ t('evaluation.evaluator.comment') }}
             <span v-if="commentsRequired" class="text-red-500">*</span>
           </div>
           <UTextarea
             :model-value="localComment"
-            :placeholder="$t('evaluation.evaluator.commentPlaceholder')"
+            :placeholder="t('evaluation.evaluator.commentPlaceholder')"
             :rows="5"
             :required="commentsRequired"
             class="w-full"
@@ -269,7 +233,7 @@ function confirmEvaluation() {
 
           <!-- Validation messages -->
           <div v-if="commentsRequired && !localComment.trim()" class="text-sm text-red-600">
-            {{ $t('evaluation.evaluator.commentRequired') }}
+            {{ t('evaluation.evaluator.commentRequired') }}
           </div>
         </div>
 
@@ -280,7 +244,7 @@ function confirmEvaluation() {
             color="primary"
             variant="solid"
             :disabled="!canConfirmEvaluation"
-            :label="$t('evaluation.actions.confirm')"
+            :label="t('evaluation.actions.confirm')"
             @click="confirmEvaluation"
           />
         </div>
