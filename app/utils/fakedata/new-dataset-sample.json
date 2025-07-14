@@ -1,0 +1,122 @@
+{
+  "context": {
+    "course": "Geography Assessment",
+    "level": "Intermediate",
+    "date": "2025-01-14",
+    "instructor": "Prof. Smith"
+  },
+  "questionList": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+      "difficulty": "easy",
+      "context": {
+        "topic": "European Geography",
+        "points": 10,
+        "category": "Capitals"
+      }
+    },
+    {
+      "id": 2,
+      "question": "Explain the formation of mountains through tectonic plate movement.",
+      "referenceAnswer": "Mountains form when tectonic plates collide, causing the Earth's crust to fold, fault, and uplift. This process, called orogenesis, creates mountain ranges through compression and deformation of rock layers.",
+      "difficulty": "hard",
+      "context": {
+        "topic": "Geology",
+        "points": 25,
+        "category": "Physical Geography"
+      }
+    },
+    {
+      "id": 3,
+      "question": "What are the main climate zones of the Earth?",
+      "referenceAnswer": "The main climate zones are: tropical (hot and humid), arid (dry), temperate (moderate temperatures), continental (large temperature variations), and polar (very cold).",
+      "difficulty": "medium",
+      "context": {
+        "topic": "Climatology",
+        "points": 15,
+        "category": "Climate"
+      }
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "questionID": 1,
+      "submittedAnswer": "Paris is the capital of France.",
+      "context": {
+        "studentId": "student_001",
+        "studentName": "Alice Johnson",
+        "submissionTime": "2025-01-14T10:00:00Z",
+        "attempt": 1
+      }
+    },
+    {
+      "id": 2,
+      "questionID": 1,
+      "submittedAnswer": "The capital is Paris, which is a beautiful city in France.",
+      "context": {
+        "studentId": "student_002",
+        "studentName": "Bob Williams",
+        "submissionTime": "2025-01-14T10:05:00Z",
+        "attempt": 1
+      }
+    },
+    {
+      "id": 3,
+      "questionID": 1,
+      "submittedAnswer": "I think it's Lyon or maybe Paris?",
+      "context": {
+        "studentId": "student_003",
+        "studentName": "Carol Davis",
+        "submissionTime": "2025-01-14T10:10:00Z",
+        "attempt": 1
+      }
+    },
+    {
+      "id": 4,
+      "questionID": 2,
+      "submittedAnswer": "Mountains are formed when tectonic plates push against each other, causing the earth to fold and create high peaks.",
+      "context": {
+        "studentId": "student_001",
+        "studentName": "Alice Johnson",
+        "submissionTime": "2025-01-14T10:15:00Z",
+        "attempt": 1
+      }
+    },
+    {
+      "id": 5,
+      "questionID": 2,
+      "submittedAnswer": "When plates collide, they push up the land and make mountains. It's like when you push two pieces of paper together.",
+      "context": {
+        "studentId": "student_002",
+        "studentName": "Bob Williams",
+        "submissionTime": "2025-01-14T10:20:00Z",
+        "attempt": 1
+      }
+    },
+    {
+      "id": 6,
+      "questionID": 3,
+      "submittedAnswer": "The main climate zones are tropical, desert, temperate, and polar.",
+      "context": {
+        "studentId": "student_001",
+        "studentName": "Alice Johnson",
+        "submissionTime": "2025-01-14T10:25:00Z",
+        "attempt": 1
+      }
+    },
+    {
+      "id": 7,
+      "questionID": 3,
+      "submittedAnswer": "Hot places, cold places, and places in between.",
+      "context": {
+        "studentId": "student_003",
+        "studentName": "Carol Davis",
+        "submissionTime": "2025-01-14T10:30:00Z",
+        "attempt": 1
+      }
+    }
+  ]
+}
