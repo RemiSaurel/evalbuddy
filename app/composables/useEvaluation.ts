@@ -76,7 +76,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
 
       session.results.forEach((result) => {
         // Handle cases where itemId might be undefined (legacy data)
-        const itemId = result.itemId || result.questionId
+        const itemId = result.itemId ?? result.questionId
         if (itemId) {
           evaluated[itemId.toString()] = {
             value: result.value,

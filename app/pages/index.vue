@@ -163,7 +163,6 @@ async function createEvaluation() {
   importErrors.value = []
 
   try {
-    // Try to import as new dataset format first, fallback to legacy format
     const { dataset, errors } = await ImportExportService.importDatasetFromFile(selectedFile.value)
 
     if (errors.length > 0) {
