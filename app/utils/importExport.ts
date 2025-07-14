@@ -1,5 +1,4 @@
 import type { DatasetStructure, EvaluationConfig, ExportData } from '@/models/index'
-import { validateDataset } from '@/models/index'
 import { evaluationStorage } from './storage'
 
 // Configuration export/import data structure
@@ -212,4 +211,72 @@ export class ImportExportService {
     const safeName = configName.replace(/[^a-z0-9]/gi, '_')
     return `${safeName}.conf`
   }
+}
+
+/**
+ * Validate DatasetStructure
+ */
+function validateDataset(dataset: any): string[] {
+  const errors: string[] = []
+
+  if (!dataset || typeof dataset !== 'object') {
+    errors.push('Dataset must be an object')
+    return errors
+  }
+
+  if (!Array.isArray(dataset.questionList)) {
+    errors.push('questionList must be an array')
+    return errors
+  }
+
+  if (!Array.isArray(dataset.items)) {
+    errors.push('items must be an array')
+    return errors
+  }
+
+  // Validate questions
+  const questionIds = new Set<number>()
+  dataset.questionList.forEach((question: any, index: number) => {
+    if (typeof question.id !== 'number') {
+      errors.push(`Question at index ${index}: id must be a number`)
+    }
+    else if (questionIds.has(question.id)) {
+      errors.push(`Question at index ${index}: duplicate id ${question.id}`)
+    }
+    else {
+      questionIds.add(question.id)
+    }
+
+    if (!question.question || typeof question.question !== 'string') {
+      errors.push(`Question at index ${index}: question text is required`)
+    }
+
+    if (!question.referenceAnswer || typeof question.referenceAnswer !== 'string') {
+      errors.push(`Question at index ${index}: referenceAnswer is required`)
+    }
+
+    if (question.difficulty && !['easy', 'medium', 'hard'].includes(question.difficulty)) {
+      errors.push(`Question at index ${index}: invalid difficulty value`)
+    }
+  })
+
+  // Validate evaluation items
+  dataset.items.forEach((item: any, index: number) => {
+    if (typeof item.id !== 'number') {
+      errors.push(`Item at index ${index}: id must be a number`)
+    }
+
+    if (typeof item.questionID !== 'number') {
+      errors.push(`Item at index ${index}: questionID must be a number`)
+    }
+    else if (!questionIds.has(item.questionID)) {
+      errors.push(`Item at index ${index}: questionID ${item.questionID} does not exist in questionList`)
+    }
+
+    if (!item.submittedAnswer || typeof item.submittedAnswer !== 'string') {
+      errors.push(`Item at index ${index}: submittedAnswer is required`)
+    }
+  })
+
+  return errors
 }

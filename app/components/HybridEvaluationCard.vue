@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { EvaluatedItem, EvaluationConfig } from '~/models'
+import type { EvaluationConfig, EvaluationItem } from '~/models'
 
 interface Props {
-  currentQuestion: EvaluatedItem
+  currentItem: EvaluationItem & { questionText?: string, referenceAnswer?: string }
   evaluatorComment: string
-  evaluatedQuestions: { [questionId: string]: { value?: any, masteryLevel?: any, comment?: string } }
+  evaluatedItems: { [itemId: string]: { value?: any, masteryLevel?: any, comment?: string } }
 
   // New generic evaluation
   evaluationConfig?: EvaluationConfig | any // Allow any to handle readonly versions
@@ -26,12 +26,12 @@ const selectedValue = ref<any>(null)
 const localComment = ref('')
 
 // Watch for question changes to reset selection and load existing evaluation
-watch(() => props.currentQuestion, () => {
+watch(() => props.currentItem, () => {
   loadEvaluationForCurrentQuestion()
 }, { immediate: true })
 
 // Watch for evaluatedQuestions changes to update the selection
-watch(() => props.evaluatedQuestions, () => {
+watch(() => props.evaluatedItems, () => {
   loadEvaluationForCurrentQuestion()
 }, { deep: true })
 
@@ -42,21 +42,15 @@ watch(() => props.evaluatorComment, (newComment) => {
 
 // Helper function to load evaluation for current question
 function loadEvaluationForCurrentQuestion() {
-  if (props.currentQuestion) {
-    const existingEvaluation = props.evaluatedQuestions[props.currentQuestion.id]
+  if (props.currentItem) {
+    const existingEvaluation = props.evaluatedItems[props.currentItem.id]
     if (existingEvaluation) {
       selectedValue.value = existingEvaluation.value ?? existingEvaluation.masteryLevel ?? null
       localComment.value = existingEvaluation.comment || ''
     }
     else {
-      // For score evaluations, set default value to minValue for better UX
-      if (props.evaluationConfig && isScoreType(props.evaluationConfig)) {
-        const settings = getScoreSettings(props.evaluationConfig)
-        selectedValue.value = settings?.minValue ?? null
-      }
-      else {
-        selectedValue.value = null
-      }
+      // Reset to null - don't auto-populate any default values
+      selectedValue.value = null
       localComment.value = ''
     }
   }
@@ -145,7 +139,7 @@ function confirmEvaluation() {
       <div class="text-neutral-800 text-sm font-semibold">
         {{ t('evaluation.question.submittedAnswer') }}
       </div>
-      {{ currentQuestion.submittedAnswer }}
+      {{ currentItem.submittedAnswer }}
     </div>
 
     <template #footer>
@@ -170,7 +164,7 @@ function confirmEvaluation() {
 
             <div class="flex items-center gap-4">
               <USlider
-                :model-value="selectedValue || scoreSettings.minValue"
+                :model-value="selectedValue !== null ? selectedValue : scoreSettings.minValue"
                 :min="scoreSettings.minValue"
                 :max="scoreSettings.maxValue"
                 :step="scoreSettings.step"
@@ -181,7 +175,7 @@ function confirmEvaluation() {
               />
 
               <span class="text-sm text-right text-neutral-500 min-w-10">
-                {{ selectedValue || scoreSettings.minValue }}{{ scoreSettings.unit || '' }}
+                {{ selectedValue !== null ? selectedValue : '---' }}{{ selectedValue !== null ? (scoreSettings.unit || '') : '' }}
               </span>
             </div>
 

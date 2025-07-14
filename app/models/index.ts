@@ -1,10 +1,23 @@
-export interface EvaluatedItem {
-  id: string
-  questionID: string
+// New data structure interfaces
+export interface Question {
+  id: number
   question: string
   referenceAnswer: string
+  difficulty?: Difficulty // Optional
+  context?: Record<string, any> // Optional
+}
+
+export interface EvaluationItem {
+  id: number
+  questionID: number
   submittedAnswer: string
-  difficulty: Difficulty
+  context?: Record<string, any> // Optional
+}
+
+export interface DatasetStructure {
+  context?: Record<string, any> // Optional
+  questionList: Question[]
+  items: EvaluationItem[]
 }
 
 // Evaluation Configuration Types
@@ -60,7 +73,8 @@ export interface ScoreSettings {
 
 // Generic evaluation result that can handle any evaluation type
 export interface EvaluationResult {
-  questionId: string
+  itemId: number // The specific item that was evaluated
+  questionId: number // The question this item belongs to
   value: any // The actual evaluation value (mastery level, boolean, score, etc.)
   comment?: string
   evaluatedAt: string // ISO timestamp
@@ -70,7 +84,7 @@ export interface EvaluationSession {
   id: string
   name: string
   description?: string
-  items: EvaluatedItem[]
+  dataset: DatasetStructure
   results: EvaluationResult[]
   config: EvaluationConfig
   createdAt: string

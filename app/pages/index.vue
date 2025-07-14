@@ -163,14 +163,21 @@ async function createEvaluation() {
   importErrors.value = []
 
   try {
-    const { items, errors } = await ImportExportService.importFromFile(selectedFile.value)
+    // Try to import as new dataset format first, fallback to legacy format
+    const { dataset, errors } = await ImportExportService.importDatasetFromFile(selectedFile.value)
 
     if (errors.length > 0) {
       importErrors.value = errors
-      if (items.length === 0) {
+      if (!dataset) {
         isImporting.value = false
         return
       }
+    }
+
+    if (!dataset) {
+      importErrors.value = ['Failed to import dataset']
+      isImporting.value = false
+      return
     }
 
     // Find selected configuration
@@ -183,10 +190,10 @@ async function createEvaluation() {
       ? JSON.parse(JSON.stringify(selectedConfig))
       : undefined
 
-    // Create new session with imported items and selected configuration
+    // Create new session with imported dataset and selected configuration
     const finalSessionName = sessionName.value.trim() || `Imported ${new Date().toLocaleDateString()}`
-    const session = await evaluationStorage.createSessionFromItems(
-      items,
+    const session = await evaluationStorage.createSessionFromDataset(
+      dataset,
       finalSessionName,
       undefined, // description
       serializableConfig,
@@ -305,7 +312,7 @@ function getDropdownItems(session: EvaluationSession) {
               <div class="flex items-center gap-4 text-sm text-neutral-600">
                 <div class="flex items-center gap-1">
                   <UIcon name="i-lucide:help-circle" class="w-3 h-3" />
-                  <span>{{ session.items.length }}</span>
+                  <span>{{ session.dataset.items.length }}</span>
                 </div>
                 <div class="flex items-center gap-1">
                   <UIcon name="i-lucide:check-circle" class="w-3 h-3 text-green-600" />
@@ -314,7 +321,7 @@ function getDropdownItems(session: EvaluationSession) {
               </div>
               <div class="text-right">
                 <div class="text-sm font-medium text-neutral-900">
-                  {{ Math.round((session.results.length / session.items.length) * 100) }}%
+                  {{ Math.round((session.results.length / session.dataset.items.length) * 100) }}%
                 </div>
               </div>
             </div>
@@ -322,7 +329,7 @@ function getDropdownItems(session: EvaluationSession) {
             <!-- Progress Bar -->
             <UProgress
               :model-value="session.results.length"
-              :max="session.items.length"
+              :max="session.dataset.items.length"
               size="sm"
               class="h-1.5"
             />

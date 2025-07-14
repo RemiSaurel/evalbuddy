@@ -1,54 +1,55 @@
 <script setup lang="ts">
-import type { EvaluatedItem } from '~/models'
+import type { EvaluationItem } from '~/models'
 
 const props = defineProps<{
   isSingleEvaluation: boolean
-  groupedQuestions: { [key: string]: EvaluatedItem[] }
-  questions: EvaluatedItem[]
-  currentQuestionGroup: EvaluatedItem[]
-  currentAbsoluteQuestionIndex: number
-  currentQuestionIndexInGroup: number
+  groupedItems: { [key: string]: readonly EvaluationItem[] }
+  items: readonly EvaluationItem[]
+  currentItemGroup: readonly EvaluationItem[]
+  currentAbsoluteItemIndex: number
+  currentItemIndexInGroup: number
   currentIndex: number
-  evaluatedQuestions: {
-    [questionId: string]: { value?: any, masteryLevel?: string, comment?: string }
+  evaluatedItems: {
+    [itemId: string]: { value?: any, masteryLevel?: string, comment?: string }
   }
   onNavigate: (index: number) => void
 }>()
 
 const { t } = useI18n()
+const { scrollToItem } = useScrollToListItem()
 
 // Reference to the scrollable container
-const questionScrollContainer = ref<HTMLElement>()
+const itemScrollContainer = ref<HTMLElement>()
 
-function scrollToActiveQuestion(questionIndex: number) {
-  useScrollToListItem(questionScrollContainer, questionIndex)
+function scrollToActiveItem(itemIndex: number) {
+  scrollToItem(itemScrollContainer, itemIndex)
 }
 
 // Handle navigation and auto-scroll
-function handleNavigation(questionIndex: number) {
-  props.onNavigate(questionIndex)
+function handleNavigation(itemIndex: number) {
+  props.onNavigate(itemIndex)
   nextTick(() => {
-    scrollToActiveQuestion(questionIndex)
+    scrollToActiveItem(itemIndex)
   })
 }
 
 // Watch for currentIndex changes to auto-scroll when navigation happens externally
 watch(() => props.currentIndex, (newIndex) => {
   nextTick(() => {
-    scrollToActiveQuestion(newIndex)
+    scrollToActiveItem(newIndex)
   })
 })
 
-// Check if a question is evaluated by looking for the specific item ID
-function isQuestionEvaluated(question: EvaluatedItem) {
+// Check if an item is evaluated
+function isItemEvaluated(item: EvaluationItem) {
   // Check only for this specific item ID
-  const evaluated = props.evaluatedQuestions[question.id]
+  const evaluated = props.evaluatedItems[item.id]
   return evaluated && (evaluated.value !== undefined || evaluated.masteryLevel !== undefined)
 }
 
-// Auto-scroll to current question on mount
+// Auto-scroll to current item on mount
 onMounted(() => {
-  scrollToActiveQuestion(props.currentIndex)
+  scrollToActiveItem(props.currentIndex)
 })
 
 // Shortcuts with arrow keys to navigate
@@ -59,7 +60,7 @@ defineShortcuts({
     }
   },
   ArrowRight: () => {
-    if (props.currentIndex < props.questions.length - 1) {
+    if (props.currentIndex < props.items.length - 1) {
       handleNavigation(props.currentIndex + 1)
     }
   },
@@ -80,17 +81,17 @@ defineShortcuts({
 
     <!-- Navigation -->
     <div class="flex flex-col gap-1">
-      <div ref="questionScrollContainer" class="flex overflow-auto gap-2 p-1">
+      <div ref="itemScrollContainer" class="flex overflow-auto gap-2 p-1">
         <NavigatorItem
-          v-for="(question, questionIndex) in currentQuestionGroup"
-          :key="question.id"
+          v-for="(item, itemIndex) in currentItemGroup"
+          :key="item.id"
           button-size="xs"
-          :item-index="(questionIndex + 1).toString()"
-          :is-current-item="questionIndex === currentQuestionIndexInGroup"
-          :is-item-evaluated="isQuestionEvaluated(question) ?? false"
+          :item-index="itemIndex + 1"
+          :is-current-item="itemIndex === currentItemIndexInGroup"
+          :is-item-evaluated="isItemEvaluated(item) ?? false"
           @click="() => handleNavigation(
-            currentAbsoluteQuestionIndex - currentQuestionIndexInGroup // first question in group
-              + questionIndex,
+            currentAbsoluteItemIndex - currentItemIndexInGroup // first question in group
+              + itemIndex,
           )"
         />
       </div>

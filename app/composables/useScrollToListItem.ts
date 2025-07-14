@@ -43,8 +43,8 @@ export function useScrollToListItem() {
     questionContainer: Ref<HTMLElement | undefined>,
     groupContainer: Ref<HTMLElement | undefined>,
     questionIndex: number,
-    currentQuestionGroup: any[],
-    groupedQuestions: { [key: string]: any[] },
+    currentQuestionGroup: readonly any[],
+    groupedQuestions: { [key: string]: readonly any[] },
   ) => {
     if (isSingleEvaluation) {
       // For single evaluation mode, scroll in the questions container

@@ -1,331 +1,237 @@
-import type { EvaluatedItem, EvaluationResult, EvaluationSession } from '~/models'
+import type { EvaluationItem, EvaluationResult, EvaluationSession, Question } from '~/models'
 import { evaluationStorage } from '@/utils/storage'
 
-export function useEvaluation(sessionId?: string) {
-  // Session management
-  const currentSession = ref<EvaluationSession | null>(null)
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
-
-  // Track current question group and index within that group
-  const currentQuestionGroupIndex = ref(0)
-  const currentQuestionIndexInGroup = ref(0)
+/**
+ * Clean evaluation composable that matches component expectations
+ */
+export function useEvaluation(evaluationSession?: EvaluationSession) {
+  // Core reactive state
+  const items = ref<EvaluationItem[]>([])
+  const groupedItems = ref<{ [key: string]: EvaluationItem[] }>({})
+  const currentIndex = ref(0)
+  const currentItem = ref<EvaluationItem | null>(null)
+  const currentItemGroup = ref<EvaluationItem[]>([])
+  const evaluatedItems = ref<{ [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } }>({})
   const evaluatorComment = ref('')
+  const isSingleEvaluation = ref(true)
 
-  // Track evaluated questions with their values and comments
-  const evaluatedQuestions = ref<{ [questionId: string]: { value: any, comment?: string } }>({})
-
-  // Load session and results from IndexedDB
-  const initializeSession = async (id?: string) => {
-    if (!id)
+  // Initialize data from session
+  function initializeFromSession(session: EvaluationSession) {
+    if (!session?.dataset?.questionList || !session?.dataset?.items)
       return
-    isLoading.value = true
-    error.value = null
-    try {
-      const session = await evaluationStorage.getSession(id)
-      if (session) {
-        currentSession.value = session
-        // Load results into evaluatedQuestions
-        const resultsMap: typeof evaluatedQuestions.value = {}
-        session.results.forEach((result) => {
-          resultsMap[result.questionId] = {
+
+    // Get all questions and items from dataset
+    const questionMap = new Map<number, Question>()
+    session.dataset.questionList.forEach((question) => {
+      questionMap.set(question.id, question)
+    })
+
+    // Transform items to evaluation items with question data
+    const allItems: EvaluationItem[] = []
+    const grouped: { [key: string]: EvaluationItem[] } = {}
+
+    session.dataset.items.forEach((item) => {
+      const question = questionMap.get(item.questionID)
+      if (question) {
+        const evaluationItem: EvaluationItem & { questionText?: string, referenceAnswer?: string, difficulty?: string } = {
+          ...item,
+          questionText: question.question,
+          referenceAnswer: question.referenceAnswer,
+          difficulty: question.difficulty,
+        }
+        allItems.push(evaluationItem)
+
+        // Group by questionID
+        const groupKey = item.questionID.toString()
+        if (!grouped[groupKey]) {
+          grouped[groupKey] = []
+        }
+        grouped[groupKey].push(evaluationItem)
+      }
+    })
+
+    items.value = allItems
+    groupedItems.value = grouped
+
+    // Determine if single evaluation: only 1 question (regardless of how many student answers/items)
+    isSingleEvaluation.value = Object.keys(grouped).length === 1
+
+    // Set current item
+    if (allItems.length > 0) {
+      currentItem.value = allItems[0] || null
+      const firstGroupKey = Object.keys(grouped)[0]
+      if (firstGroupKey) {
+        currentItemGroup.value = grouped[firstGroupKey] || []
+      }
+    }
+
+    // Load existing evaluation results
+    loadExistingResults(session)
+  }
+
+  // Load existing evaluation results
+  function loadExistingResults(session: EvaluationSession) {
+    if (session.results) {
+      const evaluated: { [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } } = {}
+
+      session.results.forEach((result) => {
+        // Handle cases where itemId might be undefined (legacy data)
+        const itemId = result.itemId || result.questionId
+        if (itemId) {
+          evaluated[itemId.toString()] = {
             value: result.value,
+            masteryLevel: result.value, // For backward compatibility
             comment: result.comment,
           }
-        })
-        evaluatedQuestions.value = resultsMap
-      }
-      else {
-        error.value = 'Session not found'
-      }
-    }
-    catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to load session'
-    }
-    finally {
-      isLoading.value = false
+        }
+      })
+
+      evaluatedItems.value = evaluated
     }
   }
 
-  // Save evaluation result to session in IndexedDB
-  const saveEvaluationResult = async (questionId: string, value: any, comment?: string) => {
-    if (!currentSession.value)
+  // Navigation functions
+  function goToItem(index: number) {
+    if (index >= 0 && index < items.value.length) {
+      currentIndex.value = index
+      const item = items.value[index]
+      if (item) {
+        currentItem.value = item
+
+        // Update current item group
+        const questionId = item.questionID
+        if (questionId) {
+          currentItemGroup.value = groupedItems.value[questionId.toString()] || []
+        }
+
+        // Load existing evaluation comment for this item (don't create new state)
+        const existing = evaluatedItems.value[item.id.toString()]
+        if (existing && existing.comment) {
+          evaluatorComment.value = existing.comment
+        }
+        else {
+          evaluatorComment.value = ''
+        }
+      }
+    }
+  }
+
+  function goToNextItem() {
+    if (currentIndex.value < items.value.length - 1) {
+      goToItem(currentIndex.value + 1)
+    }
+  }
+
+  function goToPreviousItem() {
+    if (currentIndex.value > 0) {
+      goToItem(currentIndex.value - 1)
+    }
+  }
+
+  // Evaluation functions
+  async function saveEvaluationResult(value: any, comment?: string, masteryLevel?: string) {
+    if (!currentItem.value || !evaluationSession)
       return
 
-    const result: EvaluationResult = {
-      questionId,
+    // Update local state
+    evaluatedItems.value[currentItem.value.id.toString()] = {
       value,
-      comment,
+      masteryLevel,
+      comment: comment || '',
+    }
+
+    // Create evaluation result
+    const result: EvaluationResult = {
+      itemId: currentItem.value.id,
+      questionId: currentItem.value.questionID,
+      value,
+      comment: comment || '',
       evaluatedAt: new Date().toISOString(),
     }
 
-    // Update or add result
-    const existingIndex = currentSession.value.results.findIndex(r => r.questionId === questionId)
-    if (existingIndex >= 0) {
-      currentSession.value.results[existingIndex] = result
-    }
-    else {
-      currentSession.value.results.push(result)
+    // Update session results
+    if (!evaluationSession.results) {
+      evaluationSession.results = []
     }
 
-    currentSession.value.updatedAt = new Date().toISOString()
-    currentSession.value.isCompleted = currentSession.value.results.length === currentSession.value.items.length
+    // Remove existing result for this item
+    evaluationSession.results = evaluationSession.results.filter(r => r.itemId !== result.itemId)
+    evaluationSession.results.push(result)
 
-    // Create a plain object copy of the session to avoid proxy cloning issues
-    const sessionToSave = toRaw(currentSession.value)
-    await evaluationStorage.saveSession(sessionToSave)
+    // Save to storage
+    try {
+      await evaluationStorage.saveSession(evaluationSession)
+    }
+    catch (error) {
+      console.error('Failed to save evaluation result:', error)
+      throw error
+    }
   }
 
-  // Use session items as questions
-  const questions = computed(() => currentSession.value?.items || [])
+  async function evaluateAndGoNext(value: any, comment?: string, masteryLevel?: string) {
+    await saveEvaluationResult(value, comment, masteryLevel)
+    goToNextItem()
+  }
 
-  // Group questions by questionID and get ordered groups
-  const groupedQuestions = computed(() => {
-    const groups: { [key: string]: typeof questions.value } = {}
-    questions.value.forEach((question) => {
-      if (!groups[question.questionID]) {
-        groups[question.questionID] = []
-      }
-      groups[question.questionID]!.push(question)
-    })
-    return groups
-  })
+  // Initialize if session provided
+  if (evaluationSession) {
+    initializeFromSession(evaluationSession)
+  }
 
-  // Get array of question group keys in order
-  const questionGroupKeys = computed(() => {
-    return Object.keys(groupedQuestions.value).sort((a, b) => {
-      // Extract numeric part from questionID (e.g., "Q1" -> 1, "Q10" -> 10)
-      const numA = Number.parseInt(a.replace(/\D/g, ''), 10) || 0
-      const numB = Number.parseInt(b.replace(/\D/g, ''), 10) || 0
-      return numA - numB
-    })
-  })
-
-  // Current question group being evaluated
-  const currentQuestionGroup = computed(() => {
-    const groupKey = questionGroupKeys.value[currentQuestionGroupIndex.value]
-    return groupKey ? groupedQuestions.value[groupKey] || [] : []
-  })
-
-  // Current question being displayed
-  const currentQuestion = computed<EvaluatedItem | undefined>(() => {
-    const q = currentQuestionGroup.value[currentQuestionIndexInGroup.value]
-    if (q && evaluatedQuestions.value[q.id]) {
-      evaluatorComment.value = evaluatedQuestions.value[q.id]?.comment || ''
-    }
-    return q
-  })
-
-  // Progress within current question group (only count evaluated questions)
-  const currentQuestionGroupProgress = computed(() => {
-    if (!currentQuestionGroup.value || currentQuestionGroup.value.length === 0)
-      return 0
-    return currentQuestionGroup.value.filter(q =>
-      evaluatedQuestions.value[q.id] !== undefined,
+  // Computed properties
+  const progress = computed(() => {
+    const totalItems = items.value.length
+    // Only count items that have actual evaluation values (not just navigation)
+    const evaluatedCount = Object.values(evaluatedItems.value).filter(
+      item => item.value !== undefined || item.masteryLevel !== undefined,
     ).length
+    return totalItems > 0 ? (evaluatedCount / totalItems) * 100 : 0
   })
 
-  // Total progress across all questions (only count evaluated questions)
-  const totalProgress = computed(() => {
-    return Object.keys(evaluatedQuestions.value).length
+  const isCurrentItemEvaluated = computed(() => {
+    if (!currentItem.value)
+      return false
+    const evaluation = evaluatedItems.value[currentItem.value.id.toString()]
+    return evaluation && (evaluation.value !== undefined || evaluation.masteryLevel !== undefined)
   })
 
-  // Get current absolute question index for display
-  const currentAbsoluteQuestionIndex = computed(() => {
-    let index = 0
-    for (let i = 0; i < currentQuestionGroupIndex.value; i++) {
-      const groupKey = questionGroupKeys.value[i]
-      if (groupKey) {
-        index += groupedQuestions.value[groupKey]?.length || 0
-      }
-    }
-    return index + currentQuestionIndexInGroup.value
+  const currentQuestionIndexInGroup = computed(() => {
+    if (!currentItem.value || !currentItemGroup.value.length)
+      return 0
+    return currentItemGroup.value.findIndex(item => item.id === currentItem.value?.id)
   })
 
-  // Helper functions for navigation logic
-  const canMoveWithinGroup = (direction: 'next' | 'previous') => {
-    if (direction === 'next') {
-      return currentQuestionIndexInGroup.value < currentQuestionGroup.value.length - 1
-    }
-    return currentQuestionIndexInGroup.value > 0
-  }
+  const currentAbsoluteQuestionIndex = computed(() => currentIndex.value)
 
-  const canMoveToGroup = (direction: 'next' | 'previous') => {
-    if (direction === 'next') {
-      return currentQuestionGroupIndex.value < questionGroupKeys.value.length - 1
-    }
-    return currentQuestionGroupIndex.value > 0
-  }
-
-  const saveCurrentComment = async () => {
-    if (currentQuestion.value) {
-      const questionId = currentQuestion.value.id
-      // If the question has an existing evaluation (mastery level set)
-      if (evaluatedQuestions.value[questionId]) {
-        // Update the comment in the local cache
-        evaluatedQuestions.value[questionId]!.comment = evaluatorComment.value
-
-        // Persist this change to IndexedDB
-        const evaluationValue = evaluatedQuestions.value[questionId]!.value
-        await saveEvaluationResult(questionId, evaluationValue, evaluatorComment.value)
-      }
-      // If the question is not yet evaluated, the comment will be saved
-      // along with the mastery level when evaluateAndGoNext is called.
-    }
-  }
-
-  const loadCommentForCurrentQuestion = () => {
-    if (currentQuestion.value && evaluatedQuestions.value[currentQuestion.value.id]) {
-      evaluatorComment.value = evaluatedQuestions.value[currentQuestion.value.id]?.comment || ''
-    }
-    else {
-      evaluatorComment.value = ''
-    }
-  }
-
-  const moveToNextPosition = () => {
-    if (canMoveWithinGroup('next')) {
-      currentQuestionIndexInGroup.value++
-    }
-    else if (canMoveToGroup('next')) {
-      currentQuestionGroupIndex.value++
-      currentQuestionIndexInGroup.value = 0
-    }
-  }
-
-  const moveToPreviousPosition = () => {
-    if (canMoveWithinGroup('previous')) {
-      currentQuestionIndexInGroup.value--
-    }
-    else if (canMoveToGroup('previous')) {
-      currentQuestionGroupIndex.value--
-      const previousGroupKey = questionGroupKeys.value[currentQuestionGroupIndex.value]
-      if (previousGroupKey) {
-        currentQuestionIndexInGroup.value = (groupedQuestions.value[previousGroupKey]?.length || 1) - 1
-      }
-    }
-  }
-
-  // Function to evaluate current question with generic value and go to next
-  const evaluateGenericAndGoNext = async (value: any, comment?: string) => {
-    if (currentQuestion.value) {
-      evaluatedQuestions.value[currentQuestion.value.id] = {
-        value,
-        comment: comment || evaluatorComment.value,
-      }
-      await saveEvaluationResult(currentQuestion.value.id, value, comment || evaluatorComment.value)
-      evaluatorComment.value = ''
-      moveToNextPosition()
-    }
-  }
-
-  // Function to save evaluation without moving (for intermediate saves)
-  const saveEvaluation = async (value: any, comment?: string) => {
-    if (currentQuestion.value) {
-      evaluatedQuestions.value[currentQuestion.value.id] = {
-        value,
-        comment: comment || evaluatorComment.value,
-      }
-      await saveEvaluationResult(currentQuestion.value.id, value, comment || evaluatorComment.value)
-    }
-  }
-
-  // Function to go to previous question
-  const goToPreviousQuestion = async () => {
-    await saveCurrentComment()
-    moveToPreviousPosition()
-    loadCommentForCurrentQuestion()
-  }
-
-  // Function to go to next question
-  const goToNextQuestion = async () => {
-    await saveCurrentComment()
-    moveToNextPosition()
-    loadCommentForCurrentQuestion()
-  }
-
-  // Function to navigate directly to a specific question by absolute index
-  const navigateToQuestion = async (absoluteIndex: number) => {
-    if (absoluteIndex < 0 || absoluteIndex >= questions.value.length)
-      return
-
-    await saveCurrentComment()
-
-    // Find the group and index within group for this absolute index
-    let currentIndex = 0
-    for (let groupIndex = 0; groupIndex < questionGroupKeys.value.length; groupIndex++) {
-      const groupKey = questionGroupKeys.value[groupIndex]
-      if (!groupKey)
-        continue
-
-      const group = groupedQuestions.value[groupKey] || []
-
-      if (currentIndex + group.length > absoluteIndex) {
-        // Found the right group
-        currentQuestionGroupIndex.value = groupIndex
-        currentQuestionIndexInGroup.value = absoluteIndex - currentIndex
-        break
-      }
-      currentIndex += group.length
-    }
-
-    loadCommentForCurrentQuestion()
-  }
-
-  const isCurrentQuestionEvaluated = computed(() => {
-    return !!(currentQuestion.value && evaluatedQuestions.value[currentQuestion.value.id])
-  })
-
-  const canGoNext = computed(() => {
-    return canMoveWithinGroup('next') || canMoveToGroup('next')
-  })
-
-  const canGoPrevious = computed(() => {
-    return canMoveWithinGroup('previous') || canMoveToGroup('previous')
-  })
-
-  const isEvaluationCompleted = computed(() => {
-    return totalProgress.value === questions.value.length
-  })
-
-  // Check if all question groups include only one question
-  const isSingleEvaluation = computed(() =>
-    Object.values(groupedQuestions.value)
-      .every((group: EvaluatedItem[]) => group.length === 1),
-  )
-
-  // Initialize session if sessionId is provided
-  if (sessionId) {
-    initializeSession(sessionId)
-  }
+  const hasNextItem = computed(() => currentIndex.value < items.value.length - 1)
+  const hasPreviousItem = computed(() => currentIndex.value > 0)
 
   return {
-    currentSession: readonly(currentSession),
-    isLoading: readonly(isLoading),
-    error: readonly(error),
-    initializeSession,
-    saveEvaluationResult,
-    currentQuestionGroupIndex,
-    currentQuestionIndexInGroup,
+    // State
+    items: readonly(items),
+    groupedItems: readonly(groupedItems),
+    currentIndex: readonly(currentIndex),
+    currentItem: readonly(currentItem),
+    currentItemGroup: readonly(currentItemGroup),
+    evaluatedItems: readonly(evaluatedItems),
     evaluatorComment,
-    evaluatedQuestions,
-    groupedQuestions,
-    questionGroupKeys,
-    currentQuestionGroup,
-    currentQuestion,
-    currentQuestionGroupProgress,
-    totalProgress,
+    isSingleEvaluation: readonly(isSingleEvaluation),
+
+    // Computed
+    progress,
+    isCurrentItemEvaluated,
+    currentQuestionIndexInGroup,
     currentAbsoluteQuestionIndex,
-    evaluateGenericAndGoNext,
-    saveEvaluation,
-    goToPreviousQuestion,
-    goToNextQuestion,
-    navigateToQuestion,
-    isCurrentQuestionEvaluated,
-    canGoNext,
-    canGoPrevious,
-    isEvaluationCompleted,
-    isSingleEvaluation,
-    questions,
+    hasNextItem,
+    hasPreviousItem,
+
+    // Methods
+    initializeFromSession,
+    goToItem,
+    goToNextItem,
+    goToPreviousItem,
+    saveEvaluationResult,
+    evaluateAndGoNext,
+    onNavigate: goToItem,
   }
 }

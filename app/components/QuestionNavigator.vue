@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type { EvaluatedItem } from '~/models'
+import type { EvaluationItem } from '~/models'
 
 const props = defineProps<{
   isSingleEvaluation: boolean
-  groupedQuestions: { [key: string]: EvaluatedItem[] }
-  questions: EvaluatedItem[]
-  currentQuestionGroup: EvaluatedItem[]
+  groupedItems: { [key: string]: readonly EvaluationItem[] }
+  items: readonly EvaluationItem[]
+  currentItemGroup: readonly EvaluationItem[]
   currentIndex: number
-  evaluatedQuestions: {
-    [questionId: string]: { value?: any, masteryLevel?: string, comment?: string }
+  evaluatedItems: {
+    [itemId: string]: { value?: any, masteryLevel?: string, comment?: string }
   }
   onNavigate: (index: number) => void
 }>()
@@ -29,8 +29,8 @@ function handleNavigation(questionIndex: number, groupIndex?: number) {
       questionScrollContainer,
       questionGroupScrollContainer,
       questionIndex,
-      props.currentQuestionGroup,
-      props.groupedQuestions,
+      props.currentItemGroup,
+      props.groupedItems,
     )
 
     // scroll to the active question group for grouped evaluations
@@ -51,25 +51,25 @@ watch(() => props.currentIndex, (newIndex) => {
 }, { immediate: false })
 
 // Check if a question is evaluated by looking for the specific item ID
-function isQuestionEvaluated(question: EvaluatedItem) {
+function isQuestionEvaluated(question: EvaluationItem) {
   // Check only for this specific item ID
-  const evaluated = props.evaluatedQuestions[question.id]
+  const evaluated = props.evaluatedItems[question.id]
   return evaluated && (evaluated.value !== undefined || evaluated.masteryLevel !== undefined)
 }
 
 // Helper function to get group index for a given question index
 function getGroupIndexForQuestion(_questionIndex: number) {
-  const currentGroup = props.currentQuestionGroup[0]?.questionID
+  const currentGroup = props.currentItemGroup[0]?.questionID
   if (currentGroup) {
-    const groupNames = Object.keys(props.groupedQuestions)
-    return groupNames.indexOf(currentGroup)
+    const groupNames = Object.keys(props.groupedItems)
+    return groupNames.indexOf(currentGroup.toString())
   }
   return 0
 }
 
 function getFirstGroupQuestionAbsoluteIndex(groupName: string) {
   const questionGroupKeys
-  = computed(() => Object.keys(props.groupedQuestions))
+  = computed(() => Object.keys(props.groupedItems))
   let index = 0
 
   for (let groupIndex = 0; groupIndex < questionGroupKeys.value.length; groupIndex++) {
@@ -77,7 +77,7 @@ function getFirstGroupQuestionAbsoluteIndex(groupName: string) {
     if (groupKey === groupName) {
       return { index, groupIndex }
     }
-    index += groupKey ? props.groupedQuestions[groupKey]?.length || 0 : 0
+    index += groupKey ? props.groupedItems[groupKey]?.length || 0 : 0
   }
   return { index: -1, groupIndex: -1 } // not found
 }
@@ -112,10 +112,10 @@ onMounted(() => {
         class="flex overflow-auto gap-2 p-1"
       >
         <NavigatorItem
-          v-for="(question, questionIndex) in questions"
+          v-for="(question, questionIndex) in items"
           :key="question.id"
           button-size="sm"
-          :item-index="(questionIndex + 1).toString()"
+          :item-index="questionIndex + 1"
           :sub-item-index="question.questionID"
           :is-current-item="questionIndex === currentIndex"
           :is-item-evaluated="isQuestionEvaluated(question) ?? false"
@@ -126,11 +126,11 @@ onMounted(() => {
       <!-- Group navigation otherwise -->
       <div v-else ref="questionGroupScrollContainer" class="flex overflow-auto gap-2 p-1">
         <NavigatorItem
-          v-for="(group, groupName) in groupedQuestions"
+          v-for="(group, groupName) in groupedItems"
           :key="groupName"
           button-size="sm"
-          :item-index="groupName.toString()"
-          :is-current-item="groupName === currentQuestionGroup[0]?.questionID"
+          :item-index="Number(groupName)"
+          :is-current-item="groupName === currentItemGroup[0]?.questionID.toString()"
           :is-item-evaluated="group.every(isQuestionEvaluated)"
           @click="() => {
             const { index, groupIndex }

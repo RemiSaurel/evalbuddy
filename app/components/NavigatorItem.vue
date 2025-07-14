@@ -1,8 +1,8 @@
 <script setup lang="ts">
 defineProps<{
   buttonSize: 'xs' | 'sm'
-  itemIndex: string
-  subItemIndex?: string
+  itemIndex: number
+  subItemIndex?: number
   isCurrentItem: boolean
   isItemEvaluated: boolean
 }>()
