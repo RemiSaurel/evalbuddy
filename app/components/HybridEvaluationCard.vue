@@ -25,14 +25,14 @@ const { getEvaluationOptions, isScoreType, getScoreSettings } = useEvaluationCon
 const selectedValue = ref<any>(null)
 const localComment = ref('')
 
-// Watch for question changes to reset selection and load existing evaluation
+// Watch for item changes to reset selection and load existing evaluation
 watch(() => props.currentItem, () => {
-  loadEvaluationForCurrentQuestion()
+  loadEvaluationForCurrentItem()
 }, { immediate: true })
 
-// Watch for evaluatedQuestions changes to update the selection
+// Watch for evaluatedItems changes to update the selection
 watch(() => props.evaluatedItems, () => {
-  loadEvaluationForCurrentQuestion()
+  loadEvaluationForCurrentItem()
 }, { deep: true })
 
 // Watch for comment prop changes
@@ -40,8 +40,8 @@ watch(() => props.evaluatorComment, (newComment) => {
   localComment.value = newComment || ''
 }, { immediate: true })
 
-// Helper function to load evaluation for current question
-function loadEvaluationForCurrentQuestion() {
+// Helper function to load evaluation for current item
+function loadEvaluationForCurrentItem() {
   if (props.currentItem) {
     const existingEvaluation = props.evaluatedItems[props.currentItem.id]
     if (existingEvaluation) {
