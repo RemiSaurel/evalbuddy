@@ -67,7 +67,7 @@ function getGroupIndexForQuestion(_questionIndex: number) {
   return 0
 }
 
-function getFirstGroupQuestionAbsoluteIndex(groupName: string) {
+function getFirstItemGroupAbsoluteIndex(groupName: string) {
   const questionGroupKeys
   = computed(() => Object.keys(props.groupedItems))
   let index = 0
@@ -98,7 +98,7 @@ onMounted(() => {
     <!-- Legend -->
     <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900">
       <h3>
-        {{ t('evaluation.navigation.overviewQuestions') }}
+        {{ isSingleEvaluation ? t('evaluation.navigation.overviewAnswers') : t('evaluation.navigation.overviewQuestions') }}
       </h3>
 
       <NavigatorHelp />
@@ -115,8 +115,7 @@ onMounted(() => {
           v-for="(question, questionIndex) in items"
           :key="question.id"
           button-size="sm"
-          :item-index="questionIndex + 1"
-          :sub-item-index="question.questionID"
+          :item-index="`${questionIndex + 1}`"
           :is-current-item="questionIndex === currentIndex"
           :is-item-evaluated="isQuestionEvaluated(question) ?? false"
           @click="() => handleNavigation(questionIndex)"
@@ -129,12 +128,12 @@ onMounted(() => {
           v-for="(group, groupName) in groupedItems"
           :key="groupName"
           button-size="sm"
-          :item-index="Number(groupName)"
+          :item-index="`Q${groupName}`"
           :is-current-item="groupName === currentItemGroup[0]?.questionID.toString()"
           :is-item-evaluated="group.every(isQuestionEvaluated)"
           @click="() => {
             const { index, groupIndex }
-              = getFirstGroupQuestionAbsoluteIndex(groupName as string)
+              = getFirstItemGroupAbsoluteIndex(groupName as string)
 
             handleNavigation(index, groupIndex)
           }"

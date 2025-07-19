@@ -208,14 +208,14 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
 
   return {
     // State
-    items: readonly(items),
-    groupedItems: readonly(groupedItems),
-    currentIndex: readonly(currentIndex),
-    currentItem: readonly(currentItem),
-    currentItemGroup: readonly(currentItemGroup),
-    evaluatedItems: readonly(evaluatedItems),
+    items,
+    groupedItems,
+    currentIndex,
+    currentItem,
+    currentItemGroup,
+    evaluatedItems,
     evaluatorComment,
-    isSingleEvaluation: readonly(isSingleEvaluation),
+    isSingleEvaluation,
 
     // Computed
     progress,
