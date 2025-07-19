@@ -1,10 +1,25 @@
-export interface EvaluatedItem {
-  id: string
-  questionID: string
+// Restricted context type for better display handling
+export type ContextData = Record<string, string | string[]>
+
+export interface Question {
+  id: number
   question: string
   referenceAnswer: string
+  difficulty?: Difficulty // Optional
+  context?: ContextData // Optional - supports string and string[] for display
+}
+
+export interface EvaluationItem {
+  id: number
+  questionID: number
   submittedAnswer: string
-  difficulty: Difficulty
+  context?: ContextData // Optional - supports string and string[] for display
+}
+
+export interface DatasetStructure {
+  context?: ContextData // Optional - supports string and string[] for display
+  questionList: Question[]
+  items: EvaluationItem[]
 }
 
 // Evaluation Configuration Types
@@ -60,7 +75,8 @@ export interface ScoreSettings {
 
 // Generic evaluation result that can handle any evaluation type
 export interface EvaluationResult {
-  questionId: string
+  itemId: number // The specific item that was evaluated
+  questionId: number // The question this item belongs to
   value: any // The actual evaluation value (mastery level, boolean, score, etc.)
   comment?: string
   evaluatedAt: string // ISO timestamp
@@ -70,7 +86,7 @@ export interface EvaluationSession {
   id: string
   name: string
   description?: string
-  items: EvaluatedItem[]
+  dataset: DatasetStructure
   results: EvaluationResult[]
   config: EvaluationConfig
   createdAt: string

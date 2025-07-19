@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import type { EvaluatedItem } from '~/models'
+import type { EvaluationItem } from '~/models'
 
 interface Props {
-  currentQuestion: EvaluatedItem
+  currentQuestion: EvaluationItem & {
+    questionText?: string
+    referenceAnswer?: string
+    difficulty?: 'easy' | 'medium' | 'hard'
+  }
 }
 
 const props = defineProps<Props>()
@@ -47,7 +51,7 @@ const difficultyClass = computed(() =>
       </div>
 
       <div>
-        {{ currentQuestion.question }}
+        {{ currentQuestion.questionText }}
       </div>
     </div>
   </UCard>

@@ -1,4 +1,4 @@
-import type { EvaluatedItem, EvaluationConfig, EvaluationSession } from '@/models/index'
+import type { DatasetStructure, EvaluationConfig, EvaluationSession } from '@/models/index'
 import { DEFAULT_MASTERY_CONFIG } from '@/models/index'
 
 const DB_NAME = 'EvalBuddyDB'
@@ -53,15 +53,24 @@ class EvaluationStorage {
       id: session.id,
       name: session.name,
       description: session.description,
-      items: session.items.map(item => ({
-        id: item.id,
-        questionID: item.questionID,
-        question: item.question,
-        referenceAnswer: item.referenceAnswer,
-        submittedAnswer: item.submittedAnswer,
-        difficulty: item.difficulty,
-      })),
+      dataset: {
+        context: session.dataset.context,
+        questionList: session.dataset.questionList.map(question => ({
+          id: question.id,
+          question: question.question,
+          referenceAnswer: question.referenceAnswer,
+          difficulty: question.difficulty,
+          context: question.context,
+        })),
+        items: session.dataset.items.map(item => ({
+          id: item.id,
+          questionID: item.questionID,
+          submittedAnswer: item.submittedAnswer,
+          context: item.context,
+        })),
+      },
       results: session.results.map(result => ({
+        itemId: result.itemId,
         questionId: result.questionId,
         value: result.value,
         comment: result.comment,
@@ -133,7 +142,7 @@ class EvaluationStorage {
     })
   }
 
-  async createSessionFromItems(items: EvaluatedItem[], name: string, description?: string, config?: EvaluationConfig): Promise<EvaluationSession> {
+  async createSessionFromDataset(dataset: DatasetStructure, name: string, description?: string, config?: EvaluationConfig): Promise<EvaluationSession> {
     // If no config provided, create a default mastery configuration
     const defaultConfig: EvaluationConfig = config || {
       id: crypto.randomUUID(),
@@ -152,7 +161,7 @@ class EvaluationStorage {
       id: crypto.randomUUID(),
       name,
       description,
-      items,
+      dataset,
       results: [],
       config: defaultConfig,
       createdAt: new Date().toISOString(),
