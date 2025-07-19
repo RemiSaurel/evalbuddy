@@ -66,30 +66,64 @@ npm run preview
 3. Import a JSON file containing your questions
 4. The session will be created and ready for evaluation
 
-### Question File Format
+### Dataset File Format
 
-Questions should be provided as a JSON array with the following structure:
+Datasets should be provided as a JSON object with the following structure:
 
 ```json
-[
-  {
-    "id": "1",
-    "questionID": "Q1",
-    "question": "What is the capital of France?",
-    "referenceAnswer": "Paris",
-    "submittedAnswer": "Paris",
-    "difficulty": "easy"
-  }
-]
+{
+  "context": {
+    "course": "Geography Assessment",
+    "level": "Intermediate",
+    "date": "2025-01-14",
+    "instructor": "Prof. Smith"
+  },
+  "questionList": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "referenceAnswer": "The capital of France is Paris.",
+      "difficulty": "easy",
+      "context": {
+        "topic": "European Geography",
+        "points": "10",
+        "categories": ["Capitals", "Geography", "Basic Knowledge"]
+      }
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "questionID": 1,
+      "submittedAnswer": "Paris is the capital of France.",
+      "context": {
+        "studentId": "student_001",
+        "studentName": "Alice Johnson",
+        "submissionTime": "2025-01-14T10:00:00Z",
+        "attempt": "1"
+      }
+    }
+  ]
+}
 ```
 
-**Required fields:**
-- `id`: Unique identifier for the question instance
-- `questionID`: Groups related questions together
+**Dataset Structure:**
+- `context`: Optional metadata about the dataset (course info, dates, etc.)
+- `questionList`: Array of question definitions
+- `items`: Array of evaluation items (student submissions)
+
+**Question Fields:**
+- `id`: Unique identifier for the question (number)
 - `question`: The question text
 - `referenceAnswer`: The correct/expected answer
-- `submittedAnswer`: The submitted answer
-- `difficulty`: One of "easy", "medium", or "hard"
+- `difficulty`: Optional - one of "easy", "medium", or "hard"
+- `context`: Optional metadata (supports string and string[] values for better display)
+
+**Evaluation Item Fields:**
+- `id`: Unique identifier for the evaluation item (number)
+- `questionID`: References the question this item belongs to
+- `submittedAnswer`: The student's submitted answer
+- `context`: Optional metadata (supports string and string[] values for better display)
 
 ### Evaluating Questions
 
