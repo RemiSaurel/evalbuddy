@@ -1,21 +1,23 @@
-// New data structure interfaces
+// Restricted context type for better display handling
+export type ContextData = Record<string, string | string[]>
+
 export interface Question {
   id: number
   question: string
   referenceAnswer: string
   difficulty?: Difficulty // Optional
-  context?: Record<string, any> // Optional
+  context?: ContextData // Optional - supports string and string[] for display
 }
 
 export interface EvaluationItem {
   id: number
   questionID: number
   submittedAnswer: string
-  context?: Record<string, any> // Optional
+  context?: ContextData // Optional - supports string and string[] for display
 }
 
 export interface DatasetStructure {
-  context?: Record<string, any> // Optional
+  context?: ContextData // Optional - supports string and string[] for display
   questionList: Question[]
   items: EvaluationItem[]
 }
