@@ -258,6 +258,11 @@ function validateDataset(dataset: any): string[] {
     if (question.difficulty && !['easy', 'medium', 'hard'].includes(question.difficulty)) {
       errors.push(`Question at index ${index}: invalid difficulty value`)
     }
+
+    // Validate context if present
+    if (question.context && !validateContextData(question.context)) {
+      errors.push(`Question at index ${index}: context must be an object with string or string[] values`)
+    }
   })
 
   // Validate evaluation items
@@ -276,7 +281,39 @@ function validateDataset(dataset: any): string[] {
     if (!item.submittedAnswer || typeof item.submittedAnswer !== 'string') {
       errors.push(`Item at index ${index}: submittedAnswer is required`)
     }
+
+    // Validate context if present
+    if (item.context && !validateContextData(item.context)) {
+      errors.push(`Item at index ${index}: context must be an object with string or string[] values`)
+    }
   })
 
   return errors
+}
+
+/**
+ * Validate ContextData to ensure it only contains string and string[] values
+ */
+function validateContextData(context: any): boolean {
+  if (!context || typeof context !== 'object') {
+    return false
+  }
+
+  for (const value of Object.values(context)) {
+    if (typeof value === 'string') {
+      continue
+    }
+
+    if (Array.isArray(value)) {
+      // Check if all array elements are strings
+      if (value.every(item => typeof item === 'string')) {
+        continue
+      }
+    }
+
+    // If value is neither string nor string[], it's invalid
+    return false
+  }
+
+  return true
 }

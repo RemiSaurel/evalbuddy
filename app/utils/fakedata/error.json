@@ -1,0 +1,16 @@
+{
+  "questionList": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?"
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "questionID": 1,
+      "submittedAnswer": "Paris is the capital of France."
+
+    }
+  ]
+}

@@ -13,8 +13,8 @@
       "difficulty": "easy",
       "context": {
         "topic": "European Geography",
-        "points": 10,
-        "category": "Capitals"
+        "points": "10",
+        "categories": ["Capitals", "Geography", "Basic Knowledge"]
       }
     },
     {
@@ -24,8 +24,8 @@
       "difficulty": "hard",
       "context": {
         "topic": "Geology",
-        "points": 25,
-        "category": "Physical Geography"
+        "points": "25",
+        "categories": ["Physical Geography", "Earth Science"]
       }
     },
     {
@@ -35,8 +35,8 @@
       "difficulty": "medium",
       "context": {
         "topic": "Climatology",
-        "points": 15,
-        "category": "Climate"
+        "points": "15",
+        "categories": ["Climate", "Environmental Science"]
       }
     }
   ],
