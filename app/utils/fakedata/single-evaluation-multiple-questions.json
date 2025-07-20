@@ -1,0 +1,41 @@
+{
+  "context": {
+    "description": "Sample evaluation dataset for testing",
+    "createdBy": "EvalBuddy",
+    "version": "1.0"
+  },
+  "questionList": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD."
+    },
+    {
+      "id": 2,
+      "question": "What is the largest planet in our solar system?",
+      "referenceAnswer": "The largest planet in our solar system is Jupiter. It is a gas giant with a mass more than twice that of all the other planets combined."
+    },
+    {
+      "id": 3,
+      "question": "What is the chemical symbol for water?",
+      "referenceAnswer": "The chemical symbol for water is H2O, which indicates that each molecule of water consists of two hydrogen atoms and one oxygen atom."
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "questionID": 1,
+      "submittedAnswer": "Paris is the capital of France."
+    },
+    {
+      "id": 2,
+      "questionID": 2,
+      "submittedAnswer": "The largest planet in our solar system is Jupiter, which is known for its Great Red Spot and many moons."
+    },
+    {
+      "id": 3,
+      "questionID": 3,
+      "submittedAnswer": "The chemical symbol for water is H2O, which indicates that each molecule of water consists of two hydrogen atoms and one oxygen atom."
+    }
+  ]
+}
