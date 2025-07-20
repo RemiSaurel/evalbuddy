@@ -1,4 +1,4 @@
-import type { EvaluatedItem, EvaluationConfig, ExportData } from '@/models/index'
+import type { DatasetStructure, EvaluationConfig, ExportData } from '@/models/index'
 import { evaluationStorage } from './storage'
 
 // Configuration export/import data structure
@@ -11,65 +11,27 @@ export interface ConfigExportData {
 
 export class ImportExportService {
   /**
-   * Import items from a JSON file
+   * Import dataset from a JSON file (new format only)
    */
-  static async importFromFile(file: File): Promise<{ items: EvaluatedItem[], errors: string[] }> {
+  static async importDatasetFromFile(file: File): Promise<{ dataset: DatasetStructure | null, errors: string[] }> {
     const errors: string[] = []
 
     try {
       const text = await file.text()
       const data = JSON.parse(text)
 
-      // Validate the data structure
-      if (!Array.isArray(data)) {
-        errors.push('File must contain an array of items')
-        return { items: [], errors }
+      // Validate the new format
+      const validationErrors = validateDataset(data)
+      if (validationErrors.length > 0) {
+        return { dataset: null, errors: validationErrors }
       }
 
-      const items: EvaluatedItem[] = []
-
-      for (let i = 0; i < data.length; i++) {
-        const item = data[i]
-        const validationError = this.validateEvaluatedItem(item, i)
-
-        if (validationError) {
-          errors.push(validationError)
-          continue
-        }
-
-        items.push(item)
-      }
-
-      return { items, errors }
+      return { dataset: data as DatasetStructure, errors: [] }
     }
     catch (error) {
       errors.push(`Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`)
-      return { items: [], errors }
+      return { dataset: null, errors }
     }
-  }
-
-  /**
-   * Validate a single EvaluatedItem
-   */
-  private static validateEvaluatedItem(item: any, index: number): string | null {
-    if (!item || typeof item !== 'object') {
-      return `Item at index ${index}: Must be an object`
-    }
-
-    const required = ['id', 'questionID', 'question', 'referenceAnswer', 'submittedAnswer', 'difficulty']
-
-    for (const field of required) {
-      if (!item[field] || typeof item[field] !== 'string') {
-        return `Item at index ${index}: Missing or invalid field '${field}'`
-      }
-    }
-
-    const validDifficulties = ['easy', 'medium', 'hard']
-    if (!validDifficulties.includes(item.difficulty)) {
-      return `Item at index ${index}: Invalid difficulty '${item.difficulty}'. Must be one of: ${validDifficulties.join(', ')}`
-    }
-
-    return null
   }
 
   /**
@@ -249,4 +211,109 @@ export class ImportExportService {
     const safeName = configName.replace(/[^a-z0-9]/gi, '_')
     return `${safeName}.conf`
   }
+}
+
+/**
+ * Validate DatasetStructure
+ */
+function validateDataset(dataset: any): string[] {
+  const errors: string[] = []
+
+  if (!dataset || typeof dataset !== 'object') {
+    errors.push('Dataset must be an object')
+    return errors
+  }
+
+  if (!Array.isArray(dataset.questionList)) {
+    errors.push('questionList must be an array')
+    return errors
+  }
+
+  if (!Array.isArray(dataset.items)) {
+    errors.push('items must be an array')
+    return errors
+  }
+
+  // Validate questions
+  const questionIds = new Set<number>()
+  dataset.questionList.forEach((question: any, index: number) => {
+    if (typeof question.id !== 'number') {
+      errors.push(`Question at index ${index}: id must be a number`)
+    }
+    else if (questionIds.has(question.id)) {
+      errors.push(`Question at index ${index}: duplicate id ${question.id}`)
+    }
+    else {
+      questionIds.add(question.id)
+    }
+
+    if (!question.question || typeof question.question !== 'string') {
+      errors.push(`Question at index ${index}: question text is required`)
+    }
+
+    if (!question.referenceAnswer || typeof question.referenceAnswer !== 'string') {
+      errors.push(`Question at index ${index}: referenceAnswer is required`)
+    }
+
+    if (question.difficulty && !['easy', 'medium', 'hard'].includes(question.difficulty)) {
+      errors.push(`Question at index ${index}: invalid difficulty value`)
+    }
+
+    // Validate context if present
+    if (question.context && !validateContextData(question.context)) {
+      errors.push(`Question at index ${index}: context must be an object with string or string[] values`)
+    }
+  })
+
+  // Validate evaluation items
+  dataset.items.forEach((item: any, index: number) => {
+    if (typeof item.id !== 'number') {
+      errors.push(`Item at index ${index}: id must be a number`)
+    }
+
+    if (typeof item.questionID !== 'number') {
+      errors.push(`Item at index ${index}: questionID must be a number`)
+    }
+    else if (!questionIds.has(item.questionID)) {
+      errors.push(`Item at index ${index}: questionID ${item.questionID} does not exist in questionList`)
+    }
+
+    if (!item.submittedAnswer || typeof item.submittedAnswer !== 'string') {
+      errors.push(`Item at index ${index}: submittedAnswer is required`)
+    }
+
+    // Validate context if present
+    if (item.context && !validateContextData(item.context)) {
+      errors.push(`Item at index ${index}: context must be an object with string or string[] values`)
+    }
+  })
+
+  return errors
+}
+
+/**
+ * Validate ContextData to ensure it only contains string and string[] values
+ */
+function validateContextData(context: any): boolean {
+  if (!context || typeof context !== 'object') {
+    return false
+  }
+
+  for (const value of Object.values(context)) {
+    if (typeof value === 'string') {
+      continue
+    }
+
+    if (Array.isArray(value)) {
+      // Check if all array elements are strings
+      if (value.every(item => typeof item === 'string')) {
+        continue
+      }
+    }
+
+    // If value is neither string nor string[], it's invalid
+    return false
+  }
+
+  return true
 }

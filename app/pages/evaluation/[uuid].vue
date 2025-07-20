@@ -2,29 +2,42 @@
 const route = useRoute()
 const router = useRouter()
 
+// Get session from storage
 const sessionId = route.params.uuid as string
+const { evaluationStorage } = await import('@/utils/storage')
+
+const session = await evaluationStorage.getSession(sessionId)
+if (!session) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Evaluation session not found',
+  })
+}
+
+// Initialize evaluation composable with session
 const {
-  currentSession,
-  currentQuestionGroup,
-  currentQuestionGroupProgress,
-  totalProgress,
-  currentQuestion,
-  currentAbsoluteQuestionIndex,
-  currentQuestionIndexInGroup,
+  items,
+  groupedItems,
+  currentIndex,
+  currentItem,
+  currentItemGroup,
+  evaluatedItems,
   evaluatorComment,
-  evaluateGenericAndGoNext,
-  navigateToQuestion,
-  isEvaluationCompleted,
   isSingleEvaluation,
-  questions,
-  groupedQuestions,
-  evaluatedQuestions,
-} = useEvaluation(sessionId)
+  currentQuestionIndexInGroup,
+  currentAbsoluteQuestionIndex,
+  goToItem,
+  evaluateAndGoNext,
+} = useEvaluation(session)
+
+// Navigation functions
+async function handleEvaluateAndGoNext(value: any, comment?: string) {
+  await evaluateAndGoNext(value, comment)
+}
 
 // Determine evaluation mode
 const evaluationConfig = computed(() => {
-  // Check if the session has an evaluation configuration
-  return currentSession.value?.config || null
+  return session?.config || null
 })
 
 const isGenericEvaluation = computed(() => {
@@ -34,7 +47,14 @@ const isGenericEvaluation = computed(() => {
 const isCompletionModalOpen = ref(false)
 
 // Watch for evaluation completion
-watch(isEvaluationCompleted, (newValue) => {
+const isEvaluationComplete = computed(() => {
+  const actuallyEvaluatedCount = Object.values(evaluatedItems.value).filter(
+    item => item.value !== undefined || item.masteryLevel !== undefined,
+  ).length
+  return items.value.length > 0 && actuallyEvaluatedCount === items.value.length
+})
+
+watch(isEvaluationComplete, (newValue) => {
   if (newValue) {
     isCompletionModalOpen.value = true
   }
@@ -47,6 +67,19 @@ function goToHomePage() {
 function reviewEvaluations() {
   isCompletionModalOpen.value = false
 }
+
+// Computed property for current question progress (only evaluated items in current question group)
+const currentQuestionProgress = computed(() => {
+  if (!currentItem.value || !currentItemGroup.value.length) {
+    return 0
+  }
+
+  // Count how many items in the current question group have been evaluated
+  return currentItemGroup.value.filter((item) => {
+    const evaluation = evaluatedItems.value[item.id]
+    return evaluation && (evaluation.value !== undefined || evaluation.masteryLevel !== undefined)
+  }).length
+})
 </script>
 
 <template>
@@ -55,13 +88,13 @@ function reviewEvaluations() {
       <div class="flex gap-8 justify-between">
         <QuestionProgress
           :label="$t('evaluation.progress.current')"
-          :progress="currentQuestionGroupProgress"
-          :max="currentQuestionGroup?.length || 0"
+          :progress="currentQuestionProgress"
+          :max="currentItemGroup.length"
         />
         <QuestionProgress
           :label="$t('evaluation.progress.total')"
-          :progress="totalProgress"
-          :max="questions.length"
+          :progress="Object.values(evaluatedItems).filter(item => item.value !== undefined || item.masteryLevel !== undefined).length"
+          :max="items.length"
         />
       </div>
 
@@ -69,38 +102,38 @@ function reviewEvaluations() {
       <div class="flex flex-col gap-3">
         <QuestionNavigator
           :is-single-evaluation="isSingleEvaluation"
-          :grouped-questions="groupedQuestions"
-          :questions="questions"
-          :current-question-group="currentQuestionGroup"
-          :current-index="currentAbsoluteQuestionIndex"
-          :evaluated-questions="evaluatedQuestions"
-          :on-navigate="navigateToQuestion"
+          :grouped-items="groupedItems"
+          :items="items"
+          :current-item-group="currentItemGroup"
+          :current-index="currentIndex"
+          :evaluated-items="evaluatedItems"
+          :on-navigate="goToItem"
         />
 
-        <QuestionCard v-if="currentQuestion" :current-question="currentQuestion" />
+        <QuestionCard v-if="currentItem" :current-question="currentItem" />
       </div>
 
       <!-- Evaluation navigation and card -->
       <div class="flex flex-col gap-3">
         <EvaluationNavigator
           :is-single-evaluation="isSingleEvaluation"
-          :grouped-questions="groupedQuestions"
-          :questions="questions"
-          :current-question-group="currentQuestionGroup"
-          :current-absolute-question-index="currentAbsoluteQuestionIndex"
-          :current-question-index-in-group="currentQuestionIndexInGroup"
-          :current-index="currentAbsoluteQuestionIndex"
-          :evaluated-questions="evaluatedQuestions"
-          :on-navigate="navigateToQuestion"
+          :grouped-items="groupedItems"
+          :items="items"
+          :current-item-group="currentItemGroup"
+          :current-absolute-item-index="currentAbsoluteQuestionIndex"
+          :current-item-index-in-group="currentQuestionIndexInGroup"
+          :current-index="currentIndex"
+          :evaluated-items="evaluatedItems"
+          :on-navigate="goToItem"
         />
 
         <HybridEvaluationCard
-          v-if="currentQuestion"
-          :current-question="currentQuestion"
+          v-if="currentItem"
+          :current-item="currentItem"
           :evaluator-comment="evaluatorComment"
-          :evaluated-questions="evaluatedQuestions"
+          :evaluated-items="evaluatedItems"
           :evaluation-config="evaluationConfig || undefined"
-          :evaluate-generic-and-go-next="isGenericEvaluation ? evaluateGenericAndGoNext : undefined"
+          :evaluate-generic-and-go-next="isGenericEvaluation ? handleEvaluateAndGoNext : undefined"
           @update:evaluator-comment="evaluatorComment = $event"
         />
       </div>

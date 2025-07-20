@@ -177,9 +177,7 @@
       "sessionName": "Nom de la session",
       "sessionNamePlaceholder": "Entrez le nom de la session",
       "importErrors": "Erreurs d'import",
-      "importInstructions": "Instructions pour l'import",
-      "importFormat": "Le fichier doit être un tableau JSON d'items.",
-      "importFields": "Chaque item doit avoir id, questionID, question, referenceAnswer, submittedAnswer, difficulty."
+      "importInstructions": "Pour le format de l'import et la documentation, visitez :"
     },
     "editModal": {
       "title": "Modifier la session d'évaluation",

@@ -177,9 +177,7 @@
       "sessionName": "Session Name",
       "sessionNamePlaceholder": "Enter session name",
       "importErrors": "Import Errors",
-      "importInstructions": "Instructions for import",
-      "importFormat": "The file must be a JSON array of items.",
-      "importFields": "Each item must have id, questionID, question, referenceAnswer, submittedAnswer, difficulty."
+      "importInstructions": "For import format and documentation, visit:"
     },
     "editModal": {
       "title": "Edit Evaluation Session",

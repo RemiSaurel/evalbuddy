@@ -1,0 +1,364 @@
+{
+  "context": {
+    "course": "Geography Assessment",
+    "level": "Intermediate",
+    "date": "2025-01-14",
+    "instructor": "Prof. Smith"
+  },
+  "questionList": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "referenceAnswer": "The capital of France is Paris. Paris is located in the north-central part of France and has been the country's capital since 508 AD.",
+      "difficulty": "easy",
+      "context": {
+        "topic": "European Geography",
+        "points": "10",
+        "categories": ["Capitals", "Geography", "Basic Knowledge"]
+      }
+    },
+    {
+      "id": 2,
+      "question": "Explain the formation of mountains through tectonic plate movement.",
+      "referenceAnswer": "Mountains form when tectonic plates collide, causing the Earth's crust to fold, fault, and uplift. This process, called orogenesis, creates mountain ranges through compression and deformation of rock layers.",
+      "difficulty": "hard",
+      "context": {
+        "topic": "Geology",
+        "points": "25",
+        "categories": ["Physical Geography", "Earth Science"]
+      }
+    },
+    {
+      "id": 3,
+      "question": "What are the main climate zones of the Earth?",
+      "referenceAnswer": "The main climate zones are: tropical (hot and humid), arid (dry), temperate (moderate temperatures), continental (large temperature variations), and polar (very cold).",
+      "difficulty": "medium",
+      "context": {
+        "topic": "Climatology",
+        "points": "15",
+        "categories": ["Climate", "Environmental Science"]
+      }
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "questionID": 1,
+      "submittedAnswer": "Paris is the capital of France.",
+      "context": {
+        "studentId": "student_001",
+        "studentName": "Alice Johnson",
+        "submissionTime": "2025-01-14T10:00:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 2,
+      "questionID": 1,
+      "submittedAnswer": "The capital is Paris, which is a beautiful city in France.",
+      "context": {
+        "studentId": "student_002",
+        "studentName": "Bob Williams",
+        "submissionTime": "2025-01-14T10:05:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 3,
+      "questionID": 1,
+      "submittedAnswer": "I think it's Lyon or maybe Paris?",
+      "context": {
+        "studentId": "student_003",
+        "studentName": "Carol Davis",
+        "submissionTime": "2025-01-14T10:10:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 4,
+      "questionID": 2,
+      "submittedAnswer": "Mountains are formed when tectonic plates push against each other, causing the earth to fold and create high peaks.",
+      "context": {
+        "studentId": "student_001",
+        "studentName": "Alice Johnson",
+        "submissionTime": "2025-01-14T10:15:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 5,
+      "questionID": 2,
+      "submittedAnswer": "When plates collide, they push up the land and make mountains. It's like when you push two pieces of paper together.",
+      "context": {
+        "studentId": "student_002",
+        "studentName": "Bob Williams",
+        "submissionTime": "2025-01-14T10:20:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 6,
+      "questionID": 3,
+      "submittedAnswer": "The main climate zones are tropical, desert, temperate, and polar.",
+      "context": {
+        "studentId": "student_001",
+        "studentName": "Alice Johnson",
+        "submissionTime": "2025-01-14T10:25:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 7,
+      "questionID": 3,
+      "submittedAnswer": "Hot places, cold places, and places in between.",
+      "context": {
+        "studentId": "student_003",
+        "studentName": "Carol Davis",
+        "submissionTime": "2025-01-14T10:30:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 8,
+      "questionID": 3,
+      "submittedAnswer": "Hot places, cold places, and places in between.",
+      "context": {
+        "studentId": "student_003",
+        "studentName": "Carol Davis",
+        "submissionTime": "2025-01-14T10:30:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 9,
+      "questionID": 3,
+      "submittedAnswer": "Hot places, cold places, and places in between.",
+      "context": {
+        "studentId": "student_003",
+        "studentName": "Carol Davis",
+        "submissionTime": "2025-01-14T10:30:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 10,
+      "questionID": 3,
+      "submittedAnswer": "Tropical, arid, temperate, continental, and polar climate zones.",
+      "context": {
+        "studentId": "student_004",
+        "studentName": "David Brown",
+        "submissionTime": "2025-01-14T10:35:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 11,
+      "questionID": 3,
+      "submittedAnswer": "Equatorial, desert, Mediterranean, oceanic, and arctic climates.",
+      "context": {
+        "studentId": "student_005",
+        "studentName": "Emma Wilson",
+        "submissionTime": "2025-01-14T10:40:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 12,
+      "questionID": 3,
+      "submittedAnswer": "There are five main climate zones based on temperature and precipitation patterns.",
+      "context": {
+        "studentId": "student_006",
+        "studentName": "Frank Miller",
+        "submissionTime": "2025-01-14T10:45:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 13,
+      "questionID": 3,
+      "submittedAnswer": "Warm, dry, moderate, cold, and freezing zones.",
+      "context": {
+        "studentId": "student_007",
+        "studentName": "Grace Lee",
+        "submissionTime": "2025-01-14T10:50:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 14,
+      "questionID": 3,
+      "submittedAnswer": "Climate zones include tropical rainforest, savanna, desert, grassland, deciduous forest, coniferous forest, and tundra.",
+      "context": {
+        "studentId": "student_008",
+        "studentName": "Henry Garcia",
+        "submissionTime": "2025-01-14T10:55:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 15,
+      "questionID": 3,
+      "submittedAnswer": "I'm not sure, maybe hot and cold areas?",
+      "context": {
+        "studentId": "student_009",
+        "studentName": "Isabella Martinez",
+        "submissionTime": "2025-01-14T11:00:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 16,
+      "questionID": 3,
+      "submittedAnswer": "The Köppen climate classification includes A (tropical), B (arid), C (temperate), D (continental), and E (polar) zones.",
+      "context": {
+        "studentId": "student_010",
+        "studentName": "Jack Thompson",
+        "submissionTime": "2025-01-14T11:05:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 17,
+      "questionID": 3,
+      "submittedAnswer": "Humid subtropical, Mediterranean, marine west coast, humid continental, and subarctic climates.",
+      "context": {
+        "studentId": "student_011",
+        "studentName": "Kate Anderson",
+        "submissionTime": "2025-01-14T11:10:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 18,
+      "questionID": 3,
+      "submittedAnswer": "Different regions have different weather patterns year-round.",
+      "context": {
+        "studentId": "student_012",
+        "studentName": "Liam Taylor",
+        "submissionTime": "2025-01-14T11:15:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 19,
+      "questionID": 3,
+      "submittedAnswer": "Tropical zones are near the equator, temperate zones are in the middle, and polar zones are at the poles.",
+      "context": {
+        "studentId": "student_013",
+        "studentName": "Mia Johnson",
+        "submissionTime": "2025-01-14T11:20:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 20,
+      "questionID": 3,
+      "submittedAnswer": "Climate zones depend on latitude, altitude, and proximity to water bodies.",
+      "context": {
+        "studentId": "student_014",
+        "studentName": "Noah White",
+        "submissionTime": "2025-01-14T11:25:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 21,
+      "questionID": 3,
+      "submittedAnswer": "Hot desert, cold desert, tropical rainforest, temperate forest, and tundra.",
+      "context": {
+        "studentId": "student_015",
+        "studentName": "Olivia Harris",
+        "submissionTime": "2025-01-14T11:30:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 22,
+      "questionID": 3,
+      "submittedAnswer": "The main climate zones are determined by temperature and rainfall patterns throughout the year.",
+      "context": {
+        "studentId": "student_016",
+        "studentName": "Peter Clark",
+        "submissionTime": "2025-01-14T11:35:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 23,
+      "questionID": 3,
+      "submittedAnswer": "Wet tropical, dry tropical, subtropical, temperate, and polar climates.",
+      "context": {
+        "studentId": "student_017",
+        "studentName": "Quinn Rodriguez",
+        "submissionTime": "2025-01-14T11:40:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 24,
+      "questionID": 3,
+      "submittedAnswer": "I think there are like 5 or 6 main ones but I can't remember their names.",
+      "context": {
+        "studentId": "student_018",
+        "studentName": "Rachel Lewis",
+        "submissionTime": "2025-01-14T11:45:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 25,
+      "questionID": 3,
+      "submittedAnswer": "Tropical (hot and humid), arid (dry), temperate (moderate), continental (extreme seasons), polar (very cold).",
+      "context": {
+        "studentId": "student_019",
+        "studentName": "Samuel Walker",
+        "submissionTime": "2025-01-14T11:50:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 26,
+      "questionID": 3,
+      "submittedAnswer": "Climate zones are regions with similar weather patterns and include tropical, desert, grassland, forest, and polar regions.",
+      "context": {
+        "studentId": "student_020",
+        "studentName": "Tara Hall",
+        "submissionTime": "2025-01-14T11:55:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 27,
+      "questionID": 3,
+      "submittedAnswer": "Equatorial, tropical, subtropical, temperate, subpolar, and polar zones.",
+      "context": {
+        "studentId": "student_021",
+        "studentName": "Ulysses Allen",
+        "submissionTime": "2025-01-14T12:00:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 28,
+      "questionID": 3,
+      "submittedAnswer": "The Earth has different climate zones because of varying amounts of sunlight and heat distribution.",
+      "context": {
+        "studentId": "student_022",
+        "studentName": "Violet Young",
+        "submissionTime": "2025-01-14T12:05:00Z",
+        "attempt": "1"
+      }
+    },
+    {
+      "id": 29,
+      "questionID": 3,
+      "submittedAnswer": "Major climate zones: tropical wet, tropical dry, arid, semiarid, temperate marine, temperate continental, and polar.",
+      "context": {
+        "studentId": "student_023",
+        "studentName": "William King",
+        "submissionTime": "2025-01-14T12:10:00Z",
+        "attempt": "1"
+      }
+    }
+  ]
+}
