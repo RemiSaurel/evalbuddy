@@ -53,8 +53,11 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     items.value = allItems
     groupedItems.value = grouped
 
-    // Determine if single evaluation: only 1 question (regardless of how many student answers/items)
+    // Determine if single evaluation:
+    // 1. Only 1 question (regardless of how many student answers/items)
+    // 2. OR every question has exactly 1 evaluation item
     isSingleEvaluation.value = Object.keys(grouped).length === 1
+      || Object.values(grouped).every(group => group.length === 1)
 
     // Set current item
     if (allItems.length > 0) {
