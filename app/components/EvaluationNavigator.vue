@@ -29,14 +29,17 @@ function scrollToActiveItem(itemIndex: number) {
 function handleNavigation(itemIndex: number) {
   props.onNavigate(itemIndex)
   nextTick(() => {
-    scrollToActiveItem(itemIndex)
+    // Calculate the index within the current group for scrolling
+    const indexInGroup = itemIndex - (props.currentAbsoluteItemIndex - props.currentItemIndexInGroup)
+    scrollToActiveItem(indexInGroup)
   })
 }
 
 // Watch for currentIndex changes to auto-scroll when navigation happens externally
-watch(() => props.currentIndex, (newIndex) => {
+watch(() => props.currentIndex, (_newIndex) => {
   nextTick(() => {
-    scrollToActiveItem(newIndex)
+    // For external navigation changes, use the current item index in group
+    scrollToActiveItem(props.currentItemIndexInGroup)
   })
 })
 
@@ -49,7 +52,7 @@ function isItemEvaluated(item: EvaluationItem) {
 
 // Auto-scroll to current item on mount
 onMounted(() => {
-  scrollToActiveItem(props.currentIndex)
+  scrollToActiveItem(props.currentItemIndexInGroup)
 })
 
 // Shortcuts with arrow keys to navigate
