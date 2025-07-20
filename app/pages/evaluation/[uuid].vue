@@ -98,7 +98,7 @@ const currentQuestionProgress = computed(() => {
         />
       </div>
 
-      <!-- Item navigation and context header -->
+      <!-- Question navigation and context header -->
       <div class="flex flex-col gap-3">
         <QuestionNavigator
           :is-single-evaluation="isSingleEvaluation"

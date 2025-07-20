@@ -405,13 +405,15 @@ function getDropdownItems(session: EvaluationSession) {
             </div>
 
             <div class="text-sm text-neutral-600">
-              <p class="mb-2">
-                {{ $t('evaluation.creationModal.importInstructions') }}:
-              </p>
-              <ul class="list-disc list-inside space-y-1 ml-4">
-                <li>{{ $t('evaluation.creationModal.importFormat') }}</li>
-                <li>{{ $t('evaluation.creationModal.importFields') }}</li>
-              </ul>
+              {{ $t('evaluation.creationModal.importInstructions') }}
+              <a
+                href="https://github.com/RemiSaurel/evalbuddy"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-blue-600 hover:text-blue-800 underline"
+              >
+                EvalBuddy Repository
+              </a>
             </div>
           </div>
 
