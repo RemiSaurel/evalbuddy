@@ -343,7 +343,12 @@ function getDropdownItems(session: EvaluationSession) {
     </div>
 
     <!-- Import Modal -->
-    <UModal v-model:open="isCreationModalOpen" title="Creation Evaluation Modal" description="Creation Evaluation Modal">
+    <UModal
+      v-model:open="isCreationModalOpen"
+      title="Creation Evaluation Modal"
+      description="Creation Evaluation Modal"
+      :ui="{ content: 'overflow-y-auto' }"
+    >
       <template #content>
         <UCard>
           <template #header>
