@@ -397,7 +397,7 @@ function getDropdownItems(session: EvaluationSession) {
               <h4 class="font-medium text-red-800 mb-2">
                 {{ $t('evaluation.creationModal.importErrors') }}:
               </h4>
-              <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+              <ul class="list-disc list-inside text-sm text-red-700 space-y-1 max-h-48 overflow-y-auto pr-2">
                 <li v-for="err in importErrors" :key="err">
                   {{ err }}
                 </li>
