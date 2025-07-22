@@ -83,8 +83,15 @@ const currentQuestionProgress = computed(() => {
 </script>
 
 <template>
-  <div>
-    <div class="flex flex-col gap-8 mt-8">
+  <div class="mt-8">
+    <div class="flex flex-col gap-1.5">
+      <!-- Evaluation title and dataset context button -->
+      <h1 class="font-bold text-xl text-neutral-900">
+        <span>{{ session.name }}</span>
+      </h1>
+    </div>
+
+    <div class="flex flex-col gap-8 mt-5">
       <div class="flex gap-8 justify-between">
         <QuestionProgress
           :label="$t('evaluation.progress.current')"
@@ -93,7 +100,8 @@ const currentQuestionProgress = computed(() => {
         />
         <QuestionProgress
           :label="$t('evaluation.progress.total')"
-          :progress="Object.values(evaluatedItems).filter(item => item.value !== undefined || item.masteryLevel !== undefined).length"
+          :progress="Object.values(evaluatedItems)
+            .filter(item => item.value !== undefined || item.masteryLevel !== undefined).length"
           :max="items.length"
         />
       </div>
@@ -140,7 +148,11 @@ const currentQuestionProgress = computed(() => {
     </div>
 
     <!-- Completion Modal -->
-    <UModal v-model:open="isCompletionModalOpen" title="Evalaution Completed Modal" description="Evaluation Completed Modal">
+    <UModal
+      v-model:open="isCompletionModalOpen"
+      title="Evalaution Completed Modal"
+      description="Evaluation Completed Modal"
+    >
       <template #content>
         <UCard>
           <template #header>
