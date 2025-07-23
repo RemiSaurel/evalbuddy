@@ -137,7 +137,9 @@
     "question": {
       "title": "Question",
       "answer": "Answer",
-      "submittedAnswer": "Submitted Answer"
+      "submittedAnswer": "Submitted Answer",
+      "displayQuestionContext": "Display the question context",
+      "displayAnswerContext": "Display the answer context"
     },
     "mastery": {
       "NOT_ATTAINED": "Not Attained",

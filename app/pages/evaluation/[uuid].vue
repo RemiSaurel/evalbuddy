@@ -17,6 +17,7 @@ if (!session) {
 // Initialize evaluation composable with session
 const {
   items,
+  questions,
   groupedItems,
   currentIndex,
   currentItem,
@@ -113,7 +114,7 @@ const currentQuestionProgress = computed(() => {
       </div>
 
       <!-- Question navigation and context header -->
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-2">
         <QuestionNavigator
           :is-single-evaluation="isSingleEvaluation"
           :grouped-items="groupedItems"
@@ -124,7 +125,17 @@ const currentQuestionProgress = computed(() => {
           :on-navigate="goToItem"
         />
 
-        <QuestionCard v-if="currentItem" :current-question="currentItem" />
+        <ContextDataCollapsible
+          v-if="currentItem && questions.get(currentItem.questionID)?.context"
+          :label="$t('evaluation.question.displayQuestionContext')"
+          :context="questions.get(currentItem.questionID)!.context!"
+        />
+
+        <QuestionCard
+          v-if="currentItem"
+          :current-question="currentItem"
+          class="mt-1"
+        />
       </div>
 
       <!-- Evaluation navigation and card -->

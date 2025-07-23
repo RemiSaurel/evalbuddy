@@ -7,6 +7,7 @@ import { evaluationStorage } from '@/utils/storage'
 export function useEvaluation(evaluationSession?: EvaluationSession) {
   // Core reactive state
   const items = ref<EvaluationItem[]>([])
+  const questions = ref<Map<number, Question>>(new Map())
   const groupedItems = ref<{ [key: string]: EvaluationItem[] }>({})
   const currentIndex = ref(0)
   const currentItem = ref<EvaluationItem | null>(null)
@@ -50,6 +51,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
       }
     })
 
+    questions.value = questionMap
     items.value = allItems
     groupedItems.value = grouped
 
@@ -212,6 +214,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   return {
     // State
     items,
+    questions,
     groupedItems,
     currentIndex,
     currentItem,

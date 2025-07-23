@@ -137,7 +137,9 @@
     "question": {
       "title": "Question",
       "answer": "Répondre",
-      "submittedAnswer": "Réponse soumise"
+      "submittedAnswer": "Réponse soumise",
+      "displayQuestionContext": "Afficher le contexte de la question",
+      "displayAnswerContext": "Afficher le contexte de la réponse"
     },
     "mastery": {
       "NOT_ATTAINED": "Non atteint",
