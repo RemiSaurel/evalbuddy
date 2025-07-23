@@ -137,7 +137,9 @@
     "question": {
       "title": "Question",
       "answer": "Répondre",
-      "submittedAnswer": "Réponse soumise"
+      "submittedAnswer": "Réponse soumise",
+      "displayQuestionContext": "Afficher le contexte de la question",
+      "displayAnswerContext": "Afficher le contexte de la réponse"
     },
     "mastery": {
       "NOT_ATTAINED": "Non atteint",
@@ -191,6 +193,7 @@
     },
     "error": "Erreur",
     "title": "Évaluation",
-    "subtitle": "Évaluez les réponses et reprenez les sessions quand vous le souhaitez"
+    "subtitle": "Évaluez les réponses et reprenez les sessions quand vous le souhaitez",
+    "displayContext": "Afficher le contexte de l'évaluation"
   }
 }

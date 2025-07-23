@@ -17,6 +17,7 @@ if (!session) {
 // Initialize evaluation composable with session
 const {
   items,
+  questions,
   groupedItems,
   currentIndex,
   currentItem,
@@ -83,9 +84,22 @@ const currentQuestionProgress = computed(() => {
 </script>
 
 <template>
-  <div>
-    <div class="flex flex-col gap-8 mt-8">
-      <div class="flex gap-8 justify-between">
+  <div class="mt-8">
+    <div class="flex flex-col gap-1.5">
+      <!-- Evaluation title and dataset context button -->
+      <h1 class="font-bold text-xl text-neutral-900">
+        <span>{{ session.name }}</span>
+      </h1>
+
+      <ContextDataCollapsible
+        v-if="session.dataset.context"
+        :label="$t('evaluation.displayContext')"
+        :context="session.dataset.context"
+      />
+    </div>
+
+    <div class="flex flex-col gap-8 mt-6">
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-8 justify-between">
         <QuestionProgress
           :label="$t('evaluation.progress.current')"
           :progress="currentQuestionProgress"
@@ -93,13 +107,14 @@ const currentQuestionProgress = computed(() => {
         />
         <QuestionProgress
           :label="$t('evaluation.progress.total')"
-          :progress="Object.values(evaluatedItems).filter(item => item.value !== undefined || item.masteryLevel !== undefined).length"
+          :progress="Object.values(evaluatedItems)
+            .filter(item => item.value !== undefined || item.masteryLevel !== undefined).length"
           :max="items.length"
         />
       </div>
 
       <!-- Question navigation and context header -->
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-2">
         <QuestionNavigator
           :is-single-evaluation="isSingleEvaluation"
           :grouped-items="groupedItems"
@@ -110,11 +125,21 @@ const currentQuestionProgress = computed(() => {
           :on-navigate="goToItem"
         />
 
-        <QuestionCard v-if="currentItem" :current-question="currentItem" />
+        <ContextDataCollapsible
+          v-if="currentItem && questions.get(currentItem.questionID)?.context"
+          :label="$t('evaluation.question.displayQuestionContext')"
+          :context="questions.get(currentItem.questionID)!.context!"
+        />
+
+        <QuestionCard
+          v-if="currentItem"
+          :current-question="currentItem"
+          class="mt-1"
+        />
       </div>
 
       <!-- Evaluation navigation and card -->
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-2">
         <EvaluationNavigator
           :is-single-evaluation="isSingleEvaluation"
           :grouped-items="groupedItems"
@@ -127,6 +152,12 @@ const currentQuestionProgress = computed(() => {
           :on-navigate="goToItem"
         />
 
+        <ContextDataCollapsible
+          v-if="currentItem?.context"
+          :label="$t('evaluation.question.displayAnswerContext')"
+          :context="currentItem?.context"
+        />
+
         <HybridEvaluationCard
           v-if="currentItem"
           :current-item="currentItem"
@@ -134,13 +165,18 @@ const currentQuestionProgress = computed(() => {
           :evaluated-items="evaluatedItems"
           :evaluation-config="evaluationConfig || undefined"
           :evaluate-generic-and-go-next="isGenericEvaluation ? handleEvaluateAndGoNext : undefined"
+          class="mt-1"
           @update:evaluator-comment="evaluatorComment = $event"
         />
       </div>
     </div>
 
     <!-- Completion Modal -->
-    <UModal v-model:open="isCompletionModalOpen" title="Evalaution Completed Modal" description="Evaluation Completed Modal">
+    <UModal
+      v-model:open="isCompletionModalOpen"
+      title="Evalaution Completed Modal"
+      description="Evaluation Completed Modal"
+    >
       <template #content>
         <UCard>
           <template #header>

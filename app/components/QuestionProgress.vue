@@ -16,11 +16,17 @@ defineProps<{
         {{ progress }} / {{ max }}
       </div>
     </div>
+
     <UProgress
       :model-value="progress"
       :max="max"
       size="xl"
       status
+      :ui="{
+        root: 'flex-row items-center',
+        base: 'flex-1',
+        status: 'w-fit!',
+      }"
     />
   </div>
 </template>
