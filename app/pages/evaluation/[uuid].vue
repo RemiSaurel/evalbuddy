@@ -92,7 +92,7 @@ const currentQuestionProgress = computed(() => {
     </div>
 
     <div class="flex flex-col gap-8 mt-5">
-      <div class="flex gap-8 justify-between">
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-8 justify-between">
         <QuestionProgress
           :label="$t('evaluation.progress.current')"
           :progress="currentQuestionProgress"
