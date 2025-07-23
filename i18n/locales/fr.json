@@ -191,6 +191,7 @@
     },
     "error": "Erreur",
     "title": "Évaluation",
-    "subtitle": "Évaluez les réponses et reprenez les sessions quand vous le souhaitez"
+    "subtitle": "Évaluez les réponses et reprenez les sessions quand vous le souhaitez",
+    "displayContext": "Afficher le contexte de l'évaluation"
   }
 }

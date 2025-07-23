@@ -89,9 +89,15 @@ const currentQuestionProgress = computed(() => {
       <h1 class="font-bold text-xl text-neutral-900">
         <span>{{ session.name }}</span>
       </h1>
+
+      <ContextDataCollapsible
+        v-if="session.dataset.context"
+        :label="$t('evaluation.displayContext')"
+        :context="session.dataset.context"
+      />
     </div>
 
-    <div class="flex flex-col gap-8 mt-5">
+    <div class="flex flex-col gap-8 mt-6">
       <div class="flex flex-col sm:flex-row gap-2 sm:gap-8 justify-between">
         <QuestionProgress
           :label="$t('evaluation.progress.current')"

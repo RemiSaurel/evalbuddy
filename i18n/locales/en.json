@@ -191,6 +191,7 @@
     },
     "error": "Error",
     "title": "Evaluation",
-    "subtitle": "Evaluate answers and resume sessions whenever you want"
+    "subtitle": "Evaluate answers and resume sessions whenever you want",
+    "displayContext": "Display the evaluation context"
   }
 }
