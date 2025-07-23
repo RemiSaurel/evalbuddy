@@ -22,7 +22,10 @@ defineProps<{
     />
 
     <template #content>
-      <div class="bg-neutral-100 mt-1.5 rounded-md p-5 flex flex-col gap-4 text-sm">
+      <div
+        class="bg-neutral-100 mt-1.5 rounded-md p-5 flex flex-col gap-4
+        text-sm max-h-[40rem] overflow-y-auto"
+      >
         <!-- Context key/values displayed as a list -->
         <div v-for="(value, key) in context" :key="key" class="flex gap-2">
           <span class="font-semibold text-neutral-800">
