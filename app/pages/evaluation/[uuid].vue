@@ -139,7 +139,7 @@ const currentQuestionProgress = computed(() => {
       </div>
 
       <!-- Evaluation navigation and card -->
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-2">
         <EvaluationNavigator
           :is-single-evaluation="isSingleEvaluation"
           :grouped-items="groupedItems"
@@ -152,6 +152,12 @@ const currentQuestionProgress = computed(() => {
           :on-navigate="goToItem"
         />
 
+        <ContextDataCollapsible
+          v-if="currentItem?.context"
+          :label="$t('evaluation.question.displayAnswerContext')"
+          :context="currentItem?.context"
+        />
+
         <HybridEvaluationCard
           v-if="currentItem"
           :current-item="currentItem"
@@ -159,6 +165,7 @@ const currentQuestionProgress = computed(() => {
           :evaluated-items="evaluatedItems"
           :evaluation-config="evaluationConfig || undefined"
           :evaluate-generic-and-go-next="isGenericEvaluation ? handleEvaluateAndGoNext : undefined"
+          class="mt-1"
           @update:evaluator-comment="evaluatorComment = $event"
         />
       </div>
