@@ -1,0 +1,20 @@
+{
+  "context": "This is a simple string context that provides basic information about the assessment. Students should answer all questions thoroughly and provide detailed explanations where required.",
+  "questionList": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "referenceAnswer": "The capital of France is Paris.",
+      "difficulty": "easy",
+      "context": "This is a simple geography question about European capitals."
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "questionID": 1,
+      "submittedAnswer": "Paris is the capital of France.",
+      "context": "Student provided a concise and correct answer."
+    }
+  ]
+}

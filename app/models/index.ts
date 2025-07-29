@@ -1,5 +1,5 @@
 // Restricted context type for better display handling
-export type ContextData = Record<string, string | string[]>
+export type ContextData = Record<string, string | string[]> | string
 
 export interface Question {
   id: number
