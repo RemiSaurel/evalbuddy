@@ -305,7 +305,7 @@ function validateContextData(context: any): boolean {
   }
 
   // Accept object format
-  if (typeof context === 'object' && !Array.isArray(context)) {
+  if (typeof context === 'object' && context !== null && !Array.isArray(context)) {
     for (const value of Object.values(context)) {
       if (typeof value === 'string') {
         continue
