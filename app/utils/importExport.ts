@@ -292,28 +292,38 @@ function validateDataset(dataset: any): string[] {
 }
 
 /**
- * Validate ContextData to ensure it only contains string and string[] values
+ * Validate ContextData to ensure it's either a string or only contains string and string[] values
  */
 function validateContextData(context: any): boolean {
-  if (!context || typeof context !== 'object') {
+  if (!context) {
     return false
   }
 
-  for (const value of Object.values(context)) {
-    if (typeof value === 'string') {
-      continue
-    }
+  // Accept simple string format
+  if (typeof context === 'string') {
+    return true
+  }
 
-    if (Array.isArray(value)) {
-      // Check if all array elements are strings
-      if (value.every(item => typeof item === 'string')) {
+  // Accept object format
+  if (typeof context === 'object' && !Array.isArray(context)) {
+    for (const value of Object.values(context)) {
+      if (typeof value === 'string') {
         continue
       }
+
+      if (Array.isArray(value)) {
+        // Check if all array elements are strings
+        if (value.every(item => typeof item === 'string')) {
+          continue
+        }
+      }
+
+      // If value is neither string nor string[], it's invalid
+      return false
     }
 
-    // If value is neither string nor string[], it's invalid
-    return false
+    return true
   }
 
-  return true
+  return false
 }
