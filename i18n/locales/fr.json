@@ -139,7 +139,8 @@
       "answer": "Répondre",
       "submittedAnswer": "Réponse soumise",
       "displayQuestionContext": "Afficher le contexte de la question",
-      "displayAnswerContext": "Afficher le contexte de la réponse"
+      "displayAnswerContext": "Afficher le contexte de la réponse",
+      "referenceAnswer": "Réponse de référence"
     },
     "mastery": {
       "NOT_ATTAINED": "Non atteint",

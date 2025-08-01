@@ -30,7 +30,7 @@
     {
       "id": 3,
       "question": "What are the main climate zones of the Earth?",
-      "referenceAnswer": "The main climate zones are: tropical (hot and humid), arid (dry), temperate (moderate temperatures), continental (large temperature variations), and polar (very cold).",
+      "referenceAnswer": "The main climate zones are: tropical (hot and humid), arid (dry), temperate (moderate temperatures), continental (large temperature variations), and polar (very cold).\nThese zones are determined by factors such as latitude, altitude, and proximity to oceans.",
       "difficulty": "medium",
       "context": {
         "topic": "Climatology",

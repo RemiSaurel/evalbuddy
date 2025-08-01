@@ -34,7 +34,7 @@ const difficultyClass = computed(() =>
 </script>
 
 <template>
-  <UCard>
+  <UCard :ui="{ footer: 'sm:pb-6' }">
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-center">
         <div class="text-neutral-800 text-sm font-semibold">
@@ -54,5 +54,17 @@ const difficultyClass = computed(() =>
         {{ currentQuestion.questionText }}
       </div>
     </div>
+
+    <template v-if="currentQuestion.referenceAnswer" #footer>
+      <div class="flex flex-col gap-4">
+        <div class="text-neutral-800 text-sm font-semibold">
+          {{ t('evaluation.question.referenceAnswer') }}
+        </div>
+
+        <div class="whitespace-pre-line max-h-60 overflow-y-auto">
+          {{ currentQuestion.referenceAnswer }}
+        </div>
+      </div>
+    </template>
   </UCard>
 </template>
