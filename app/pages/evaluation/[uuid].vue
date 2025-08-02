@@ -84,7 +84,7 @@ const currentQuestionProgress = computed(() => {
 </script>
 
 <template>
-  <div class="mt-8">
+  <div class="mt-8 pb-4">
     <div class="flex flex-col gap-1.5">
       <!-- Evaluation title and dataset context button -->
       <h1 class="font-bold text-xl text-neutral-900">

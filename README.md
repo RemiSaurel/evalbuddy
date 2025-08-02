@@ -115,7 +115,7 @@ Datasets should be provided as a JSON object with the following structure:
 **Question Fields:**
 - `id`: Unique identifier for the question (number)
 - `question`: The question text
-- `referenceAnswer`: The correct/expected answer
+- `referenceAnswer`: Optional - the correct/expected answer (string)
 - `difficulty`: Optional - one of "easy", "medium", or "hard"
 - `context`: Optional metadata (supports string and string[] values for better display)
 

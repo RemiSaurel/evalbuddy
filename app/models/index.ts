@@ -4,7 +4,7 @@ export type ContextData = Record<string, string | string[]> | string
 export interface Question {
   id: number
   question: string
-  referenceAnswer: string
+  referenceAnswer?: string
   difficulty?: Difficulty // Optional
   context?: ContextData // Optional - supports string and string[] for display
 }

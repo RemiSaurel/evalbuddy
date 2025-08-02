@@ -1,4 +1,4 @@
-import type { DatasetStructure, EvaluationConfig, ExportData } from '@/models/index'
+import type { DatasetStructure, EvaluationConfig, ExportData } from '~/models'
 import { evaluationStorage } from './storage'
 
 // Configuration export/import data structure
@@ -251,8 +251,8 @@ function validateDataset(dataset: any): string[] {
       errors.push(`Question at index ${index}: question text is required`)
     }
 
-    if (!question.referenceAnswer || typeof question.referenceAnswer !== 'string') {
-      errors.push(`Question at index ${index}: referenceAnswer is required`)
+    if (question.referenceAnswer && typeof question.referenceAnswer !== 'string') {
+      errors.push(`Question at index ${index}: referenceAnswer must be a string`)
     }
 
     if (question.difficulty && !['easy', 'medium', 'hard'].includes(question.difficulty)) {

@@ -8,8 +8,7 @@
   "items": [
     {
       "id": 1,
-      "questionID": 1,
-      "submittedAnswer": "Paris is the capital of France."
+      "questionID": 1
 
     }
   ]
