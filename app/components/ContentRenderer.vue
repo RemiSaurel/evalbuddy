@@ -1,11 +1,9 @@
 <script setup lang="ts">
-interface Props {
+const props = withDefaults(defineProps<{
   content?: string
   /** Additional CSS classes to apply to the rendered content */
   class?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   content: '',
   class: '',
 })
@@ -18,13 +16,39 @@ const processedContent = computed(() => processContent(props.content))
 
 <template>
   <div
-    :class="props.class"
+    :class="[
+      props.class,
+      // Base typography
+      'leading-relaxed',
+      // Prose-like styling for rendered content
+      '[&_p]:mb-2',
+      '[&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:mt-4 [&_h1]:mb-2',
+      '[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2',
+      '[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2',
+      '[&_h4]:text-base [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2',
+      '[&_h5]:text-sm [&_h5]:font-semibold [&_h5]:mt-4 [&_h5]:mb-2',
+      '[&_h6]:text-xs [&_h6]:font-semibold [&_h6]:mt-4 [&_h6]:mb-2',
+      '[&_ul]:my-2 [&_ul]:pl-6 [&_ul]:list-disc',
+      '[&_ol]:my-2 [&_ol]:pl-6 [&_ol]:list-decimal',
+      '[&_li]:mb-1',
+      '[&_strong]:font-semibold',
+      '[&_b]:font-semibold',
+      '[&_em]:italic',
+      '[&_i]:italic',
+      '[&_code]:bg-gray-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm',
+      '[&_pre]:bg-gray-100 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-2',
+      '[&_pre_code]:bg-transparent [&_pre_code]:p-0',
+      '[&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:my-2 [&_blockquote]:italic',
+      '[&_table]:border-collapse [&_table]:w-full [&_table]:my-2',
+      '[&_th]:border [&_th]:border-gray-300 [&_th]:p-2 [&_th]:text-left [&_th]:bg-gray-100 [&_th]:font-semibold',
+      '[&_td]:border [&_td]:border-gray-300 [&_td]:p-2 [&_td]:text-left'
+    ]"
     v-html="processedContent"
   />
 </template>
 
 <style>
-/* Ensure KaTeX styles are properly applied */
+/* Essential KaTeX styles that can't be replaced with Tailwind */
 .katex-display {
   margin: 1em 0;
   text-align: center;
@@ -32,91 +56,5 @@ const processedContent = computed(() => processContent(props.content))
 
 .katex {
   font-size: 1em;
-}
-
-/* Basic styling for rendered HTML content */
-.rendered-content {
-  line-height: 1.6;
-}
-
-.rendered-content p {
-  margin-bottom: 0.5em;
-}
-
-.rendered-content h1,
-.rendered-content h2,
-.rendered-content h3,
-.rendered-content h4,
-.rendered-content h5,
-.rendered-content h6 {
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-  font-weight: 600;
-}
-
-.rendered-content ul,
-.rendered-content ol {
-  margin: 0.5em 0;
-  padding-left: 1.5em;
-}
-
-.rendered-content li {
-  margin-bottom: 0.25em;
-}
-
-.rendered-content strong,
-.rendered-content b {
-  font-weight: 600;
-}
-
-.rendered-content em,
-.rendered-content i {
-  font-style: italic;
-}
-
-.rendered-content code {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 0.125em 0.25em;
-  border-radius: 0.25em;
-  font-family: monospace;
-  font-size: 0.9em;
-}
-
-.rendered-content pre {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 0.75em;
-  border-radius: 0.5em;
-  overflow-x: auto;
-  margin: 0.5em 0;
-}
-
-.rendered-content pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.rendered-content blockquote {
-  border-left: 4px solid rgba(0, 0, 0, 0.15);
-  padding-left: 1em;
-  margin: 0.5em 0;
-  font-style: italic;
-}
-
-.rendered-content table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 0.5em 0;
-}
-
-.rendered-content th,
-.rendered-content td {
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  padding: 0.5em;
-  text-align: left;
-}
-
-.rendered-content th {
-  background-color: rgba(0, 0, 0, 0.05);
-  font-weight: 600;
 }
 </style>
