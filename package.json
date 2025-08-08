@@ -21,6 +21,8 @@
     "@vueuse/core": "^13.2.0",
     "@vueuse/integrations": "^13.3.0",
     "@vueuse/nuxt": "^13.2.0",
+    "dompurify": "^3.2.6",
+    "katex": "^0.16.22",
     "nuxt": "^3.17.4",
     "sortablejs": "^1.15.6",
     "vue": "^3.5.14"
@@ -28,6 +30,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^4.13.2",
     "@nuxt/eslint": "^1.4.0",
+    "@types/dompurify": "^3.0.5",
     "eslint": "^9.27.0",
     "typescript": "^5.8.3"
   }
