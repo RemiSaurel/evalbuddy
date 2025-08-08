@@ -1,0 +1,41 @@
+{
+  "context": {
+    "description": "Test dataset with HTML and LaTeX content",
+    "createdBy": "EvalBuddy Test",
+    "version": "1.0"
+  },
+  "questionList": [
+    {
+      "id": 1,
+      "question": "<h3>Mathematics Problem</h3><p>Solve the following quadratic equation:</p><p>$ax^2 + bx + c = 0$</p><p>Where $a = 1$, $b = -5$, and $c = 6$.</p>",
+      "referenceAnswer": "<p>To solve the quadratic equation $x^2 - 5x + 6 = 0$, we can use the quadratic formula:</p><p>$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$</p><p>Substituting our values:</p><ul><li>$a = 1$</li><li>$b = -5$</li><li>$c = 6$</li></ul><p>$$x = \\frac{5 \\pm \\sqrt{25 - 24}}{2} = \\frac{5 \\pm 1}{2}$$</p><p>Therefore, $x = 3$ or $x = 2$.</p>"
+    },
+    {
+      "id": 2,
+      "question": "<h3>Physics Problem</h3><p>Calculate the force needed to accelerate a <strong>10 kg</strong> object at <em>5 m/s²</em>.</p><p>Use Newton's second law: $F = ma$</p>",
+      "referenceAnswer": "<p>Using Newton's second law:</p><p>$$F = ma$$</p><p>Where:</p><ul><li>$m = 10$ kg</li><li>$a = 5$ m/s²</li></ul><p>Therefore:</p><p>$$F = 10 \\times 5 = 50 \\text{ N}$$</p><p>The required force is <strong>50 Newtons</strong>.</p>"
+    },
+    {
+      "id": 3,
+      "question": "<h3>Chemistry Question</h3><p>What is the molecular formula for <em>glucose</em>?</p><p>Include the structural representation using proper chemical notation.</p>",
+      "referenceAnswer": "<p>The molecular formula for glucose is:</p><p>$$\\text{C}_6\\text{H}_{12}\\text{O}_6$$</p><p>This means glucose contains:</p><ul><li><strong>6</strong> carbon atoms</li><li><strong>12</strong> hydrogen atoms</li><li><strong>6</strong> oxygen atoms</li></ul><p>Glucose is a simple sugar and the primary source of energy for cells.</p>"
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "questionID": 1,
+      "submittedAnswer": "<p>I solved this using the quadratic formula:</p><p>$$x = \\frac{-(-5) \\pm \\sqrt{(-5)^2 - 4(1)(6)}}{2(1)}$$</p><p>$$x = \\frac{5 \\pm \\sqrt{25 - 24}}{2} = \\frac{5 \\pm 1}{2}$$</p><p>So $x = 3$ or $x = 2$</p><p><strong>Answer:</strong> $x \\in \\{2, 3\\}$</p>"
+    },
+    {
+      "id": 2,
+      "questionID": 2,
+      "submittedAnswer": "<p>Using $F = ma$:</p><p>$F = 10 \\text{ kg} \\times 5 \\text{ m/s}^2 = 50 \\text{ N}$</p><p>The force is <em>50 Newtons</em>.</p>"
+    },
+    {
+      "id": 3,
+      "questionID": 3,
+      "submittedAnswer": "<p>The formula is $\\text{C}_6\\text{H}_{12}\\text{O}_6$</p><p>This represents:</p><blockquote><p>6 carbon + 12 hydrogen + 6 oxygen atoms</p></blockquote>"
+    }
+  ]
+}
