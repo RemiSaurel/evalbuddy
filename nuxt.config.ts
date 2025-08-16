@@ -15,7 +15,10 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
   ],
 
-  css: ['~/assets/css/main.css'],
+  css: [
+    '~/assets/css/main.css',
+    'katex/dist/katex.min.css',
+  ],
 
   future: {
     compatibilityVersion: 4,

@@ -139,7 +139,10 @@ function confirmEvaluation() {
       <div class="text-neutral-800 text-sm font-semibold">
         {{ t('evaluation.question.submittedAnswer') }}
       </div>
-      {{ currentItem.submittedAnswer }}
+      <ContentRenderer
+        :content="currentItem.submittedAnswer"
+        class="whitespace-pre-line"
+      />
     </div>
 
     <template #footer>
