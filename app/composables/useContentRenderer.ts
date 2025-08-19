@@ -11,8 +11,6 @@ export function useContentRenderer() {
    */
   function sanitizeHTML(content: string): string {
     if (typeof window === 'undefined') {
-      // Server-side: return content as-is for now
-      // In a real production app, you might want to use isomorphic-dompurify
       return content
     }
 

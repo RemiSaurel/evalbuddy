@@ -141,7 +141,6 @@ function confirmEvaluation() {
       </div>
       <ContentRenderer
         :content="currentItem.submittedAnswer"
-        class="whitespace-pre-line"
       />
     </div>
 

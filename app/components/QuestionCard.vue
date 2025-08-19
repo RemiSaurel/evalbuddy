@@ -52,7 +52,6 @@ const difficultyClass = computed(() =>
 
       <ContentRenderer
         :content="currentQuestion.questionText || ''"
-        class="whitespace-pre-line"
       />
     </div>
 
@@ -64,7 +63,7 @@ const difficultyClass = computed(() =>
 
         <ContentRenderer
           :content="currentQuestion.referenceAnswer"
-          class="whitespace-pre-line max-h-60 overflow-y-auto"
+          class="max-h-60 overflow-y-auto"
         />
       </div>
     </template>
