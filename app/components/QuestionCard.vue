@@ -50,9 +50,9 @@ const difficultyClass = computed(() =>
         </div>
       </div>
 
-      <div>
-        {{ currentQuestion.questionText }}
-      </div>
+      <ContentRenderer
+        :content="currentQuestion.questionText || ''"
+      />
     </div>
 
     <template v-if="currentQuestion.referenceAnswer" #footer>
@@ -61,9 +61,10 @@ const difficultyClass = computed(() =>
           {{ t('evaluation.question.referenceAnswer') }}
         </div>
 
-        <div class="whitespace-pre-line max-h-60 overflow-y-auto">
-          {{ currentQuestion.referenceAnswer }}
-        </div>
+        <ContentRenderer
+          :content="currentQuestion.referenceAnswer"
+          class="max-h-60 overflow-y-auto"
+        />
       </div>
     </template>
   </UCard>
