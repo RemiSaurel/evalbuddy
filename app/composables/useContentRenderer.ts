@@ -68,50 +68,34 @@ export function useContentRenderer() {
 
   /**
    * Render inline LaTeX expressions using KaTeX
-   * Supports both $...$ and $$...$$ syntax
+   * Supports $...$, $$...$$, \(...\), and \[...\] syntax
    */
   function renderLaTeX(content: string): string {
     if (typeof window === 'undefined') {
-      // Server-side: return content as-is
       return content
     }
 
     try {
-      // Replace $$...$$ (display math) first
-      content = content.replace(/\$\$(.*?)\$\$/g, (match, latex) => {
-        try {
+      const patterns = [
+        { regex: /\\\[(.*?)\\\]/gs, displayMode: true }, // \[...\] (display)
+        { regex: /\$\$(.*?)\$\$/gs, displayMode: true }, // $$...$$ (display)
+        { regex: /\\\((.*?)\\\)/g, displayMode: false }, // \(...\) (inline)
+        { regex: /\$([^$]+)\$/g, displayMode: false }, // $...$ (inline)
+      ]
+
+      return patterns.reduce((result, { regex, displayMode }) => {
+        return result.replace(regex, (_, latex) => {
           return katex.renderToString(latex.trim(), {
-            displayMode: true,
+            displayMode,
             throwOnError: false,
             trust: false,
           })
-        }
-        catch (error) {
-          console.warn('LaTeX rendering error (display):', error)
-          return match // Return original if rendering fails
-        }
-      })
-
-      // Replace $...$ (inline math)
-      content = content.replace(/\$([^$]+)\$/g, (match, latex) => {
-        try {
-          return katex.renderToString(latex.trim(), {
-            displayMode: false,
-            throwOnError: false,
-            trust: false,
-          })
-        }
-        catch (error) {
-          console.warn('LaTeX rendering error (inline):', error)
-          return match // Return original if rendering fails
-        }
-      })
-
-      return content
+        })
+      }, content)
     }
     catch (error) {
       console.warn('LaTeX processing error:', error)
-      return content // Return original content if processing fails
+      return content
     }
   }
 
@@ -140,7 +124,7 @@ export function useContentRenderer() {
     if (!content || typeof content !== 'string') {
       return false
     }
-    return /\$\$?[^$]+\$\$?/.test(content)
+    return /\$\$?[^$]+\$\$?|\\\([^)]+\\\)|\\\[[^\]]+\\\]/.test(content)
   }
 
   /**
