@@ -12,7 +12,8 @@ const props = defineProps<{
   evaluatedItems: {
     [itemId: string]: { value?: any, masteryLevel?: string, comment?: string }
   }
-  onNavigate: (index: number) => void
+  onNavigate: (index: number) => void // FIXME change to (groupIndex: number, itemIndexInGroup: number)
+  // FIXME add current group index for handleNavigation ?
 }>()
 
 const { t } = useI18n()

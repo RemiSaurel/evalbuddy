@@ -25,7 +25,7 @@ const {
   evaluatedItems,
   evaluatorComment,
   isSingleEvaluation,
-  currentQuestionIndexInGroup,
+  currentItemIndexInGroup,
   currentAbsoluteQuestionIndex,
   goToItem,
   evaluateAndGoNext,
@@ -146,7 +146,7 @@ const currentQuestionProgress = computed(() => {
           :items="items"
           :current-item-group="currentItemGroup"
           :current-absolute-item-index="currentAbsoluteQuestionIndex"
-          :current-item-index-in-group="currentQuestionIndexInGroup"
+          :current-item-index-in-group="currentItemIndexInGroup"
           :current-index="currentIndex"
           :evaluated-items="evaluatedItems"
           :on-navigate="goToItem"
