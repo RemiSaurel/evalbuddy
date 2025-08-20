@@ -29,9 +29,6 @@ function scrollToActiveItem(itemIndex: number) {
 // Handle navigation and auto-scroll
 function handleNavigation(itemIndexInGroup: number) {
   props.onNavigate(props.currentGroupIndex, itemIndexInGroup)
-  nextTick(() => {
-    scrollToActiveItem(itemIndexInGroup)
-  })
 }
 
 // Watch for current item changes to auto-scroll when navigation happens externally
