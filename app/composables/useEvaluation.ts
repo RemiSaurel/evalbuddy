@@ -9,6 +9,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   const items = ref<EvaluationItem[]>([])
   const questions = ref<Map<number, Question>>(new Map())
   const groupedItems = ref<{ [key: string]: EvaluationItem[] }>({})
+  const groupKeys = ref<string[]>([])
   const currentIndex = ref(0)
   const currentItem = ref<EvaluationItem | null>(null)
   const currentItemGroup = ref<EvaluationItem[]>([])
@@ -54,17 +55,18 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     questions.value = questionMap
     items.value = allItems
     groupedItems.value = grouped
+    groupKeys.value = Object.keys(grouped)
 
     // Determine if single evaluation:
     // 1. Only 1 question (regardless of how many student answers/items)
     // 2. OR every question has exactly 1 evaluation item
-    isSingleEvaluation.value = Object.keys(grouped).length === 1
+    isSingleEvaluation.value = groupKeys.value.length === 1
       || Object.values(grouped).every(group => group.length === 1)
 
     // Set current item
     if (allItems.length > 0) {
       currentItem.value = allItems[0] || null
-      const firstGroupKey = Object.keys(grouped)[0]
+      const firstGroupKey = groupKeys.value[0]
       if (firstGroupKey) {
         currentItemGroup.value = grouped[firstGroupKey] || []
       }
