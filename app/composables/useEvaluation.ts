@@ -11,7 +11,6 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   const groupedItems = ref<{ [key: string]: EvaluationItem[] }>({})
   const groupKeys = ref<string[]>([])
   const currentGroupIndex = ref(0)
-  const currentIndex = ref(0)
   const currentItemIndexInGroup = ref(0)
   const currentItem = ref<EvaluationItem | null>(null)
   const currentItemGroup = ref<EvaluationItem[]>([])
@@ -247,7 +246,8 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     items,
     questions,
     groupedItems,
-    currentIndex,
+    groupKeys,
+    currentGroupIndex,
     currentItem,
     currentItemGroup,
     evaluatedItems,

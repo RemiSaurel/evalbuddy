@@ -19,15 +19,17 @@ const {
   items,
   questions,
   groupedItems,
-  currentIndex,
+  groupKeys,
+  currentGroupIndex,
   currentItem,
   currentItemGroup,
   evaluatedItems,
   evaluatorComment,
   isSingleEvaluation,
   currentItemIndexInGroup,
-  currentAbsoluteQuestionIndex,
   goToItem,
+  goToPreviousItem,
+  goToNextItem,
   evaluateAndGoNext,
 } = useEvaluation(session)
 
@@ -118,9 +120,11 @@ const currentQuestionProgress = computed(() => {
         <QuestionNavigator
           :is-single-evaluation="isSingleEvaluation"
           :grouped-items="groupedItems"
+          :group-keys="groupKeys"
           :items="items"
+          :current-group-index="currentGroupIndex"
+          :current-item-index-in-group="currentItemIndexInGroup"
           :current-item-group="currentItemGroup"
-          :current-index="currentIndex"
           :evaluated-items="evaluatedItems"
           :on-navigate="goToItem"
         />
@@ -145,11 +149,12 @@ const currentQuestionProgress = computed(() => {
           :grouped-items="groupedItems"
           :items="items"
           :current-item-group="currentItemGroup"
-          :current-absolute-item-index="currentAbsoluteQuestionIndex"
+          :current-group-index="currentGroupIndex"
           :current-item-index-in-group="currentItemIndexInGroup"
-          :current-index="currentIndex"
           :evaluated-items="evaluatedItems"
           :on-navigate="goToItem"
+          :go-to-previous="goToPreviousItem"
+          :go-to-next="goToNextItem"
         />
 
         <ContextDataCollapsible
