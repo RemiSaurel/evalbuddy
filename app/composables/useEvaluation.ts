@@ -9,7 +9,9 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   const items = ref<EvaluationItem[]>([])
   const questions = ref<Map<number, Question>>(new Map())
   const groupedItems = ref<{ [key: string]: EvaluationItem[] }>({})
-  const currentIndex = ref(0)
+  const groupKeys = ref<string[]>([])
+  const currentGroupIndex = ref(0)
+  const currentItemIndexInGroup = ref(0)
   const currentItem = ref<EvaluationItem | null>(null)
   const currentItemGroup = ref<EvaluationItem[]>([])
   const evaluatedItems = ref<{ [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } }>({})
@@ -54,20 +56,20 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     questions.value = questionMap
     items.value = allItems
     groupedItems.value = grouped
+    groupKeys.value = Object.keys(grouped)
 
     // Determine if single evaluation:
     // 1. Only 1 question (regardless of how many student answers/items)
     // 2. OR every question has exactly 1 evaluation item
-    isSingleEvaluation.value = Object.keys(grouped).length === 1
+    isSingleEvaluation.value = groupKeys.value.length === 1
       || Object.values(grouped).every(group => group.length === 1)
 
     // Set current item
-    if (allItems.length > 0) {
-      currentItem.value = allItems[0] || null
-      const firstGroupKey = Object.keys(grouped)[0]
-      if (firstGroupKey) {
-        currentItemGroup.value = grouped[firstGroupKey] || []
-      }
+    if (allItems.length > 0 && groupKeys.value.length > 0 && groupKeys.value[0]) {
+      currentGroupIndex.value = 0
+      currentItemGroup.value = grouped[groupKeys.value[0]] || []
+      currentItemIndexInGroup.value = 0
+      currentItem.value = currentItemGroup.value[0] ?? null
     }
 
     // Load existing evaluation results
@@ -96,40 +98,54 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   }
 
   // Navigation functions
-  function goToItem(index: number) {
-    if (index >= 0 && index < items.value.length) {
-      currentIndex.value = index
-      const item = items.value[index]
+  function goToItem(groupIndex: number, itemIndexInGroup: number) {
+    const groupKey = groupKeys.value[groupIndex]
+    if (groupIndex >= 0 && groupIndex < groupKeys.value.length && groupKey // valid group index
+      && itemIndexInGroup >= 0
+      && itemIndexInGroup < (groupedItems.value[groupKey]?.length ?? 0)) { // valid item index
+      currentGroupIndex.value = groupIndex
+      currentItemGroup.value = groupedItems.value[groupKey] || []
+      currentItemIndexInGroup.value = itemIndexInGroup
+      currentItem.value = currentItemGroup.value[itemIndexInGroup] ?? null
+
+      // Load existing evaluation comment for this item (don't create new state)
+      const item = currentItem.value
       if (item) {
-        currentItem.value = item
-
-        // Update current item group
-        const questionId = item.questionID
-        if (questionId) {
-          currentItemGroup.value = groupedItems.value[questionId.toString()] || []
-        }
-
-        // Load existing evaluation comment for this item (don't create new state)
         const existing = evaluatedItems.value[item.id.toString()]
-        if (existing && existing.comment) {
-          evaluatorComment.value = existing.comment
-        }
-        else {
-          evaluatorComment.value = ''
-        }
+        evaluatorComment.value = existing?.comment || ''
       }
     }
   }
 
   function goToNextItem() {
-    if (currentIndex.value < items.value.length - 1) {
-      goToItem(currentIndex.value + 1)
+    const groupIndex = currentGroupIndex.value
+    const itemIndexInGroup = currentItemIndexInGroup.value
+    const group = groupKeys.value[groupIndex]
+      ? (groupedItems.value[groupKeys.value[groupIndex]] ?? [])
+      : []
+
+    if (itemIndexInGroup < group.length - 1) {
+      goToItem(groupIndex, itemIndexInGroup + 1)
+    }
+    else if (groupIndex < groupKeys.value.length - 1) {
+      goToItem(groupIndex + 1, 0)
     }
   }
 
   function goToPreviousItem() {
-    if (currentIndex.value > 0) {
-      goToItem(currentIndex.value - 1)
+    const groupIndex = currentGroupIndex.value
+    const itemIndexInGroup = currentItemIndexInGroup.value
+
+    if (itemIndexInGroup > 0) {
+      goToItem(groupIndex, itemIndexInGroup - 1)
+    }
+    else if (groupIndex > 0) {
+      const previousGroupKey = groupKeys.value[groupIndex - 1]
+      const previousGroup = previousGroupKey
+        ? groupedItems.value[previousGroupKey] || []
+        : []
+
+      goToItem(groupIndex - 1, previousGroup.length - 1)
     }
   }
 
@@ -200,33 +216,48 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     return evaluation && (evaluation.value !== undefined || evaluation.masteryLevel !== undefined)
   })
 
-  const currentQuestionIndexInGroup = computed(() => {
-    if (!currentItem.value || !currentItemGroup.value.length)
-      return 0
-    return currentItemGroup.value.findIndex(item => item.id === currentItem.value?.id)
+  const currentAbsoluteQuestionIndex = computed(() => { // index in all groupedItems values
+    let previousItemsCount = 0
+    // Sum of all previous groups' items
+    for (let i = 0; i < currentGroupIndex.value; i++) {
+      const groupKey = groupKeys.value[i]
+      previousItemsCount += groupKey
+        ? (groupedItems.value[groupKey]?.length ?? 0)
+        : 0
+    }
+    return previousItemsCount + currentItemIndexInGroup.value
   })
 
-  const currentAbsoluteQuestionIndex = computed(() => currentIndex.value)
+  const hasNextItem = computed(() => {
+    const groupIndex = currentGroupIndex.value
+    const itemIndexInGroup = currentItemIndexInGroup.value
+    const groupKey = groupKeys.value[groupIndex]
+    const group = groupKey ? groupedItems.value[groupKey] || [] : []
 
-  const hasNextItem = computed(() => currentIndex.value < items.value.length - 1)
-  const hasPreviousItem = computed(() => currentIndex.value > 0)
+    return (itemIndexInGroup < group.length - 1) // has next item in current group
+      || (groupIndex < groupKeys.value.length - 1) // has next group
+  })
+  const hasPreviousItem = computed(() => {
+    return currentItemIndexInGroup.value > 0 || currentGroupIndex.value > 0
+  })
 
   return {
     // State
     items,
     questions,
     groupedItems,
-    currentIndex,
+    groupKeys,
+    currentGroupIndex,
     currentItem,
     currentItemGroup,
     evaluatedItems,
     evaluatorComment,
     isSingleEvaluation,
+    currentItemIndexInGroup,
 
     // Computed
     progress,
     isCurrentItemEvaluated,
-    currentQuestionIndexInGroup,
     currentAbsoluteQuestionIndex,
     hasNextItem,
     hasPreviousItem,

@@ -6,13 +6,14 @@ const props = defineProps<{
   groupedItems: { [key: string]: readonly EvaluationItem[] }
   items: readonly EvaluationItem[]
   currentItemGroup: readonly EvaluationItem[]
-  currentAbsoluteItemIndex: number
+  currentGroupIndex: number
   currentItemIndexInGroup: number
-  currentIndex: number
   evaluatedItems: {
     [itemId: string]: { value?: any, masteryLevel?: string, comment?: string }
   }
-  onNavigate: (index: number) => void
+  onNavigate: (groupIndex: number, itemIndexInGroup: number) => void
+  goToPrevious: () => void
+  goToNext: () => void
 }>()
 
 const { t } = useI18n()
@@ -26,17 +27,12 @@ function scrollToActiveItem(itemIndex: number) {
 }
 
 // Handle navigation and auto-scroll
-function handleNavigation(itemIndex: number) {
-  props.onNavigate(itemIndex)
-  nextTick(() => {
-    // Calculate the index within the current group for scrolling
-    const indexInGroup = itemIndex - (props.currentAbsoluteItemIndex - props.currentItemIndexInGroup)
-    scrollToActiveItem(indexInGroup)
-  })
+function handleNavigation(itemIndexInGroup: number) {
+  props.onNavigate(props.currentGroupIndex, itemIndexInGroup)
 }
 
-// Watch for currentIndex changes to auto-scroll when navigation happens externally
-watch(() => props.currentIndex, (_newIndex) => {
+// Watch for current item changes to auto-scroll when navigation happens externally
+watch(() => [props.currentGroupIndex, props.currentItemIndexInGroup], () => {
   nextTick(() => {
     // For external navigation changes, use the current item index in group
     scrollToActiveItem(props.currentItemIndexInGroup)
@@ -57,16 +53,8 @@ onMounted(() => {
 
 // Shortcuts with arrow keys to navigate
 defineShortcuts({
-  ArrowLeft: () => {
-    if (props.currentIndex > 0) {
-      handleNavigation(props.currentIndex - 1)
-    }
-  },
-  ArrowRight: () => {
-    if (props.currentIndex < props.items.length - 1) {
-      handleNavigation(props.currentIndex + 1)
-    }
-  },
+  ArrowLeft: () => props.goToPrevious(),
+  ArrowRight: () => props.goToNext(),
 })
 </script>
 
@@ -92,10 +80,7 @@ defineShortcuts({
           :item-index="itemIndex + 1"
           :is-current-item="itemIndex === currentItemIndexInGroup"
           :is-item-evaluated="isItemEvaluated(item) ?? false"
-          @click="() => handleNavigation(
-            currentAbsoluteItemIndex - currentItemIndexInGroup // first question in group
-              + itemIndex,
-          )"
+          @click="() => handleNavigation(itemIndex)"
         />
       </div>
     </div>

@@ -4,13 +4,15 @@ import type { EvaluationItem } from '~/models'
 const props = defineProps<{
   isSingleEvaluation: boolean
   groupedItems: { [key: string]: readonly EvaluationItem[] }
+  groupKeys: readonly string[]
   items: readonly EvaluationItem[]
   currentItemGroup: readonly EvaluationItem[]
-  currentIndex: number
+  currentItemIndexInGroup: number
+  currentGroupIndex: number
   evaluatedItems: {
     [itemId: string]: { value?: any, masteryLevel?: string, comment?: string }
   }
-  onNavigate: (index: number) => void
+  onNavigate: (groupIndex: number, itemIndexInGroup: number) => void
 }>()
 
 const { t } = useI18n()
@@ -21,33 +23,37 @@ const questionScrollContainer = ref<HTMLElement>()
 const questionGroupScrollContainer = ref<HTMLElement>()
 
 // Handle navigation and auto-scroll
-function handleNavigation(questionIndex: number, groupIndex?: number) {
-  props.onNavigate(questionIndex)
+function handleSingleNavigation(itemIndex: number) {
+  props.onNavigate(0, itemIndex)
   nextTick(() => {
     scrollToActiveQuestion(
-      props.isSingleEvaluation,
+      true, // single navigation
       questionScrollContainer,
       questionGroupScrollContainer,
-      questionIndex,
+      itemIndex,
       props.currentItemGroup,
       props.groupedItems,
     )
-
-    // scroll to the active question group for grouped evaluations
-    if (!props.isSingleEvaluation && groupIndex !== undefined) {
-      scrollToItem(questionGroupScrollContainer, groupIndex)
-    }
+  })
+}
+function handleGroupNavigation(groupIndex: number) {
+  props.onNavigate(groupIndex, 0)
+  nextTick(() => {
+    scrollToActiveQuestion(
+      false,
+      questionScrollContainer,
+      questionGroupScrollContainer,
+      groupIndex,
+      props.currentItemGroup,
+      props.groupedItems,
+    )
+    scrollToItem(questionGroupScrollContainer, groupIndex)
   })
 }
 
-// Watch for currentIndex changes to auto-scroll when navigation happens externally
-watch(() => props.currentIndex, (newIndex) => {
-  nextTick(() => {
-    scrollToItem(
-      props.isSingleEvaluation ? questionScrollContainer : questionGroupScrollContainer,
-      props.isSingleEvaluation ? newIndex : getGroupIndexForQuestion(newIndex),
-    )
-  })
+// Watch for current item changes to auto-scroll when navigation happens externally
+watch(() => [props.currentGroupIndex, props.currentItemIndexInGroup], () => {
+  scrollToCurrentQuestion()
 }, { immediate: false })
 
 // Check if a question is evaluated by looking for the specific item ID
@@ -57,40 +63,17 @@ function isQuestionEvaluated(question: EvaluationItem) {
   return evaluated && (evaluated.value !== undefined || evaluated.masteryLevel !== undefined)
 }
 
-// Helper function to get group index for a given question index
-function getGroupIndexForQuestion(_questionIndex: number) {
-  const currentGroup = props.currentItemGroup[0]?.questionID
-  if (currentGroup) {
-    const groupNames = Object.keys(props.groupedItems)
-    return groupNames.indexOf(currentGroup.toString())
-  }
-  return 0
-}
-
-function getFirstItemGroupAbsoluteIndex(groupName: string) {
-  const questionGroupKeys
-  = computed(() => Object.keys(props.groupedItems))
-  let index = 0
-
-  for (let groupIndex = 0; groupIndex < questionGroupKeys.value.length; groupIndex++) {
-    const groupKey = questionGroupKeys.value[groupIndex]
-    if (groupKey === groupName) {
-      return { index, groupIndex }
-    }
-    index += groupKey ? props.groupedItems[groupKey]?.length || 0 : 0
-  }
-  return { index: -1, groupIndex: -1 } // not found
-}
-
 // Auto-scroll to current question on mount
-onMounted(() => {
+onMounted(() => scrollToCurrentQuestion())
+
+function scrollToCurrentQuestion() {
   nextTick(() => {
     scrollToItem(
       props.isSingleEvaluation ? questionScrollContainer : questionGroupScrollContainer,
-      props.isSingleEvaluation ? props.currentIndex : getGroupIndexForQuestion(props.currentIndex),
+      props.isSingleEvaluation ? props.currentItemIndexInGroup : props.currentGroupIndex,
     )
   })
-})
+}
 </script>
 
 <template>
@@ -98,7 +81,9 @@ onMounted(() => {
     <!-- Legend -->
     <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900">
       <h3>
-        {{ isSingleEvaluation ? t('evaluation.navigation.overviewAnswers') : t('evaluation.navigation.overviewQuestions') }}
+        {{ isSingleEvaluation
+          ? t('evaluation.navigation.overviewAnswers')
+          : t('evaluation.navigation.overviewQuestions') }}
       </h3>
 
       <NavigatorHelp />
@@ -112,31 +97,26 @@ onMounted(() => {
         class="flex overflow-auto gap-2 p-1"
       >
         <NavigatorItem
-          v-for="(question, questionIndex) in items"
+          v-for="(question, itemIndex) in items"
           :key="question.id"
           button-size="sm"
-          :item-index="`${questionIndex + 1}`"
-          :is-current-item="questionIndex === currentIndex"
+          :item-index="`${itemIndex + 1}`"
+          :is-current-item="itemIndex === currentItemIndexInGroup"
           :is-item-evaluated="isQuestionEvaluated(question) ?? false"
-          @click="() => handleNavigation(questionIndex)"
+          @click="() => handleSingleNavigation(itemIndex)"
         />
       </div>
 
       <!-- Group navigation otherwise -->
       <div v-else ref="questionGroupScrollContainer" class="flex overflow-auto gap-2 p-1">
         <NavigatorItem
-          v-for="(group, groupName) in groupedItems"
-          :key="groupName"
+          v-for="(groupKey, groupIndex) in groupKeys"
+          :key="groupKey"
           button-size="sm"
-          :item-index="`Q${groupName}`"
-          :is-current-item="groupName === currentItemGroup[0]?.questionID.toString()"
-          :is-item-evaluated="group.every(isQuestionEvaluated)"
-          @click="() => {
-            const { index, groupIndex }
-              = getFirstItemGroupAbsoluteIndex(groupName as string)
-
-            handleNavigation(index, groupIndex)
-          }"
+          :item-index="`Q${groupKey}`"
+          :is-current-item="groupIndex === currentGroupIndex"
+          :is-item-evaluated="groupedItems[groupKey]?.every(isQuestionEvaluated) ?? false"
+          @click="() => handleGroupNavigation(groupIndex)"
         />
       </div>
     </div>
