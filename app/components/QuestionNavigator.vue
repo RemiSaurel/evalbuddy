@@ -51,11 +51,6 @@ function handleGroupNavigation(groupIndex: number) {
   })
 }
 
-// Watch for current item changes to auto-scroll when navigation happens externally
-watch(() => [props.currentGroupIndex, props.currentItemIndexInGroup], () => {
-  scrollToCurrentQuestion()
-}, { immediate: false })
-
 // Check if a question is evaluated by looking for the specific item ID
 function isQuestionEvaluated(question: EvaluationItem) {
   // Check only for this specific item ID
