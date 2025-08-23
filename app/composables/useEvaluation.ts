@@ -64,15 +64,34 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     isSingleEvaluation.value = groupKeys.value.length === 1
       || Object.values(grouped).every(group => group.length === 1)
 
-    // Set current item
+    // Set current item to first unevaluated item or first item if all are evaluated
     if (allItems.length > 0 && groupKeys.value.length > 0 && groupKeys.value[0]) {
-      currentGroupIndex.value = 0
-      currentItemGroup.value = grouped[groupKeys.value[0]] || []
-      currentItemIndexInGroup.value = 0
-      currentItem.value = currentItemGroup.value[0] ?? null
+      // Load existing evaluation results first
+      loadExistingResults(session)
+
+      // Find the first unevaluated item
+      const firstUnevaluated = findFirstUnevaluatedItem()
+
+      if (firstUnevaluated) {
+        // Navigate to first unevaluated item
+        currentGroupIndex.value = firstUnevaluated.groupIndex
+        currentItemIndexInGroup.value = firstUnevaluated.itemIndexInGroup
+      }
+      else {
+        // All items are evaluated, default to first item
+        currentGroupIndex.value = 0
+        currentItemIndexInGroup.value = 0
+      }
+
+      // Set current item group and current item based on the selected indices
+      const currentGroupKey = groupKeys.value[currentGroupIndex.value]
+      if (currentGroupKey) {
+        currentItemGroup.value = grouped[currentGroupKey] || []
+        currentItem.value = currentItemGroup.value[currentItemIndexInGroup.value] ?? null
+      }
     }
 
-    // Load existing evaluation results
+    // Load existing evaluation results (called again to ensure state is consistent)
     loadExistingResults(session)
   }
 
@@ -95,6 +114,34 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
 
       evaluatedItems.value = evaluated
     }
+  }
+
+  // Helper function to find the first unevaluated item
+  function findFirstUnevaluatedItem(): { groupIndex: number, itemIndexInGroup: number } | null {
+    // Iterate through all groups and items to find the first unevaluated one
+    for (let groupIndex = 0; groupIndex < groupKeys.value.length; groupIndex++) {
+      const groupKey = groupKeys.value[groupIndex]
+      if (!groupKey)
+        continue
+
+      const group = groupedItems.value[groupKey] || []
+
+      for (let itemIndexInGroup = 0; itemIndexInGroup < group.length; itemIndexInGroup++) {
+        const item = group[itemIndexInGroup]
+        if (!item)
+          continue
+
+        const evaluation = evaluatedItems.value[item.id.toString()]
+
+        // Check if item is not evaluated (no value or masteryLevel)
+        if (!evaluation || (evaluation.value === undefined && evaluation.masteryLevel === undefined)) {
+          return { groupIndex, itemIndexInGroup }
+        }
+      }
+    }
+
+    // If all items are evaluated, return null (will fall back to first item)
+    return null
   }
 
   // Navigation functions
