@@ -1,8 +1,8 @@
 import type { Locale } from 'vue-i18n'
-import { useLocalStorage } from '@vueuse/core'
 
 interface LanguageType {
   label: string
+  emoji: string
   value: Locale
 }
 
@@ -10,13 +10,16 @@ export function useLanguage() {
   const { setLocale } = useI18n()
 
   const languages: LanguageType[] = [
-    { label: 'FR', value: 'fr' },
-    { label: 'EN', value: 'en' },
+    { label: 'Français', emoji: '🇫🇷', value: 'fr' },
+    { label: 'English', emoji: '🇬🇧', value: 'en' },
   ]
 
-  const languageValue = useLocalStorage<Locale>('selectedLanguage', 'fr')
+  const languageValue = useState<Locale>('languageValue', () => {
+    return (localStorage.getItem('selectedLanguage') as Locale) || 'fr'
+  })
 
   watch(languageValue, (newValue) => {
+    localStorage.setItem('selectedLanguage', newValue)
     setLocale(newValue)
   }, { immediate: true })
 
