@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const { t } = useI18n()
-const { languages, languageValue } = useLanguage()
 </script>
 
 <template>
@@ -35,12 +34,7 @@ const { languages, languageValue } = useLanguage()
         </div>
 
         <!-- Language Selector -->
-        <USelect
-          v-model="languageValue"
-          :items="languages"
-          color="neutral"
-          size="sm"
-        />
+        <LocaleSelect />
       </div>
     </nav>
     <slot />
