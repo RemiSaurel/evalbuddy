@@ -16,6 +16,8 @@ const {
 // State
 const selectedConfig = ref<EvaluationConfig | null>(null)
 const isConfigModalOpen = ref(false)
+const isViewModalOpen = ref(false)
+const configToView = ref<EvaluationConfig | null>(null)
 const isDeleteModalOpen = ref(false)
 const configToDelete = ref<EvaluationConfig | null>(null)
 const searchQuery = ref('')
@@ -76,6 +78,11 @@ function handleConfigModalClose() {
   isConfigModalOpen.value = false
 }
 
+function openViewModal(config: EvaluationConfig) {
+  configToView.value = config
+  isViewModalOpen.value = true
+}
+
 function confirmDelete(config: EvaluationConfig) {
   configToDelete.value = config
   isDeleteModalOpen.value = true
@@ -128,6 +135,11 @@ function getConfigActions(config: EvaluationConfig) {
         label: t('configuration.actions.edit'),
         icon: 'i-lucide:edit',
         onSelect: () => openEditModal(serializableConfig),
+      },
+      {
+        label: t('configuration.actions.view'),
+        icon: 'i-lucide:eye',
+        onSelect: () => openViewModal(serializableConfig),
       },
       {
         label: t('configuration.actions.clone'),
@@ -285,6 +297,12 @@ async function handleImport() {
       v-model:open="isConfigModalOpen"
       @save="handleConfigSave"
       @update:open="value => { if (!value) handleConfigModalClose() }"
+    />
+
+    <!-- View Configuration Modal -->
+    <EvaluationConfigViewModal
+      v-model:open="isViewModalOpen"
+      :config="configToView"
     />
 
     <!-- Delete Confirmation Modal -->

@@ -81,11 +81,15 @@
     },
     "actions": {
       "edit": "Edit",
+      "view": "View",
       "clone": "Clone",
       "delete": "Delete",
       "cancel": "Cancel",
       "export": "Export",
       "import": "Import"
+    },
+    "viewModal": {
+      "title": "View Configuration"
     },
     "deleteModal": {
       "title": "Delete Configuration",
