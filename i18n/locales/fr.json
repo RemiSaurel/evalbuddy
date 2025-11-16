@@ -81,11 +81,15 @@
     },
     "actions": {
       "edit": "Modifier",
+      "view": "Voir",
       "clone": "Cloner",
       "delete": "Supprimer",
       "cancel": "Annuler",
       "export": "Exporter",
       "import": "Importer"
+    },
+    "viewModal": {
+      "title": "Consulter la configuration"
     },
     "deleteModal": {
       "title": "Supprimer la configuration",
