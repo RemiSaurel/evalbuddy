@@ -34,7 +34,7 @@ function close() {
 <template>
   <UModal v-model:open="isOpen" title="View Configuration Modal" description="View Configuration Modal">
     <template #content>
-      <UCard v-if="config">
+      <UCard v-if="config" class="max-h-[90vh] overflow-auto">
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-lg font-semibold">
@@ -246,14 +246,6 @@ function close() {
             </div>
           </div>
         </div>
-
-        <template #footer>
-          <div class="flex justify-end">
-            <UButton color="neutral" variant="ghost" @click="close">
-              {{ t('configuration.actions.cancel') }}
-            </UButton>
-          </div>
-        </template>
       </UCard>
     </template>
   </UModal>
