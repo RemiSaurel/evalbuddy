@@ -21,6 +21,7 @@ const importErrors = ref<string[]>([])
 const isImporting = ref(false)
 const selectedConfigId = ref<string>('default')
 const sessionName = ref<string>('')
+const evaluatorName = ref<string>('')
 
 // Delete functionality
 const isDeleteModalOpen = ref(false)
@@ -30,6 +31,7 @@ const sessionToDelete = ref<EvaluationSession | null>(null)
 const isEditModalOpen = ref(false)
 const sessionToEdit = ref<EvaluationSession | null>(null)
 const editSessionName = ref<string>('')
+const editEvaluatorName = ref<string>('')
 
 // Load sessions and configs on mount
 onMounted(async () => {
@@ -93,6 +95,7 @@ function confirmDelete(session: EvaluationSession) {
 function openEditModal(session: EvaluationSession) {
   sessionToEdit.value = session
   editSessionName.value = session.name
+  editEvaluatorName.value = session.evaluatorName || ''
   isEditModalOpen.value = true
 }
 
@@ -104,11 +107,13 @@ async function updateSessionName() {
   try {
     await evaluationStorage.updateSession(sessionToEdit.value.id, {
       name: editSessionName.value.trim(),
+      evaluatorName: editEvaluatorName.value.trim() || undefined,
     })
     await loadSessions()
     isEditModalOpen.value = false
     sessionToEdit.value = null
     editSessionName.value = ''
+    editEvaluatorName.value = ''
   }
   catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to update session'
@@ -146,6 +151,7 @@ function openCreationEvaluation() {
   importErrors.value = []
   selectedConfigId.value = 'default'
   sessionName.value = ''
+  evaluatorName.value = ''
   // Force reload configs when opening modal to ensure latest data
   loadConfigs()
 }
@@ -191,11 +197,13 @@ async function createEvaluation() {
 
     // Create new session with imported dataset and selected configuration
     const finalSessionName = sessionName.value.trim() || `Imported ${new Date().toLocaleDateString()}`
+    const finalEvaluatorName = evaluatorName.value.trim() || undefined
     const session = await evaluationStorage.createSessionFromDataset(
       dataset,
       finalSessionName,
       undefined, // description
       serializableConfig,
+      finalEvaluatorName,
     )
 
     await loadSessions()
@@ -369,6 +377,17 @@ function getDropdownItems(session: EvaluationSession) {
               />
             </div>
 
+            <!-- Evaluator Name Input -->
+            <div>
+              <label class="block text-sm font-medium mb-2">
+                {{ $t('evaluation.creationModal.evaluatorName') }}
+              </label>
+              <UInput
+                v-model="evaluatorName"
+                :placeholder="$t('evaluation.creationModal.evaluatorNamePlaceholder')"
+              />
+            </div>
+
             <!-- Configuration Selection -->
             <div>
               <label class="block text-sm font-medium mb-2">
@@ -461,6 +480,15 @@ function getDropdownItems(session: EvaluationSession) {
               <UInput
                 v-model="editSessionName"
                 :placeholder="$t('evaluation.editModal.sessionNamePlaceholder')"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">
+                {{ $t('evaluation.editModal.evaluatorName') }}
+              </label>
+              <UInput
+                v-model="editEvaluatorName"
+                :placeholder="$t('evaluation.editModal.evaluatorNamePlaceholder')"
               />
             </div>
           </div>

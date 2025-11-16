@@ -114,7 +114,7 @@ class EvaluationStorage {
     })
   }
 
-  async updateSession(sessionId: string, updates: Partial<Pick<EvaluationSession, 'name' | 'description'>>): Promise<void> {
+  async updateSession(sessionId: string, updates: Partial<Pick<EvaluationSession, 'name' | 'description' | 'evaluatorName'>>): Promise<void> {
     const session = await this.getSession(sessionId)
 
     if (!session) {
@@ -142,7 +142,7 @@ class EvaluationStorage {
     })
   }
 
-  async createSessionFromDataset(dataset: DatasetStructure, name: string, description?: string, config?: EvaluationConfig): Promise<EvaluationSession> {
+  async createSessionFromDataset(dataset: DatasetStructure, name: string, description?: string, config?: EvaluationConfig, evaluatorName?: string): Promise<EvaluationSession> {
     // If no config provided, create a default mastery configuration
     const defaultConfig: EvaluationConfig = config || {
       id: crypto.randomUUID(),
@@ -166,6 +166,7 @@ class EvaluationStorage {
       config: defaultConfig,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      evaluatorName,
       isCompleted: false,
     }
 

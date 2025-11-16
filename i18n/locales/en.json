@@ -183,13 +183,17 @@
       "selectFile": "Select a file",
       "sessionName": "Session Name",
       "sessionNamePlaceholder": "Enter session name",
+      "evaluatorName": "Evaluator Name",
+      "evaluatorNamePlaceholder": "Enter your name (optional)",
       "importErrors": "Import Errors",
       "importInstructions": "For import format and documentation, visit:"
     },
     "editModal": {
       "title": "Edit Evaluation Session",
       "sessionName": "Session Name",
-      "sessionNamePlaceholder": "Enter session name"
+      "sessionNamePlaceholder": "Enter session name",
+      "evaluatorName": "Evaluator Name",
+      "evaluatorNamePlaceholder": "Enter your name (optional)"
     },
     "deleteModal": {
       "title": "Delete Evaluation Session",
