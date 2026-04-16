@@ -373,6 +373,7 @@ function getDropdownItems(session: EvaluationSession) {
               </label>
               <UInput
                 v-model="sessionName"
+                class="w-full"
                 :placeholder="$t('evaluation.creationModal.sessionNamePlaceholder')"
               />
             </div>
@@ -384,6 +385,7 @@ function getDropdownItems(session: EvaluationSession) {
               </label>
               <UInput
                 v-model="evaluatorName"
+                class="w-full"
                 :placeholder="$t('evaluation.creationModal.evaluatorNamePlaceholder')"
               />
             </div>
@@ -395,6 +397,7 @@ function getDropdownItems(session: EvaluationSession) {
               </label>
               <USelect
                 v-model="selectedConfigId"
+                class="w-full"
                 :items="configItems"
                 :placeholder="$t('configuration.selectForEvaluation')"
               />
@@ -428,17 +431,45 @@ function getDropdownItems(session: EvaluationSession) {
               </ul>
             </div>
 
-            <div class="text-sm text-neutral-600">
-              {{ $t('evaluation.creationModal.importInstructions') }}
-              <a
-                href="https://github.com/RemiSaurel/evalbuddy"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-blue-600 hover:text-blue-800 underline"
-              >
-                EvalBuddy Repository
-              </a>
-            </div>
+            <!-- File Format Collapsible -->
+            <UCollapsible>
+              <UButton
+                trailing-icon="i-lucide-chevron-down"
+                size="sm"
+                class="group w-full justify-between"
+                color="neutral"
+                variant="soft"
+                :label="$t('evaluation.creationModal.viewFileFormat')"
+                :ui="{
+                  trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+                }"
+              />
+              <template #content>
+                <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto"><code>{
+  "context": {
+    "course": "Geography Assessment",
+    "level": "Intermediate"
+  },
+  "questionList": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "referenceAnswer": "Paris",
+      "difficulty": "easy",
+      "context": { "topic": "European Geography" }
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "questionID": 1,
+      "submittedAnswer": "Paris is the capital of France.",
+      "context": { "studentName": "Alice" }
+    }
+  ]
+}</code></pre>
+              </template>
+            </UCollapsible>
           </div>
 
           <template #footer>
