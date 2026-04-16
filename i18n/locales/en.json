@@ -186,7 +186,8 @@
       "evaluatorName": "Evaluator Name",
       "evaluatorNamePlaceholder": "Enter your name (optional)",
       "importErrors": "Import Errors",
-      "importInstructions": "For import format and documentation, visit:"
+      "importInstructions": "For import format and documentation, visit:",
+      "viewFileFormat": "View expected file format"
     },
     "editModal": {
       "title": "Edit Evaluation Session",

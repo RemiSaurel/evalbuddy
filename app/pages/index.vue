@@ -373,6 +373,7 @@ function getDropdownItems(session: EvaluationSession) {
               </label>
               <UInput
                 v-model="sessionName"
+                class="w-full"
                 :placeholder="$t('evaluation.creationModal.sessionNamePlaceholder')"
               />
             </div>
@@ -384,6 +385,7 @@ function getDropdownItems(session: EvaluationSession) {
               </label>
               <UInput
                 v-model="evaluatorName"
+                class="w-full"
                 :placeholder="$t('evaluation.creationModal.evaluatorNamePlaceholder')"
               />
             </div>
@@ -395,6 +397,7 @@ function getDropdownItems(session: EvaluationSession) {
               </label>
               <USelect
                 v-model="selectedConfigId"
+                class="w-full"
                 :items="configItems"
                 :placeholder="$t('configuration.selectForEvaluation')"
               />
@@ -428,17 +431,61 @@ function getDropdownItems(session: EvaluationSession) {
               </ul>
             </div>
 
-            <div class="text-sm text-neutral-600">
-              {{ $t('evaluation.creationModal.importInstructions') }}
-              <a
-                href="https://github.com/RemiSaurel/evalbuddy"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-blue-600 hover:text-blue-800 underline"
-              >
-                EvalBuddy Repository
-              </a>
-            </div>
+            <!-- File Format Collapsible -->
+            <UCollapsible>
+              <UButton
+                trailing-icon="i-lucide-chevron-down"
+                size="sm"
+                class="group w-full justify-between"
+                color="neutral"
+                variant="soft"
+                :label="$t('evaluation.creationModal.viewFileFormat')"
+                :ui="{
+                  trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+                }"
+              />
+              <template #content>
+                <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto"><code>{
+  // optional — dataset-level metadata (string or string[] values)
+  "context": {
+    "course": "Geography Assessment",
+    "level": "Intermediate"
+  },
+
+  // required — list of questions
+  "questionList": [
+    {
+      "id": 1,                          // required (number)
+      "question": "What is the capital of France?", // required
+      "referenceAnswer": "Paris",       // optional
+      "difficulty": "easy",             // optional — "easy" | "medium" | "hard"
+      "context": { "topic": "European Geography" }  // optional
+    }
+  ],
+
+  // required — list of student submissions
+  "items": [
+    {
+      "id": 1,                          // required (number)
+      "questionID": 1,                  // required — references questionList id
+      "submittedAnswer": "Paris is the capital of France.", // required
+      "context": { "studentName": "Alice" }  // optional
+    }
+  ]
+}</code></pre>
+                <div class="mt-2 text-xs text-neutral-500">
+                  {{ $t('evaluation.creationModal.importInstructions') }}
+                  <a
+                    href="https://github.com/RemiSaurel/evalbuddy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    EvalBuddy Repository
+                  </a>
+                </div>
+              </template>
+            </UCollapsible>
           </div>
 
           <template #footer>
