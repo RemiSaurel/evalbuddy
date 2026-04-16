@@ -446,28 +446,44 @@ function getDropdownItems(session: EvaluationSession) {
               />
               <template #content>
                 <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto"><code>{
+  // optional — dataset-level metadata (string or string[] values)
   "context": {
     "course": "Geography Assessment",
     "level": "Intermediate"
   },
+
+  // required — list of questions
   "questionList": [
     {
-      "id": 1,
-      "question": "What is the capital of France?",
-      "referenceAnswer": "Paris",
-      "difficulty": "easy",
-      "context": { "topic": "European Geography" }
+      "id": 1,                          // required (number)
+      "question": "What is the capital of France?", // required
+      "referenceAnswer": "Paris",       // optional
+      "difficulty": "easy",             // optional — "easy" | "medium" | "hard"
+      "context": { "topic": "European Geography" }  // optional
     }
   ],
+
+  // required — list of student submissions
   "items": [
     {
-      "id": 1,
-      "questionID": 1,
-      "submittedAnswer": "Paris is the capital of France.",
-      "context": { "studentName": "Alice" }
+      "id": 1,                          // required (number)
+      "questionID": 1,                  // required — references questionList id
+      "submittedAnswer": "Paris is the capital of France.", // required
+      "context": { "studentName": "Alice" }  // optional
     }
   ]
 }</code></pre>
+                <div class="mt-2 text-xs text-neutral-500">
+                  {{ $t('evaluation.creationModal.importInstructions') }}
+                  <a
+                    href="https://github.com/RemiSaurel/evalbuddy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    EvalBuddy Repository
+                  </a>
+                </div>
               </template>
             </UCollapsible>
           </div>
