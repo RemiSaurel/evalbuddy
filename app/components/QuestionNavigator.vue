@@ -108,7 +108,7 @@ function scrollToCurrentQuestion() {
           v-for="(groupKey, groupIndex) in groupKeys"
           :key="groupKey"
           button-size="sm"
-          :item-index="`Q${groupKey}`"
+          :item-index="`Q${groupIndex + 1}`"
           :is-current-item="groupIndex === currentGroupIndex"
           :is-item-evaluated="groupedItems[groupKey]?.every(isQuestionEvaluated) ?? false"
           @click="() => handleGroupNavigation(groupIndex)"
