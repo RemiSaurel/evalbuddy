@@ -111,6 +111,11 @@
   },
   "evaluation": {
     "passingScore": "Passing Score",
+    "shortcuts": {
+      "selectOption": "select",
+      "confirm": "confirm",
+      "adjustScore": "adjust score"
+    },
     "actions": {
       "create": "Create Evaluation",
       "import": "Import",
