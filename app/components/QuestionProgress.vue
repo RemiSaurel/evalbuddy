@@ -7,7 +7,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col flex-1 gap-1">
+  <div class="flex flex-col gap-1">
     <div class="flex justify-between items-center">
       <div class="text-sm text-neutral-600">
         {{ label }}

@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxtjs/i18n',
     '@vueuse/nuxt',
+    'motion-v/nuxt',
   ],
 
   css: [

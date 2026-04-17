@@ -4,7 +4,7 @@ const { t } = useI18n()
 
 <template>
   <div class="flex flex-col h-dvh">
-    <!-- Top nav bar (same as evaluation layout) -->
+    <!-- Top nav bar -->
     <nav class="flex shrink-0 gap-4 items-center py-3 px-4 justify-between border-b border-neutral-200 bg-white">
       <span class="text-2xl font-bold">
         <NuxtLink to="/">🧑‍🏫 EvalBuddy</NuxtLink>
@@ -37,10 +37,6 @@ const { t } = useI18n()
       </div>
     </nav>
 
-    <div class="flex-1 overflow-y-auto">
-      <div class="max-w-6xl mx-auto px-4 py-4">
-        <slot />
-      </div>
-    </div>
+    <slot />
   </div>
 </template>

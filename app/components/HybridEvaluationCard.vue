@@ -5,9 +5,7 @@ interface Props {
   currentItem: EvaluationItem & { questionText?: string, referenceAnswer?: string }
   evaluatorComment: string
   evaluatedItems: { [itemId: string]: { value?: any, masteryLevel?: any, comment?: string } }
-
-  // New generic evaluation
-  evaluationConfig?: EvaluationConfig | any // Allow any to handle readonly versions
+  evaluationConfig?: EvaluationConfig | any
   evaluateGenericAndGoNext?: (value: any, comment?: string) => void
   saveEvaluation?: (value: any, comment?: string) => void
 }
@@ -21,26 +19,24 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { getEvaluationOptions, isScoreType, getScoreSettings } = useEvaluationConfig()
 
-// State for selected evaluation value
 const selectedValue = ref<any>(null)
 const localComment = ref('')
 
-// Watch for item changes to reset selection and load existing evaluation
+// Track item ID for motion transitions
+const itemKey = computed(() => props.currentItem?.id ?? '')
+
 watch(() => props.currentItem, () => {
   loadEvaluationForCurrentItem()
 }, { immediate: true })
 
-// Watch for evaluatedItems changes to update the selection
 watch(() => props.evaluatedItems, () => {
   loadEvaluationForCurrentItem()
 }, { deep: true })
 
-// Watch for comment prop changes
 watch(() => props.evaluatorComment, (newComment) => {
   localComment.value = newComment || ''
 }, { immediate: true })
 
-// Helper function to load evaluation for current item
 function loadEvaluationForCurrentItem() {
   if (props.currentItem) {
     const existingEvaluation = props.evaluatedItems[props.currentItem.id]
@@ -49,7 +45,6 @@ function loadEvaluationForCurrentItem() {
       localComment.value = existingEvaluation.comment || ''
     }
     else {
-      // Reset to null - don't auto-populate any default values
       selectedValue.value = null
       localComment.value = ''
     }
@@ -60,7 +55,6 @@ function loadEvaluationForCurrentItem() {
   }
 }
 
-// Generic evaluation helpers
 const evaluationOptions = computed(() => {
   if (props.evaluationConfig) {
     return getEvaluationOptions(props.evaluationConfig)
@@ -96,14 +90,18 @@ const commentsRequired = computed(() => {
   return false
 })
 
-// Validation
 const canConfirmEvaluation = computed(() => {
   const hasValue = selectedValue.value !== null && selectedValue.value !== undefined
   const hasRequiredComment = !commentsRequired.value || (localComment.value && localComment.value.trim())
   return hasValue && hasRequiredComment
 })
 
-// Event handlers
+// Auto-advance: when comments are not allowed or not required and empty,
+// selecting a value auto-confirms
+const shouldAutoAdvance = computed(() => {
+  return !commentsAllowed.value || (!commentsRequired.value && !localComment.value?.trim())
+})
+
 function onCommentUpdate(value: string) {
   localComment.value = value
   emit('update:evaluatorComment', value)
@@ -111,10 +109,27 @@ function onCommentUpdate(value: string) {
 
 function selectValue(value: any) {
   selectedValue.value = value
+
+  // Auto-advance for non-score types when comments not needed
+  if (!isScoreEvaluation.value && shouldAutoAdvance.value) {
+    nextTick(() => confirmEvaluation())
+  }
 }
 
-function updateScore(value: number) {
-  selectedValue.value = value
+function incrementScore() {
+  if (!scoreSettings.value)
+    return
+  const current = selectedValue.value ?? scoreSettings.value.minValue
+  const next = Math.min(current + scoreSettings.value.step, scoreSettings.value.maxValue)
+  selectedValue.value = next
+}
+
+function decrementScore() {
+  if (!scoreSettings.value)
+    return
+  const current = selectedValue.value ?? scoreSettings.value.minValue
+  const next = Math.max(current - scoreSettings.value.step, scoreSettings.value.minValue)
+  selectedValue.value = next
 }
 
 function confirmEvaluation() {
@@ -122,27 +137,59 @@ function confirmEvaluation() {
     return
 
   if (props.evaluateGenericAndGoNext) {
-    // Use new generic evaluation
     const comment = commentsAllowed.value ? localComment.value : undefined
     props.evaluateGenericAndGoNext(selectedValue.value, comment)
   }
 
-  // Reset selection for next question
   selectedValue.value = null
   localComment.value = ''
 }
+
+// Keyboard shortcuts
+useEvaluationShortcuts({
+  onSelectOption: (index: number) => {
+    const options = evaluationOptions.value
+    if (index < options.length) {
+      selectValue(options[index]!.value)
+    }
+  },
+  onConfirm: () => confirmEvaluation(),
+  onIncrement: () => incrementScore(),
+  onDecrement: () => decrementScore(),
+  optionCount: computed(() => evaluationOptions.value.length),
+  isScoreMode: isScoreEvaluation,
+})
+
+// Score display helpers
+const scoreDisplayValue = computed(() => {
+  if (selectedValue.value === null || selectedValue.value === undefined)
+    return '—'
+  return `${selectedValue.value}${scoreSettings.value?.unit || ''}`
+})
+
+const scoreIsAtPassing = computed(() => {
+  if (!scoreSettings.value?.passingScore || selectedValue.value === null)
+    return null
+  return selectedValue.value >= scoreSettings.value.passingScore
+})
 </script>
 
 <template>
   <UCard>
-    <div class="flex flex-col gap-4">
-      <div class="text-neutral-800 text-sm font-semibold">
-        {{ t('evaluation.question.submittedAnswer') }}
+    <!-- Submitted answer with transition -->
+    <Motion
+      :key="itemKey"
+      :initial="{ opacity: 0, y: 8 }"
+      :animate="{ opacity: 1, y: 0 }"
+      :transition="{ duration: 0.2 }"
+    >
+      <div class="flex flex-col gap-3">
+        <div class="text-neutral-800 text-sm font-semibold">
+          {{ t('evaluation.question.submittedAnswer') }}
+        </div>
+        <ContentRenderer :content="currentItem.submittedAnswer" />
       </div>
-      <ContentRenderer
-        :content="currentItem.submittedAnswer"
-      />
-    </div>
+    </Motion>
 
     <template #footer>
       <div class="flex flex-col gap-4">
@@ -156,59 +203,112 @@ function confirmEvaluation() {
           </div>
         </div>
 
-        <!-- Generic Evaluation Options -->
-        <div>
-          <!-- Score-based Evaluation -->
-          <div v-if="isScoreEvaluation && scoreSettings" class="space-y-3">
-            <label class="block text-sm font-medium text-neutral-700">
-              Score ({{ scoreSettings.minValue }} - {{ scoreSettings.maxValue }}{{ scoreSettings.unit || '' }})
-            </label>
+        <!-- Score-based Evaluation: Stepper + Input -->
+        <div v-if="isScoreEvaluation && scoreSettings" class="space-y-3">
+          <label class="block text-sm font-medium text-neutral-700">
+            Score ({{ scoreSettings.minValue }}–{{ scoreSettings.maxValue }}{{ scoreSettings.unit || '' }})
+          </label>
 
-            <div class="flex items-center gap-4">
-              <USlider
-                :model-value="selectedValue !== null ? selectedValue : scoreSettings.minValue"
-                :min="scoreSettings.minValue"
-                :max="scoreSettings.maxValue"
-                :step="scoreSettings.step"
-                color="primary"
-                size="xl"
-                class="flex-1"
-                @update:model-value="updateScore(Number($event))"
-              />
+          <div class="flex items-center gap-3">
+            <UButton
+              icon="i-lucide-minus"
+              color="neutral"
+              variant="soft"
+              size="lg"
+              :disabled="selectedValue !== null && selectedValue <= scoreSettings.minValue"
+              @click="decrementScore"
+            />
 
-              <span class="text-sm text-right text-neutral-500 min-w-10">
-                {{ selectedValue !== null ? selectedValue : '---' }}{{ selectedValue !== null ? (scoreSettings.unit || '') : '' }}
+            <UInput
+              :model-value="selectedValue !== null ? String(selectedValue) : ''"
+              type="number"
+              :min="scoreSettings.minValue"
+              :max="scoreSettings.maxValue"
+              :step="scoreSettings.step"
+              placeholder="—"
+              class="w-20 text-center [&_input]:text-center"
+              size="lg"
+              @update:model-value="(v: string | number) => {
+                const num = Number(v)
+                if (!Number.isNaN(num)) {
+                  selectedValue = Math.min(Math.max(num, scoreSettings!.minValue), scoreSettings!.maxValue)
+                }
+              }"
+            />
+
+            <UButton
+              icon="i-lucide-plus"
+              color="neutral"
+              variant="soft"
+              size="lg"
+              :disabled="selectedValue !== null && selectedValue >= scoreSettings.maxValue"
+              @click="incrementScore"
+            />
+
+            <!-- Score feedback -->
+            <div class="ml-2 flex items-center gap-2">
+              <span
+                class="text-lg font-semibold transition-colors duration-200"
+                :class="scoreIsAtPassing === true ? 'text-green-600' : scoreIsAtPassing === false ? 'text-red-500' : 'text-neutral-400'"
+              >
+                {{ scoreDisplayValue }}
               </span>
-            </div>
-
-            <!-- Passing score indicator -->
-            <div v-if="scoreSettings.passingScore" class="text-xs text-neutral-500">
-              {{ t('evaluation.passingScore') }}: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
             </div>
           </div>
 
-          <!-- Option-based Evaluation (Mastery, Boolean, etc.) -->
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <UButton
-              v-for="option in evaluationOptions"
+          <!-- Passing score indicator -->
+          <div v-if="scoreSettings.passingScore" class="text-xs text-neutral-500">
+            {{ t('evaluation.passingScore') }}: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
+          </div>
+
+          <!-- Keyboard shortcut hint for score -->
+          <div class="text-xs text-neutral-400">
+            <UKbd>+</UKbd> / <UKbd>-</UKbd> {{ t('evaluation.shortcuts.adjustScore', 'adjust score') }}
+            &middot; <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm', 'confirm') }}
+          </div>
+        </div>
+
+        <!-- Option-based Evaluation (Mastery, Boolean) -->
+        <div v-else>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Motion
+              v-for="(option, index) in evaluationOptions"
               :key="option.id"
-              :class="[option.color || '', {
-                'ring-2 ring-offset-1': selectedValue === option.value,
-                'opacity-70': selectedValue !== null && selectedValue !== option.value,
-              }]"
-              size="lg"
-              block
-              @click="selectValue(option.value)"
+              :while-hover="{ scale: 1.02 }"
+              :while-press="{ scale: 0.97 }"
+              :transition="{ type: 'spring', stiffness: 500, damping: 30 }"
+              as-child
             >
-              <div class="text-left w-full">
-                <div class="font-semibold">
-                  {{ option.label }}
+              <UButton
+                :class="[option.color || '', {
+                  'ring-2 ring-offset-1': selectedValue === option.value,
+                  'opacity-60': selectedValue !== null && selectedValue !== option.value,
+                }]"
+                size="lg"
+                block
+                @click="selectValue(option.value)"
+              >
+                <div class="flex items-center justify-between w-full">
+                  <div class="text-left">
+                    <div class="font-semibold">
+                      {{ option.label }}
+                    </div>
+                    <div v-if="'description' in option && option.description" class="text-xs opacity-75 mt-0.5">
+                      {{ option.description }}
+                    </div>
+                  </div>
+                  <UKbd class="opacity-50 ml-2">
+                    {{ index + 1 }}
+                  </UKbd>
                 </div>
-                <div v-if="'description' in option && option.description" class="text-xs opacity-75 mt-0.5">
-                  {{ option.description }}
-                </div>
-              </div>
-            </UButton>
+              </UButton>
+            </Motion>
+          </div>
+
+          <!-- Keyboard shortcut hint -->
+          <div class="text-xs text-neutral-400 mt-2">
+            <UKbd>1</UKbd>–<UKbd>{{ evaluationOptions.length }}</UKbd> {{ t('evaluation.shortcuts.selectOption', 'select') }}
+            &middot; <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm', 'confirm') }}
           </div>
         </div>
 
@@ -221,19 +321,18 @@ function confirmEvaluation() {
           <UTextarea
             :model-value="localComment"
             :placeholder="t('evaluation.evaluator.commentPlaceholder')"
-            :rows="5"
+            :rows="3"
             :required="commentsRequired"
             class="w-full"
             @update:model-value="onCommentUpdate"
           />
 
-          <!-- Validation messages -->
           <div v-if="commentsRequired && !localComment.trim()" class="text-sm text-red-600">
             {{ t('evaluation.evaluator.commentRequired') }}
           </div>
         </div>
 
-        <!-- Confirm Evaluation Button - Always visible -->
+        <!-- Confirm Evaluation Button -->
         <div class="flex justify-end pt-2">
           <UButton
             icon="i-lucide:check"
