@@ -22,9 +22,6 @@ const { getEvaluationOptions, isScoreType, getScoreSettings } = useEvaluationCon
 const selectedValue = ref<any>(null)
 const localComment = ref('')
 
-// Track item ID for motion transitions
-const itemKey = computed(() => props.currentItem?.id ?? '')
-
 watch(() => props.currentItem, () => {
   loadEvaluationForCurrentItem()
 }, { immediate: true })
