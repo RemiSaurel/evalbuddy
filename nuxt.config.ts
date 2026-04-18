@@ -9,12 +9,19 @@ export default defineNuxtConfig({
 
   modules: [
     '@nuxt/ui',
+    '@nuxt/fonts',
     '@nuxt/eslint',
     '@nuxt/icon',
     '@nuxtjs/i18n',
     '@vueuse/nuxt',
     'motion-v/nuxt',
   ],
+
+  fonts: {
+    families: [
+      { name: 'Instrument Sans', provider: 'google' },
+    ],
+  },
 
   css: [
     '~/assets/css/main.css',

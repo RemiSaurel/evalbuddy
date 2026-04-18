@@ -16,8 +16,8 @@ defineProps<{
       'ring-2 ring-blue-700 ring-offset-2': isCurrentItem,
       'bg-neutral-600 text-white': isItemEvaluated,
       'bg-neutral-200 text-neutral-500': !isItemEvaluated,
-      'size-12 min-w-12': buttonSize === 'xs',
-      'size-14 min-w-14': buttonSize === 'sm',
+      'size-10 min-w-10': buttonSize === 'xs',
+      'size-12 min-w-12': buttonSize === 'sm',
     }"
   >
     <span class="font-bold text-lg leading-none">

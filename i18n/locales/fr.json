@@ -206,6 +206,9 @@
       "message": "Êtes-vous sûr de vouloir supprimer l'évaluation \"{name}\" ?",
       "warning": "Cette action ne peut pas être annulée."
     },
+    "settings": {
+      "hideProgressBar": "Masquer la barre de progression"
+    },
     "error": "Erreur",
     "title": "Évaluation",
     "subtitle": "Évaluez les réponses et reprenez les sessions quand vous le souhaitez",

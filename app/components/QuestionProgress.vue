@@ -20,7 +20,7 @@ defineProps<{
     <UProgress
       :model-value="progress"
       :max="max"
-      size="xl"
+      size="lg"
       status
       :ui="{
         root: 'flex-row items-center',

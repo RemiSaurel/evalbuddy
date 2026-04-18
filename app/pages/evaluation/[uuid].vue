@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import type { DropdownMenuItem } from '@nuxt/ui'
+import { ImportExportService } from '@/utils/importExport'
+
 definePageMeta({
   layout: 'evaluation',
 })
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
@@ -43,6 +47,7 @@ const evaluationConfig = computed(() => session?.config || null)
 const isGenericEvaluation = computed(() => !!evaluationConfig.value)
 
 const isCompletionModalOpen = ref(false)
+const isDeleteModalOpen = ref(false)
 
 const totalEvaluated = computed(() =>
   Object.values(evaluatedItems.value).filter(
@@ -74,11 +79,48 @@ const currentQuestionProgress = computed(() => {
     return evaluation && (evaluation.value !== undefined || evaluation.masteryLevel !== undefined)
   }).length
 })
-
-const questionKey = computed(() => currentItem.value?.questionID ?? 0)
-const answerKey = computed(() => currentItem.value?.id ?? '')
-
 const isDesktop = useMediaQuery('(min-width: 1024px)')
+
+// View settings (persisted in localStorage)
+const hideProgressBar = useLocalStorage('evalbuddy-hide-progress', false)
+
+// Session dropdown menu
+const sessionMenuItems = computed<DropdownMenuItem[][]>(() => [
+  [
+    {
+      label: t('evaluation.settings.hideProgressBar'),
+      icon: 'i-lucide:chart-bar',
+      type: 'checkbox' as const,
+      checked: hideProgressBar.value,
+      onUpdateChecked: (checked: boolean) => { hideProgressBar.value = checked },
+    },
+  ],
+  [
+    {
+      label: t('evaluation.actions.export'),
+      icon: 'i-lucide:download',
+      onSelect: () => handleExport(),
+    },
+    {
+      label: t('evaluation.actions.delete'),
+      icon: 'i-lucide:trash-2',
+      color: 'error' as const,
+      onSelect: () => { isDeleteModalOpen.value = true },
+    },
+  ],
+])
+
+async function handleExport() {
+  const blob = await ImportExportService.exportSession(session.id)
+  const filename = ImportExportService.generateExportFilename(session.name)
+  ImportExportService.downloadBlob(blob, filename)
+}
+
+async function handleDelete() {
+  await evaluationStorage.deleteSession(session.id)
+  isDeleteModalOpen.value = false
+  router.push('/')
+}
 </script>
 
 <template>
@@ -93,6 +135,16 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
         :label="$t('evaluation.displayContext')"
         :context="session.dataset.context"
       />
+      <div class="ml-auto">
+        <UDropdownMenu :items="sessionMenuItems" :modal="false">
+          <UButton
+            icon="i-lucide:more-vertical"
+            variant="ghost"
+            color="neutral"
+            size="sm"
+          />
+        </UDropdownMenu>
+      </div>
     </div>
 
     <!-- Desktop: side-by-side resizable panels -->
@@ -109,11 +161,12 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
         :default-size="50"
         :min-size="30"
         :max-size="70"
-        :ui="{ root: 'min-h-0!' }"
+        :ui="{ root: 'min-h-[0px]!', body: 'min-h-[0px]!' }"
       >
         <template #header>
           <div class="flex flex-col gap-3 p-4 pb-0">
             <QuestionProgress
+              v-if="!hideProgressBar"
               :label="$t('evaluation.progress.total')"
               :progress="totalEvaluated"
               :max="items.length"
@@ -139,29 +192,24 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
             :label="$t('evaluation.question.displayQuestionContext')"
             :context="questions.get(currentItem.questionID)!.context!"
           />
-
-          <Motion
-            :key="questionKey"
-            :initial="{ opacity: 0, x: -12 }"
-            :animate="{ opacity: 1, x: 0 }"
-            :transition="{ duration: 0.2 }"
-          >
+          <div class="min-h-0 mb-1">
             <QuestionCard
               v-if="currentItem"
               :current-question="currentItem"
             />
-          </Motion>
+          </div>
         </template>
       </UDashboardPanel>
 
       <!-- RIGHT PANEL: Answer + Scoring -->
       <UDashboardPanel
         id="answer-panel"
-        :ui="{ root: 'min-h-0!' }"
+        :ui="{ root: 'min-h-[0px]!', body: 'min-h-[0px]!' }"
       >
         <template #header>
           <div class="flex flex-col gap-3 p-4 pb-0">
             <QuestionProgress
+              v-if="!hideProgressBar"
               :label="$t('evaluation.progress.current')"
               :progress="currentQuestionProgress"
               :max="currentItemGroup.length"
@@ -189,12 +237,7 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
             :context="currentItem?.context"
           />
 
-          <Motion
-            :key="answerKey"
-            :initial="{ opacity: 0, x: 12 }"
-            :animate="{ opacity: 1, x: 0 }"
-            :transition="{ duration: 0.2 }"
-          >
+          <div class="min-h-0 mb-1">
             <HybridEvaluationCard
               v-if="currentItem"
               :current-item="currentItem"
@@ -204,7 +247,7 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
               :evaluate-generic-and-go-next="isGenericEvaluation ? handleEvaluateAndGoNext : undefined"
               @update:evaluator-comment="evaluatorComment = $event"
             />
-          </Motion>
+          </div>
         </template>
       </UDashboardPanel>
 
@@ -250,9 +293,10 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
     </UDashboardGroup>
 
     <!-- Mobile: single column scrollable -->
-    <div v-else class="flex flex-col flex-1 overflow-y-auto gap-4 p-4">
+    <div v-else class="flex flex-col gap-4 p-4">
       <!-- Total progress -->
       <QuestionProgress
+        v-if="!hideProgressBar"
         :label="$t('evaluation.progress.total')"
         :progress="totalEvaluated"
         :max="items.length"
@@ -287,6 +331,7 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
 
       <!-- Current question progress -->
       <QuestionProgress
+        v-if="!hideProgressBar"
         :label="$t('evaluation.progress.current')"
         :progress="currentQuestionProgress"
         :max="currentItemGroup.length"
@@ -323,5 +368,45 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
         @update:evaluator-comment="evaluatorComment = $event"
       />
     </div>
+
+    <!-- Delete confirmation modal -->
+    <UModal v-model:open="isDeleteModalOpen" title="Delete Evaluation Session Modal" description="Delete Evaluation Session Modal">
+      <template #content>
+        <UCard>
+          <template #header>
+            <h3 class="text-lg font-semibold">
+              {{ $t('evaluation.deleteModal.title') }}
+            </h3>
+          </template>
+
+          <div class="space-y-4">
+            <p class="text-neutral-600">
+              {{ $t('evaluation.deleteModal.message', { name: session.name }) }}
+            </p>
+            <p class="text-sm text-error">
+              {{ $t('evaluation.deleteModal.warning') }}
+            </p>
+          </div>
+
+          <template #footer>
+            <div class="flex justify-end gap-3">
+              <UButton
+                color="neutral"
+                variant="outline"
+                @click="isDeleteModalOpen = false"
+              >
+                {{ $t('evaluation.actions.cancel') }}
+              </UButton>
+              <UButton
+                color="error"
+                @click="handleDelete"
+              >
+                {{ $t('evaluation.actions.delete') }}
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
+    </UModal>
   </div>
 </template>

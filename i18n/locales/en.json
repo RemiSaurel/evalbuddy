@@ -206,6 +206,9 @@
       "message": "Are you sure you want to delete the evaluation session \"{name}\"?",
       "warning": "This action cannot be undone. All evaluation progress will be lost."
     },
+    "settings": {
+      "hideProgressBar": "Hide Progress Bar"
+    },
     "error": "Error",
     "title": "Evaluation",
     "subtitle": "Evaluate answers and resume sessions whenever you want",
