@@ -159,37 +159,17 @@ useEvaluationShortcuts({
   optionCount: computed(() => evaluationOptions.value.length),
   isScoreMode: isScoreEvaluation,
 })
-
-// Score display helpers
-const scoreDisplayValue = computed(() => {
-  if (selectedValue.value === null || selectedValue.value === undefined)
-    return '—'
-  return `${selectedValue.value}${scoreSettings.value?.unit || ''}`
-})
-
-const scoreIsAtPassing = computed(() => {
-  if (!scoreSettings.value?.passingScore || selectedValue.value === null)
-    return null
-  return selectedValue.value >= scoreSettings.value.passingScore
-})
 </script>
 
 <template>
   <UCard>
-    <!-- Submitted answer with transition -->
-    <Motion
-      :key="itemKey"
-      :initial="{ opacity: 0, y: 8 }"
-      :animate="{ opacity: 1, y: 0 }"
-      :transition="{ duration: 0.2 }"
-    >
-      <div class="flex flex-col gap-3">
-        <div class="text-neutral-800 text-sm font-semibold">
-          {{ t('evaluation.question.submittedAnswer') }}
-        </div>
-        <ContentRenderer :content="currentItem.submittedAnswer" />
+    <!-- Submitted answer -->
+    <div class="flex flex-col gap-3">
+      <div class="text-neutral-800 text-sm font-semibold">
+        {{ t('evaluation.question.submittedAnswer') }}
       </div>
-    </Motion>
+      <ContentRenderer :content="currentItem.submittedAnswer" />
+    </div>
 
     <template #footer>
       <div class="flex flex-col gap-4">
@@ -244,16 +224,6 @@ const scoreIsAtPassing = computed(() => {
               :disabled="selectedValue !== null && selectedValue >= scoreSettings.maxValue"
               @click="incrementScore"
             />
-
-            <!-- Score feedback -->
-            <div class="ml-2 flex items-center gap-2">
-              <span
-                class="text-lg font-semibold transition-colors duration-200"
-                :class="scoreIsAtPassing === true ? 'text-green-600' : scoreIsAtPassing === false ? 'text-red-500' : 'text-neutral-400'"
-              >
-                {{ scoreDisplayValue }}
-              </span>
-            </div>
           </div>
 
           <!-- Passing score indicator -->
