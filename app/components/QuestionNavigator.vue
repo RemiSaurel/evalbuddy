@@ -58,6 +58,11 @@ function isQuestionEvaluated(question: EvaluationItem) {
   return evaluated && (evaluated.value !== undefined || evaluated.masteryLevel !== undefined)
 }
 
+// Watch for navigation changes from arrow keys to auto-scroll active question
+watch(() => [props.currentGroupIndex, props.currentItemIndexInGroup], () => {
+  scrollToCurrentQuestion()
+})
+
 // Auto-scroll to current question on mount
 onMounted(() => scrollToCurrentQuestion())
 
@@ -72,7 +77,7 @@ function scrollToCurrentQuestion() {
 </script>
 
 <template>
-  <div class="w-full overflow-x-auto">
+  <div class="w-full overflow-x-auto pb-2">
     <!-- Legend -->
     <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900">
       <h3>
