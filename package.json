@@ -2,7 +2,7 @@
   "name": "nuxt-app",
   "type": "module",
   "private": true,
-  "packageManager": "npm@10.9.2",
+  "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@iconify-json/lucide": "^1.2.44",
     "@iconify-json/simple-icons": "^1.2.34",
+    "@nuxt/fonts": "^0.14.0",
     "@nuxt/icon": "^1.13.0",
     "@nuxt/ui": "^4.6.1",
     "@nuxtjs/i18n": "^9.5.4",

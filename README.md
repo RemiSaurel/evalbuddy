@@ -10,7 +10,7 @@ EvalBuddy is a web-based application built with Nuxt 3 that provides educators w
 
 ### Prerequisites
 - Node.js 18+
-- npm or yarn package manager
+- pnpm package manager
 
 ### Installation
 
@@ -22,12 +22,12 @@ EvalBuddy is a web-based application built with Nuxt 3 that provides educators w
 
 2. **Install dependencies**
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Start development server**
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 4. **Access the application**
@@ -37,13 +37,13 @@ EvalBuddy is a web-based application built with Nuxt 3 that provides educators w
 
 ```bash
 # Build for production
-npm run build
+pnpm build
 
 # Generate static files
-npm run generate
+pnpm generate
 
 # Preview production build
-npm run preview
+pnpm preview
 ```
 
 ## 📖 Usage Guide
