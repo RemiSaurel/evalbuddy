@@ -48,6 +48,8 @@
       "fields": {
         "configurationName": "Nom de la configuration",
         "configurationNamePlaceholder": "Entrez le nom de la configuration",
+        "instructions": "Consignes d'évaluation",
+        "instructionsPlaceholder": "Entrez les consignes d'évaluation (optionnel)",
         "masteryLevels": "Niveaux de maîtrise",
         "levelName": "Nom du niveau",
         "level": "Niveau",
@@ -211,6 +213,7 @@
     },
     "error": "Erreur",
     "title": "Évaluation",
+    "instructions": "Consignes d'évaluation",
     "subtitle": "Évaluez les réponses et reprenez les sessions quand vous le souhaitez",
     "displayContext": "Afficher le contexte de l'évaluation"
   }

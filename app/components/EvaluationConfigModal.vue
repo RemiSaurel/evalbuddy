@@ -197,6 +197,14 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
                       class="w-full"
                     />
                   </UFormField>
+                  <UFormField :label="t('configuration.modal.fields.instructions')">
+                    <UTextarea
+                      v-model="localConfig.settings.instructions"
+                      :placeholder="t('configuration.modal.fields.instructionsPlaceholder')"
+                      :rows="4"
+                      class="w-full"
+                    />
+                  </UFormField>
                 </div>
               </template>
 

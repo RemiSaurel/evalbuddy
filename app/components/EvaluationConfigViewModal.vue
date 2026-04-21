@@ -55,6 +55,16 @@ function close() {
             </div>
           </div>
 
+          <!-- Instructions -->
+          <div v-if="config.settings.instructions" class="space-y-2">
+            <div class="text-sm font-medium text-neutral-700">
+              {{ t('configuration.modal.fields.instructions') }}
+            </div>
+            <div class="text-sm text-neutral-700 whitespace-pre-wrap">
+              {{ config.settings.instructions }}
+            </div>
+          </div>
+
           <!-- Configuration Type -->
           <div class="space-y-2">
             <div class="text-sm font-medium text-neutral-700">

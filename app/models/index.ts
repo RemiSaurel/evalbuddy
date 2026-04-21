@@ -38,6 +38,7 @@ export interface EvaluationSettings {
   // Common settings
   allowComments: boolean
   requireComments: boolean
+  instructions?: string
 
   // Type-specific settings
   masterySettings?: MasterySettings
