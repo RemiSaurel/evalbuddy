@@ -48,6 +48,8 @@
       "fields": {
         "configurationName": "Configuration Name",
         "configurationNamePlaceholder": "Enter configuration name",
+        "instructions": "Instructions",
+        "instructionsPlaceholder": "Enter evaluation instructions (optional)",
         "masteryLevels": "Mastery Levels",
         "levelName": "Level name",
         "level": "Level",
@@ -211,6 +213,7 @@
     },
     "error": "Error",
     "title": "Evaluation",
+    "instructions": "Instructions",
     "subtitle": "Evaluate answers and resume sessions whenever you want",
     "displayContext": "Display the evaluation context"
   }

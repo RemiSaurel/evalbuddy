@@ -180,6 +180,25 @@ useEvaluationShortcuts({
           </div>
         </div>
 
+        <!-- Instructions Collapsible -->
+        <UCollapsible v-if="evaluationConfig?.settings?.instructions" class="w-full">
+          <UButton
+            block
+            color="neutral"
+            variant="ghost"
+            trailing-icon="i-lucide:chevron-down"
+            class="justify-between text-sm font-medium text-neutral-700"
+          >
+            {{ t('evaluation.instructions') }}
+          </UButton>
+
+          <template #content>
+            <div class="px-2 py-2 text-sm text-neutral-700 whitespace-pre-wrap">
+              {{ evaluationConfig.settings.instructions }}
+            </div>
+          </template>
+        </UCollapsible>
+
         <!-- Score-based Evaluation: Stepper + Input -->
         <div v-if="isScoreEvaluation && scoreSettings" class="space-y-3">
           <label class="block text-sm font-medium text-neutral-700">
