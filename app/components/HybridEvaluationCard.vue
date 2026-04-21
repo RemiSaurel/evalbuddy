@@ -169,7 +169,7 @@ useEvaluationShortcuts({
     </div>
 
     <template #footer>
-      <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-3">
         <!-- Evaluation Type Header -->
         <div class="flex justify-between items-center">
           <div class="text-neutral-800 text-sm font-semibold">
@@ -183,15 +183,16 @@ useEvaluationShortcuts({
         <!-- Instructions Collapsible -->
         <UCollapsible v-if="evaluationConfig?.settings?.instructions" class="w-full">
           <UButton
-            block
+            trailing-icon="i-lucide-chevron-down"
+            size="sm"
+            class="group justify-between"
             color="neutral"
-            variant="ghost"
-            trailing-icon="i-lucide:chevron-down"
-            class="justify-between text-sm font-medium text-neutral-700"
-          >
-            {{ t('evaluation.instructions') }}
-          </UButton>
-
+            variant="soft"
+            :label="$t('evaluation.instructions')"
+            :ui="{
+              trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+            }"
+          />
           <template #content>
             <div class="px-2 py-2 text-sm text-neutral-700 whitespace-pre-wrap">
               {{ evaluationConfig.settings.instructions }}
@@ -199,58 +200,80 @@ useEvaluationShortcuts({
           </template>
         </UCollapsible>
 
-        <!-- Score-based Evaluation: Stepper + Input -->
-        <div v-if="isScoreEvaluation && scoreSettings" class="space-y-3">
-          <label class="block text-sm font-medium text-neutral-700">
-            Score ({{ scoreSettings.minValue }}–{{ scoreSettings.maxValue }}{{ scoreSettings.unit || '' }})
-          </label>
+        <!-- Score-based Evaluation: Stepper + Input + Comments side by side -->
+        <div v-if="isScoreEvaluation && scoreSettings" class="flex flex-col sm:flex-row gap-4">
+          <div class="flex-1 space-y-3">
+            <label class="block text-sm font-medium text-neutral-700">
+              Score ({{ scoreSettings.minValue }}–{{ scoreSettings.maxValue }}{{ scoreSettings.unit || '' }})
+            </label>
 
-          <div class="flex items-center gap-3">
-            <UButton
-              icon="i-lucide-minus"
-              color="neutral"
-              variant="soft"
-              size="lg"
-              :disabled="selectedValue !== null && selectedValue <= scoreSettings.minValue"
-              @click="decrementScore"
-            />
+            <div class="flex items-center gap-3">
+              <UButton
+                icon="i-lucide-minus"
+                color="neutral"
+                variant="soft"
+                size="lg"
+                :disabled="selectedValue !== null && selectedValue <= scoreSettings.minValue"
+                @click="decrementScore"
+              />
 
-            <UInput
-              :model-value="selectedValue !== null ? String(selectedValue) : ''"
-              type="number"
-              :min="scoreSettings.minValue"
-              :max="scoreSettings.maxValue"
-              :step="scoreSettings.step"
-              placeholder="—"
-              class="w-20 text-center [&_input]:text-center"
-              size="lg"
-              @update:model-value="(v: string | number) => {
-                const num = Number(v)
-                if (!Number.isNaN(num)) {
-                  selectedValue = Math.min(Math.max(num, scoreSettings!.minValue), scoreSettings!.maxValue)
-                }
-              }"
-            />
+              <UInput
+                :model-value="selectedValue !== null ? String(selectedValue) : ''"
+                type="number"
+                :min="scoreSettings.minValue"
+                :max="scoreSettings.maxValue"
+                :step="scoreSettings.step"
+                placeholder="—"
+                class="w-20 text-center [&_input]:text-center"
+                size="lg"
+                @update:model-value="(v: string | number) => {
+                  const num = Number(v)
+                  if (!Number.isNaN(num)) {
+                    selectedValue = Math.min(Math.max(num, scoreSettings!.minValue), scoreSettings!.maxValue)
+                  }
+                }"
+              />
 
-            <UButton
-              icon="i-lucide-plus"
-              color="neutral"
-              variant="soft"
-              size="lg"
-              :disabled="selectedValue !== null && selectedValue >= scoreSettings.maxValue"
-              @click="incrementScore"
-            />
+              <UButton
+                icon="i-lucide-plus"
+                color="neutral"
+                variant="soft"
+                size="lg"
+                :disabled="selectedValue !== null && selectedValue >= scoreSettings.maxValue"
+                @click="incrementScore"
+              />
+            </div>
+
+            <!-- Passing score indicator -->
+            <div v-if="scoreSettings.passingScore" class="text-xs text-neutral-500">
+              {{ t('evaluation.passingScore') }}: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
+            </div>
+
+            <!-- Keyboard shortcut hint for score -->
+            <div class="text-xs text-neutral-400">
+              <UKbd>+</UKbd> / <UKbd>-</UKbd> {{ t('evaluation.shortcuts.adjustScore', 'adjust score') }}
+              &middot; <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm', 'confirm') }}
+            </div>
           </div>
 
-          <!-- Passing score indicator -->
-          <div v-if="scoreSettings.passingScore" class="text-xs text-neutral-500">
-            {{ t('evaluation.passingScore') }}: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
-          </div>
+          <!-- Comments (inline with score on larger screens) -->
+          <div v-if="commentsAllowed" class="flex-1 flex flex-col gap-1">
+            <div class="text-neutral-800 text-sm font-semibold">
+              {{ t('evaluation.evaluator.comment') }}
+              <span v-if="commentsRequired" class="text-red-500">*</span>
+            </div>
+            <UTextarea
+              :model-value="localComment"
+              :placeholder="t('evaluation.evaluator.commentPlaceholder')"
+              :rows="3"
+              :required="commentsRequired"
+              class="w-full"
+              @update:model-value="onCommentUpdate"
+            />
 
-          <!-- Keyboard shortcut hint for score -->
-          <div class="text-xs text-neutral-400">
-            <UKbd>+</UKbd> / <UKbd>-</UKbd> {{ t('evaluation.shortcuts.adjustScore', 'adjust score') }}
-            &middot; <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm', 'confirm') }}
+            <div v-if="commentsRequired && !localComment.trim()" class="text-sm text-red-600">
+              {{ t('evaluation.evaluator.commentRequired') }}
+            </div>
           </div>
         </div>
 
@@ -298,8 +321,8 @@ useEvaluationShortcuts({
           </div>
         </div>
 
-        <!-- Comments Section -->
-        <div v-if="commentsAllowed" class="flex flex-col gap-1">
+        <!-- Comments Section (only for non-score evaluations) -->
+        <div v-if="commentsAllowed && !isScoreEvaluation" class="flex flex-col gap-1">
           <div class="text-neutral-800 text-sm font-semibold">
             {{ t('evaluation.evaluator.comment') }}
             <span v-if="commentsRequired" class="text-red-500">*</span>
@@ -319,7 +342,7 @@ useEvaluationShortcuts({
         </div>
 
         <!-- Confirm Evaluation Button -->
-        <div class="flex justify-end pt-2">
+        <div class="flex justify-end">
           <UButton
             icon="i-lucide:check"
             color="primary"
