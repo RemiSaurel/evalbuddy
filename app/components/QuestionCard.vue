@@ -61,7 +61,6 @@ const difficultyClass = computed(() =>
 
         <ContentRenderer
           :content="currentQuestion.referenceAnswer"
-          class="max-h-60 overflow-y-auto"
         />
       </div>
     </template>

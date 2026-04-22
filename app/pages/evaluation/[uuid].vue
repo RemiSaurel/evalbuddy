@@ -187,16 +187,18 @@ async function handleDelete() {
         </template>
 
         <template #body>
-          <ContextDataCollapsible
-            v-if="currentItem && questions.get(currentItem.questionID)?.context"
-            :label="$t('evaluation.question.displayQuestionContext')"
-            :context="questions.get(currentItem.questionID)!.context!"
-          />
-          <div class="min-h-0 mb-1">
-            <QuestionCard
-              v-if="currentItem"
-              :current-question="currentItem"
+          <div class="flex flex-col gap-3 overflow-hidden">
+            <ContextDataCollapsible
+              v-if="currentItem && questions.get(currentItem.questionID)?.context"
+              :label="$t('evaluation.question.displayQuestionContext')"
+              :context="questions.get(currentItem.questionID)!.context!"
             />
+            <div class="min-h-0 p-0.5 mb-1 overflow-auto">
+              <QuestionCard
+                v-if="currentItem"
+                :current-question="currentItem"
+              />
+            </div>
           </div>
         </template>
       </UDashboardPanel>
