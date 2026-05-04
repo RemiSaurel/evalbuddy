@@ -96,7 +96,7 @@ const canConfirmEvaluation = computed(() => {
 // Auto-advance: when comments are not allowed or not required and empty,
 // selecting a value auto-confirms
 const shouldAutoAdvance = computed(() => {
-  return !commentsAllowed.value || (!commentsRequired.value && !localComment.value?.trim())
+  return !commentsAllowed.value
 })
 
 function onCommentUpdate(value: string) {
@@ -150,7 +150,7 @@ useEvaluationShortcuts({
       selectValue(options[index]!.value)
     }
   },
-  onConfirm: () => confirmEvaluation(),
+  onConfirm: () => {if (shouldAutoAdvance){confirmEvaluation()}},
   onIncrement: () => incrementScore(),
   onDecrement: () => decrementScore(),
   optionCount: computed(() => evaluationOptions.value.length),
