@@ -150,7 +150,11 @@ useEvaluationShortcuts({
       selectValue(options[index]!.value)
     }
   },
-  onConfirm: () => {if (shouldAutoAdvance){confirmEvaluation()}},
+  onConfirm: () => {
+    if (shouldAutoAdvance.value) {
+      confirmEvaluation()
+    }
+  },
   onIncrement: () => incrementScore(),
   onDecrement: () => decrementScore(),
   optionCount: computed(() => evaluationOptions.value.length),
