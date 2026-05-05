@@ -82,7 +82,7 @@ const commentsAllowed = computed(() => {
 
 const commentsRequired = computed(() => {
   if (!commentsAllowed.value) {
-     return false
+    return false
   }
 
   if (props.evaluationConfig) {
