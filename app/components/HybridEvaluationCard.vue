@@ -81,6 +81,10 @@ const commentsAllowed = computed(() => {
 })
 
 const commentsRequired = computed(() => {
+  if (!commentsAllowed.value) {
+     return false
+  }
+
   if (props.evaluationConfig) {
     return props.evaluationConfig.settings.requireComments ?? false
   }
