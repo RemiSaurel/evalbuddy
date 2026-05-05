@@ -88,7 +88,6 @@ function validateAndSave() {
 }
 
 function cancel() {
-  emit('update:modelValue', null)
   isOpen.value = false
 }
 
