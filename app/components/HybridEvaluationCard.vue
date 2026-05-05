@@ -93,10 +93,9 @@ const canConfirmEvaluation = computed(() => {
   return hasValue && hasRequiredComment
 })
 
-// Auto-advance: when comments are not allowed or not required and empty,
-// selecting a value auto-confirms
+// Auto-advance: only when comments are not allowed at all
 const shouldAutoAdvance = computed(() => {
-  return !commentsAllowed.value || (!commentsRequired.value && !localComment.value?.trim())
+  return !commentsAllowed.value
 })
 
 function onCommentUpdate(value: string) {
