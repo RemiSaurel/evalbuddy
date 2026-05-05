@@ -81,6 +81,10 @@ const commentsAllowed = computed(() => {
 })
 
 const commentsRequired = computed(() => {
+  if (!commentsAllowed.value) {
+    return false
+  }
+
   if (props.evaluationConfig) {
     return props.evaluationConfig.settings.requireComments ?? false
   }
@@ -93,8 +97,7 @@ const canConfirmEvaluation = computed(() => {
   return hasValue && hasRequiredComment
 })
 
-// Auto-advance: when comments are not allowed or not required and empty,
-// selecting a value auto-confirms
+// Auto-advance: only when comments are not allowed at all
 const shouldAutoAdvance = computed(() => {
   return !commentsAllowed.value
 })
@@ -150,7 +153,7 @@ useEvaluationShortcuts({
       selectValue(options[index]!.value)
     }
   },
-  onConfirm: () => { confirmEvaluation() },
+  onConfirm: () => confirmEvaluation(),
   onIncrement: () => incrementScore(),
   onDecrement: () => decrementScore(),
   optionCount: computed(() => evaluationOptions.value.length),
