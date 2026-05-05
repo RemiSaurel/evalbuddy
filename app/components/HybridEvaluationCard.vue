@@ -75,14 +75,18 @@ const isScoreEvaluation = computed(() => {
 
 const commentsAllowed = computed(() => {
   if (props.evaluationConfig) {
-    return props.evaluationConfig.settings.allowComments
+    return props.evaluationConfig.settings.allowComments ?? true
   }
   return true
 })
 
 const commentsRequired = computed(() => {
+  if (!commentsAllowed.value) {
+     return false
+  }
+
   if (props.evaluationConfig) {
-    return props.evaluationConfig.settings.requireComments
+    return props.evaluationConfig.settings.requireComments ?? false
   }
   return false
 })
