@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     '@vueuse/nuxt',
     'motion-v/nuxt',
-    '@nuxtjs/color-mode'
+    '@nuxtjs/color-mode',
   ],
 
   fonts: {
@@ -52,6 +52,6 @@ export default defineNuxtConfig({
   colorMode: {
     classSuffix: '',
     preference: 'system',
-    fallback: 'light'
-  }
+    fallback: 'light',
+  },
 })
