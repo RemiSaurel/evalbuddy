@@ -28,7 +28,7 @@ const activeTab = ref<string>('basic')
 const isSaving = ref(false)
 
 function onAfterLeave() {
-  // Réinitialiser tout les valeurs une fois que le modal est fermé
+  // Reset modal values once the modal is closed
   localConfig.value = null
   validationErrors.value = []
   isSaving.value = false
