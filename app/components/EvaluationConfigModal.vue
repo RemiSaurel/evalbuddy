@@ -27,6 +27,14 @@ const validationErrors = ref<string[]>([])
 const activeTab = ref<string>('basic')
 const isSaving = ref(false)
 
+function onAfterLeave() {
+  // Reset modal values once the modal is closed
+  localConfig.value = null
+  validationErrors.value = []
+  isSaving.value = false
+  activeTab.value = 'basic'
+}
+
 // Initialize local config when props change
 watch(() => props.modelValue, (newConfig) => {
   if (newConfig) {
@@ -80,11 +88,6 @@ function validateAndSave() {
 }
 
 function cancel() {
-  localConfig.value = null
-  validationErrors.value = []
-  isSaving.value = false
-  activeTab.value = 'basic' // Reset tab to default
-  emit('update:modelValue', null)
   isOpen.value = false
 }
 
@@ -132,18 +135,13 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
     )
   }
   else {
-    // Reset all state when modal is closed
-    localConfig.value = null
-    validationErrors.value = []
-    isSaving.value = false
-    activeTab.value = 'basic'
     sortableInstance.value = null
   }
 })
 </script>
 
 <template>
-  <UModal v-model:open="isOpen" title="Evaluation Config Modal" description="Evaluation Config Modal">
+  <UModal v-model:open="isOpen" title="Evaluation Config Modal" description="Evaluation Config Modal" @after:leave="onAfterLeave">
     <template #content>
       <UCard>
         <template #header>
