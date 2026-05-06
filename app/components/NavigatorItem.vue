@@ -14,7 +14,7 @@ defineProps<{
     flex-col items-center justify-center gap-1 hover:shadow-md"
     :class="{
       'ring-2 ring-blue-700 ring-offset-2': isCurrentItem,
-      'bg-neutral-600 text-white': isItemEvaluated,
+      'bg-neutral-600 text-white transition-colors dark:text-neutral-500': isItemEvaluated,
       'bg-neutral-200 text-neutral-500': !isItemEvaluated,
       'size-10 min-w-10': buttonSize === 'xs',
       'size-12 min-w-12': buttonSize === 'sm',

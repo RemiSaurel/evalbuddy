@@ -23,8 +23,8 @@ defineProps<{
 
     <template #content>
       <div
-        class="bg-neutral-100 mt-1.5 rounded-md p-5 flex flex-col gap-4
-        text-sm max-h-[40rem] overflow-y-auto"
+        class="bg-neutral-100 dark:bg-neutral-900 mt-1.5 rounded-md p-5 flex flex-col gap-4
+        text-sm max-h-160 overflow-y-auto text-neutral-700 dark:text-neutral-200"
       >
         <!-- Simple string context -->
         <div v-if="typeof context === 'string'" class="whitespace-pre-line">
@@ -34,7 +34,7 @@ defineProps<{
         <!-- Object context key/values displayed as a list -->
         <div v-else>
           <div v-for="(value, key) in context" :key="key" class="flex gap-2">
-            <span class="font-semibold text-neutral-800">
+            <span class="font-semibold text-neutral-800 dark:text-neutral-300">
               {{ key.charAt(0).toUpperCase() + key.slice(1) }}:
             </span>
 
@@ -45,7 +45,7 @@ defineProps<{
                 </li>
               </ul>
             </div>
-            <span v-else class="whitespace-pre-line">{{ value }}</span>
+            <span v-else class="whitespace-pre-line text-neutral-700 dark:text-neutral-200">{{ value }}</span>
           </div>
         </div>
       </div>

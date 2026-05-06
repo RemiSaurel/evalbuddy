@@ -47,7 +47,7 @@ function close() {
         <div class="space-y-6">
           <!-- Configuration Name -->
           <div class="space-y-2">
-            <div class="text-sm font-medium text-neutral-700">
+            <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300 transition-colors">
               {{ t('configuration.modal.fields.configurationName') }}
             </div>
             <div class="text-base">
@@ -93,14 +93,14 @@ function close() {
               <li
                 v-for="(level, index) in config.settings.masterySettings.levels"
                 :key="level.id"
-                class="flex items-start gap-3 p-3 border border-neutral-200 rounded-lg"
+                class="flex items-start gap-3 p-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 rounded-lg transition-colors"
               >
-                <span class="text-sm text-neutral-500">{{ index + 1 }}.</span>
+                <span class="text-sm text-neutral-500 dark:text-neutral-400">{{ index + 1 }}.</span>
                 <div class="flex-1 space-y-1">
                   <div class="font-medium">
                     {{ level.label }}
                   </div>
-                  <div v-if="level.description" class="text-sm text-neutral-600">
+                  <div v-if="level.description" class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
                     {{ level.description }}
                   </div>
                 </div>
@@ -123,7 +123,7 @@ function close() {
 
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-1">
-                <div class="text-sm text-neutral-600">
+                <div class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
                   {{ t('configuration.modal.fields.trueLabel') }}
                 </div>
                 <div class="font-medium">
@@ -132,7 +132,7 @@ function close() {
               </div>
 
               <div class="space-y-1">
-                <div class="text-sm text-neutral-600">
+                <div class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
                   {{ t('configuration.modal.fields.falseLabel') }}
                 </div>
                 <div class="font-medium">
@@ -157,7 +157,7 @@ function close() {
 
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-1">
-                <div class="text-sm text-neutral-600">
+                <div class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
                   {{ t('configuration.modal.fields.minimumValue') }}
                 </div>
                 <div class="font-medium">
@@ -166,7 +166,7 @@ function close() {
               </div>
 
               <div class="space-y-1">
-                <div class="text-sm text-neutral-600">
+                <div class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
                   {{ t('configuration.modal.fields.maximumValue') }}
                 </div>
                 <div class="font-medium">
@@ -175,7 +175,7 @@ function close() {
               </div>
 
               <div class="space-y-1">
-                <div class="text-sm text-neutral-600">
+                <div class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
                   {{ t('configuration.modal.fields.step') }}
                 </div>
                 <div class="font-medium">
@@ -184,7 +184,7 @@ function close() {
               </div>
 
               <div class="space-y-1">
-                <div class="text-sm text-neutral-600">
+                <div class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
                   {{ t('configuration.modal.fields.unit') }}
                 </div>
                 <div class="font-medium">
@@ -194,7 +194,7 @@ function close() {
             </div>
 
             <div v-if="config.settings.scoreSettings.passingScore !== undefined" class="space-y-1">
-              <div class="text-sm text-neutral-600">
+              <div class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
                 {{ t('configuration.modal.fields.passingScore') }}
               </div>
               <div class="font-medium">
@@ -237,7 +237,7 @@ function close() {
             <USeparator />
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div class="space-y-1">
-                <div class="text-neutral-600">
+                <div class="text-neutral-600 dark:text-neutral-400 transition-colors">
                   {{ t('configuration.created') }}
                 </div>
                 <div class="font-medium">
@@ -246,7 +246,7 @@ function close() {
               </div>
 
               <div class="space-y-1">
-                <div class="text-neutral-600">
+                <div class="text-neutral-600 dark:text-neutral-400 transition-colors">
                   {{ t('configuration.updated') }}
                 </div>
                 <div class="font-medium">

@@ -214,12 +214,12 @@ async function handleImport() {
 <template>
   <div class="max-w-6xl mx-auto mt-8">
     <!-- Header -->
-    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-4">
+    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-4 dark:bg-neutral-900">
       <div>
-        <h1 class="text-3xl font-bold text-neutral-900">
+        <h1 class="text-3xl font-bold text-neutral-900 dark:text-neutral-100 transition-colors">
           {{ t('configuration.title') }}
         </h1>
-        <p class="text-neutral-600 mt-2">
+        <p class="text-neutral-600 dark:text-neutral-400 transition-colors mt-2">
           {{ t('configuration.subtitle') }}
         </p>
       </div>
@@ -246,12 +246,12 @@ async function handleImport() {
     <!-- Empty State -->
     <div v-if="filteredConfigs.length === 0" class="text-center py-12">
       <div class="text-neutral-400 mb-4">
-        <UIcon name="i-lucide:settings" class="text-6xl" />
+        <UIcon name="i-lucide:settings" class="text-6xl dark:text-neutral-600" />
       </div>
-      <h3 class="text-lg font-medium text-neutral-900 mb-2">
+      <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 transition-colors mb-2">
         {{ t('configuration.noConfigurations') }}
       </h3>
-      <p class="text-neutral-600 mb-4">
+      <p class="text-neutral-600 dark:text-neutral-400 transition-colors mb-4">
         {{ searchQuery ? t('configuration.noSearchResults') : t('configuration.noConfigurationsMessage') }}
       </p>
     </div>
@@ -261,7 +261,7 @@ async function handleImport() {
       <div
         v-for="config in filteredConfigs"
         :key="config.id"
-        class="p-3 border border-neutral-200 rounded-lg"
+        class="p-3 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 transition-colors rounded-lg"
       >
         <div class="flex flex-1 items-center justify-between">
           <div class="flex items-center gap-3">
@@ -270,7 +270,7 @@ async function handleImport() {
               class="text-blue-600 text-xl"
             />
             <div>
-              <h3 class="font-semibold text-neutral-900">
+              <h3 class="font-semibold text-neutral-900 dark:text-neutral-100 transition-colors">
                 {{ config.name }}
               </h3>
               <p class="text-sm text-neutral-500">
@@ -316,7 +316,7 @@ async function handleImport() {
           </template>
 
           <div class="space-y-4">
-            <p class="text-neutral-600">
+            <p class="text-neutral-600 dark:text-neutral-400 transition-colors">
               {{ t('configuration.deleteModal.message', { name: configToDelete?.name }) }}
             </p>
             <p class="text-sm text-error">
@@ -391,7 +391,7 @@ async function handleImport() {
             </UAlert>
 
             <!-- Import Instructions -->
-            <div class="text-sm text-neutral-600">
+            <div class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
               <h4 class="font-medium mb-2">
                 {{ t('configuration.importModal.importInstructions') }}
               </h4>

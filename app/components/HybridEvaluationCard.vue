@@ -165,7 +165,7 @@ useEvaluationShortcuts({
   <UCard>
     <!-- Submitted answer -->
     <div class="flex flex-col gap-3">
-      <div class="text-neutral-800 text-sm font-semibold">
+      <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
         {{ t('evaluation.question.submittedAnswer') }}
       </div>
       <ContentRenderer :content="currentItem.submittedAnswer" />
@@ -175,10 +175,10 @@ useEvaluationShortcuts({
       <div class="flex flex-col gap-3">
         <!-- Evaluation Type Header -->
         <div class="flex justify-between items-center">
-          <div class="text-neutral-800 text-sm font-semibold">
+          <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
             {{ t('evaluation.title') }}
           </div>
-          <div v-if="evaluationConfig" class="text-xs text-neutral-500">
+          <div v-if="evaluationConfig" class="text-xs text-neutral-500 dark:text-neutral-400">
             {{ evaluationConfig.name }} ({{ evaluationConfig.type }})
           </div>
         </div>
@@ -197,7 +197,7 @@ useEvaluationShortcuts({
             }"
           />
           <template #content>
-            <div class="px-2 py-2 text-sm text-neutral-700 whitespace-pre-wrap">
+            <div class="px-2 py-2 text-sm text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap transition-colors">
               {{ evaluationConfig.settings.instructions }}
             </div>
           </template>
@@ -206,7 +206,7 @@ useEvaluationShortcuts({
         <!-- Score-based Evaluation: Stepper + Input + Comments side by side -->
         <div v-if="isScoreEvaluation && scoreSettings" class="flex flex-col sm:flex-row gap-4">
           <div class="flex-1 space-y-3">
-            <label class="block text-sm font-medium text-neutral-700">
+            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 transition-colors">
               Score ({{ scoreSettings.minValue }}–{{ scoreSettings.maxValue }}{{ scoreSettings.unit || '' }})
             </label>
 
@@ -248,12 +248,12 @@ useEvaluationShortcuts({
             </div>
 
             <!-- Passing score indicator -->
-            <div v-if="scoreSettings.passingScore" class="text-xs text-neutral-500">
+            <div v-if="scoreSettings.passingScore" class="text-xs text-neutral-500 dark:text-neutral-400">
               {{ t('evaluation.passingScore') }}: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
             </div>
 
             <!-- Keyboard shortcut hint for score -->
-            <div class="text-xs text-neutral-400">
+            <div class="text-xs text-neutral-400 dark:text-neutral-500 transition-colors">
               <UKbd>+</UKbd> / <UKbd>-</UKbd> {{ t('evaluation.shortcuts.adjustScore', 'adjust score') }}
               &middot; <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm', 'confirm') }}
             </div>
@@ -261,7 +261,7 @@ useEvaluationShortcuts({
 
           <!-- Comments (inline with score on larger screens) -->
           <div v-if="commentsAllowed" class="flex-1 flex flex-col gap-1">
-            <div class="text-neutral-800 text-sm font-semibold">
+            <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
               {{ t('evaluation.evaluator.comment') }}
               <span v-if="commentsRequired" class="text-red-500">*</span>
             </div>
@@ -318,7 +318,7 @@ useEvaluationShortcuts({
           </div>
 
           <!-- Keyboard shortcut hint -->
-          <div class="text-xs text-neutral-400 mt-2">
+          <div class="text-xs text-neutral-400 dark:text-neutral-500 transition-colors mt-2">
             <UKbd>1</UKbd>–<UKbd>{{ evaluationOptions.length }}</UKbd> {{ t('evaluation.shortcuts.selectOption', 'select') }}
             &middot; <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm', 'confirm') }}
           </div>
@@ -326,7 +326,7 @@ useEvaluationShortcuts({
 
         <!-- Comments Section (only for non-score evaluations) -->
         <div v-if="commentsAllowed && !isScoreEvaluation" class="flex flex-col gap-1">
-          <div class="text-neutral-800 text-sm font-semibold">
+          <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
             {{ t('evaluation.evaluator.comment') }}
             <span v-if="commentsRequired" class="text-red-500">*</span>
           </div>

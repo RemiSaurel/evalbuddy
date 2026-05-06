@@ -256,12 +256,12 @@ function getDropdownItems(session: EvaluationSession) {
     />
 
     <!-- Header -->
-    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-8">
+    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-8 dark:bg-neutral-900">
       <div>
-        <h1 class="text-3xl font-bold text-neutral-900">
+        <h1 class="text-3xl font-bold text-neutral-900 dark:text-neutral-300 transition-colors">
           {{ t('evaluation.title') }}
         </h1>
-        <p class="text-neutral-600 mt-2">
+        <p class="text-neutral-600 mt-2 dark:text-neutral-400 transition-colors">
           {{ t('evaluation.subtitle') }}
         </p>
       </div>
@@ -289,7 +289,7 @@ function getDropdownItems(session: EvaluationSession) {
           <template #header>
             <div class="flex justify-between items-start">
               <div class="flex flex-col gap-1">
-                <h3 class="font-semibold text-base truncate text-neutral-900  transition-colors">
+                <h3 class="font-semibold text-base truncate text-neutral-900 dark:text-neutral-100 transition-colors">
                   {{ session.name }}
                 </h3>
                 <div class="text-sm text-neutral-500 truncate">
@@ -445,7 +445,7 @@ function getDropdownItems(session: EvaluationSession) {
                 }"
               />
               <template #content>
-                <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto"><code>{
+                <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto dark:bg-neurtal-900"><code>{
   // optional — dataset-level metadata (string or string[] values)
   "context": {
     "course": "Geography Assessment",

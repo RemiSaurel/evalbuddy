@@ -126,8 +126,8 @@ async function handleDelete() {
 <template>
   <div class="flex flex-col flex-1 min-h-0">
     <!-- Session title bar spanning full width -->
-    <div class="flex shrink-0 items-center gap-2 px-4 py-2 border-b border-neutral-200 bg-neutral-50">
-      <h1 class="font-bold text-lg text-neutral-900 truncate">
+    <div class="flex shrink-0 items-center gap-2 px-4 py-2 border-b border-neutral-200 bg-white dark:bg-neutral-900 transition-colors">
+      <h1 class="font-bold text-lg text-neutral-900 dark:text-neutral-100 truncate">
         {{ session.name }}
       </h1>
       <ContextDataCollapsible
@@ -164,7 +164,7 @@ async function handleDelete() {
         :ui="{ root: 'min-h-[0px]!', body: 'min-h-[0px]!' }"
       >
         <template #header>
-          <div class="flex flex-col gap-3 p-4 pb-0">
+          <div class="flex flex-col gap-3 p-4 pb-0 dark:bg-neutral-900">
             <QuestionProgress
               v-if="!hideProgressBar"
               :label="$t('evaluation.progress.total')"
@@ -209,7 +209,7 @@ async function handleDelete() {
         :ui="{ root: 'min-h-[0px]!', body: 'min-h-[0px]!' }"
       >
         <template #header>
-          <div class="flex flex-col gap-3 p-4 pb-0">
+          <div class="flex flex-col gap-3 p-4 pb-0 dark:bg-neutral-900">
             <QuestionProgress
               v-if="!hideProgressBar"
               :label="$t('evaluation.progress.current')"
@@ -295,7 +295,7 @@ async function handleDelete() {
     </UDashboardGroup>
 
     <!-- Mobile: single column scrollable -->
-    <div v-else class="flex flex-col gap-4 p-4">
+    <div v-else class="flex flex-col gap-4 p-4 bg-white dark:bg-neutral-900">
       <!-- Total progress -->
       <QuestionProgress
         v-if="!hideProgressBar"
