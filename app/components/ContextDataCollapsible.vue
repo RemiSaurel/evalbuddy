@@ -24,7 +24,7 @@ defineProps<{
     <template #content>
       <div
         class="bg-neutral-100 dark:bg-neutral-900 mt-1.5 rounded-md p-5 flex flex-col gap-4
-        text-sm max-h-160 overflow-y-auto text-neutral-700 dark:text-neutral-200"
+        text-sm max-h-[40rem] overflow-y-auto text-neutral-700 dark:text-neutral-200"
       >
         <!-- Simple string context -->
         <div v-if="typeof context === 'string'" class="whitespace-pre-line">

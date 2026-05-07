@@ -445,7 +445,7 @@ function getDropdownItems(session: EvaluationSession) {
                 }"
               />
               <template #content>
-                <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto dark:bg-neurtal-900"><code>{
+                <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto dark:bg-neutral-900"><code>{
   // optional — dataset-level metadata (string or string[] values)
   "context": {
     "course": "Geography Assessment",

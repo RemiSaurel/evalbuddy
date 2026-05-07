@@ -11,7 +11,7 @@ function toggleColorMode() {
 <template>
   <button
     class="p-2 rounded-md transition hover:bg-gray-200 dark:hover:bg-gray-700"
-    aria-label="Toggle dark mode"
+    aria-label="Toggle color mode"
     @click="toggleColorMode"
   >
     <Icon v-if="colorMode.preference === 'light'" name="lucide:moon" />
