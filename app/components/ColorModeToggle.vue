@@ -1,10 +1,12 @@
-<script setup>
+<script setup lang="ts">
+type ColorModePreference = 'light' | 'dark' | 'system'
+
 const colorMode = useColorMode()
 
 function toggleColorMode() {
-  const modes = ['light', 'dark', 'system']
-  const current = modes.indexOf(colorMode.preference)
-  colorMode.preference = modes[(current + 1) % modes.length]
+  const modes: ColorModePreference[] = ['light', 'dark', 'system']
+  const current = modes.indexOf(colorMode.preference as ColorModePreference)
+  colorMode.preference = modes[(current + 1) % modes.length] as ColorModePreference
 }
 </script>
 
