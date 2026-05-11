@@ -162,13 +162,13 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div
                 v-for="type in evaluationTypes" :key="type.value"
-                class="cursor-pointer hover:shadow-md transition-all duration-200 border border-neutral-200 hover:border-primary-300 p-3 rounded-lg"
+                class="cursor-pointer hover:shadow-md transition-all duration-200 border border-neutral-200 dark:border-neutral-700 hover:border-primary-300 dark:hover:border-primary-400 p-3 rounded-lg bg-white dark:bg-neutral-900"
                 @click="createNewConfig(type.value)"
               >
-                <div class="font-medium text-neutral-900">
+                <div class="font-medium text-neutral-900 dark:text-neutral-100 transition-colors">
                   {{ type.label }}
                 </div>
-                <div class="text-sm text-neutral-500 mt-1">
+                <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                   {{ type.description }}
                 </div>
               </div>
@@ -232,7 +232,7 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
                         :key="level.id"
                       >
                         <div class="flex w-full gap-3">
-                          <span class="mt-1.5">
+                          <span class="mt-1.5 text-neutral-700 dark:text-neutral-300 transition-colors">
                             {{ index + 1 }}.
                           </span>
                           <EvaluationConfigMasteryLevelOption

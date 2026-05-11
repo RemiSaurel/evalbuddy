@@ -62,7 +62,7 @@ defineShortcuts({
   <!-- Evaluation navigation if there is more than one evaluation per question -->
   <div v-if="!isSingleEvaluation" class="w-full overflow-x-auto">
     <!-- Legend -->
-    <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900">
+    <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100 transition-colors">
       <h3>
         {{ t('evaluation.navigation.overviewAnswers') }}
       </h3>
@@ -72,7 +72,7 @@ defineShortcuts({
 
     <!-- Navigation -->
     <div class="flex flex-col gap-1">
-      <div ref="itemScrollContainer" class="flex overflow-auto gap-2 p-1">
+      <div ref="itemScrollContainer" class="flex overflow-auto gap-2 p-1 bg-white dark:bg-neutral-900 transition-colors">
         <NavigatorItem
           v-for="(item, itemIndex) in currentItemGroup"
           :key="item.id"

@@ -79,7 +79,7 @@ function scrollToCurrentQuestion() {
 <template>
   <div class="w-full overflow-x-auto pb-2">
     <!-- Legend -->
-    <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900">
+    <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100 transition-colors">
       <h3>
         {{ isSingleEvaluation
           ? t('evaluation.navigation.overviewAnswers')
@@ -94,7 +94,7 @@ function scrollToCurrentQuestion() {
       <div
         v-if="isSingleEvaluation"
         ref="questionScrollContainer"
-        class="flex overflow-auto gap-2 p-1"
+        class="flex overflow-auto gap-2 p-1 bg-white dark:bg-neutral-900 transition-colors"
       >
         <NavigatorItem
           v-for="(question, itemIndex) in items"
@@ -108,7 +108,7 @@ function scrollToCurrentQuestion() {
       </div>
 
       <!-- Group navigation otherwise -->
-      <div v-else ref="questionGroupScrollContainer" class="flex overflow-auto gap-2 p-1">
+      <div v-else ref="questionGroupScrollContainer" class="flex overflow-auto gap-2 p-1 bg-white dark:bg-neutral-900 transition-colors">
         <NavigatorItem
           v-for="(groupKey, groupIndex) in groupKeys"
           :key="groupKey"

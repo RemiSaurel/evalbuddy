@@ -256,12 +256,12 @@ function getDropdownItems(session: EvaluationSession) {
     />
 
     <!-- Header -->
-    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-8">
+    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-8 dark:bg-neutral-900">
       <div>
-        <h1 class="text-3xl font-bold text-neutral-900">
+        <h1 class="text-3xl font-bold text-neutral-900 dark:text-neutral-300 transition-colors">
           {{ t('evaluation.title') }}
         </h1>
-        <p class="text-neutral-600 mt-2">
+        <p class="text-neutral-600 mt-2 dark:text-neutral-400 transition-colors">
           {{ t('evaluation.subtitle') }}
         </p>
       </div>
@@ -283,13 +283,13 @@ function getDropdownItems(session: EvaluationSession) {
         <UCard
           v-for="session in sortedSessions"
           :key="session.id"
-          class="cursor-pointer hover:shadow-lg transition-all duration-200"
+          class="cursor-pointer dark:ring-neutral-600 dark:bg-neutral-800 hover:ring-neutral-300 dark:hover:ring-neutral-500 transition-all"
           @click="openSession(session.id)"
         >
           <template #header>
             <div class="flex justify-between items-start">
               <div class="flex flex-col gap-1">
-                <h3 class="font-semibold text-base truncate text-neutral-900  transition-colors">
+                <h3 class="font-semibold text-base truncate text-neutral-900 dark:text-neutral-100 transition-colors">
                   {{ session.name }}
                 </h3>
                 <div class="text-sm text-neutral-500 truncate">
@@ -313,21 +313,21 @@ function getDropdownItems(session: EvaluationSession) {
             </div>
           </template>
 
-          <div class="space-y-2">
+          <div class="space-y-2 ">
             <!-- Stats Row -->
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4 text-sm text-neutral-600">
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 dark:text-white">
                   <UIcon name="i-lucide:help-circle" class="w-3 h-3" />
                   <span>{{ session.dataset.items.length }}</span>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 dark:text-white">
                   <UIcon name="i-lucide:check-circle" class="w-3 h-3 text-green-600" />
                   <span>{{ session.results.length }}</span>
                 </div>
               </div>
-              <div class="text-right">
-                <div class="text-sm font-medium text-neutral-900">
+              <div class="text-right dark:text-white">
+                <div class="text-sm font-medium">
                   {{ Math.round((session.results.length / session.dataset.items.length) * 100) }}%
                 </div>
               </div>
@@ -445,7 +445,7 @@ function getDropdownItems(session: EvaluationSession) {
                 }"
               />
               <template #content>
-                <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto"><code>{
+                <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto dark:bg-neutral-900"><code>{
   // optional — dataset-level metadata (string or string[] values)
   "context": {
     "course": "Geography Assessment",

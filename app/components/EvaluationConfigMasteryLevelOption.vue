@@ -14,11 +14,11 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="flex gap-2 w-full pl-1.5 pr-3 py-3 rounded-lg bg-neutral-100">
+  <div class="flex gap-2 w-full pl-1.5 pr-3 py-3 rounded-lg bg-neutral-100 dark:bg-neutral-900 transition-colors">
     <UIcon
       name="i-lucide-grip-vertical"
       :class="handleClass"
-      class="size-5 text-neutral-500 cursor-grab hover:text-neutral-700
+      class="size-5 text-neutral-500 dark:text-neutral-400 cursor-grab hover:text-neutral-700 dark:hover:text-neutral-200
       transition-colors duration-150"
     />
 

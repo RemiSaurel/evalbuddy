@@ -3,9 +3,9 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="flex flex-col h-dvh">
+  <div class="flex flex-col h-dvh bg-white text-black dark:bg-neutral-900 dark:text-white transition-colors">
     <!-- Top nav bar (same as evaluation layout) -->
-    <nav class="flex shrink-0 gap-4 items-center py-3 px-4 justify-between border-b border-neutral-200 bg-white">
+    <nav class="flex shrink-0 gap-4 items-center py-3 px-4 justify-between border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 transition-colors">
       <span class="text-2xl font-bold">
         <NuxtLink to="/">🧑‍🏫 EvalBuddy</NuxtLink>
       </span>
@@ -31,6 +31,7 @@ const { t } = useI18n()
           >
             {{ t('navigation.configurations') }}
           </UButton>
+          <ColorModeToggle />
         </div>
 
         <LocaleSelect />
