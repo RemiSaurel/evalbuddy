@@ -261,7 +261,7 @@ async function handleImport() {
       <div
         v-for="config in filteredConfigs"
         :key="config.id"
-        class="p-3 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 transition-colors rounded-lg"
+        class="p-3 border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 dark:hover:border-neutral-500 transition-colors rounded-lg"
       >
         <div class="flex flex-1 items-center justify-between">
           <div class="flex items-center gap-3">

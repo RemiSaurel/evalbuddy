@@ -34,7 +34,7 @@ const difficultyClass = computed(() =>
 </script>
 
 <template>
-  <UCard>
+  <UCard class="dark:bg-neutral-800 dark:ring-neutral-600">
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-center">
         <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">

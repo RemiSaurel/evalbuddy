@@ -162,7 +162,7 @@ useEvaluationShortcuts({
 </script>
 
 <template>
-  <UCard>
+  <UCard class="dark:bg-neutral-800 dark:ring-neutral-600">
     <!-- Submitted answer -->
     <div class="flex flex-col gap-3">
       <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
@@ -186,6 +186,7 @@ useEvaluationShortcuts({
         <!-- Instructions Collapsible -->
         <UCollapsible v-if="evaluationConfig?.settings?.instructions" class="w-full">
           <UButton
+            icon="i-lucide-message-circle-more"
             trailing-icon="i-lucide-chevron-down"
             size="sm"
             class="group justify-between"

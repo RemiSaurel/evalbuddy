@@ -283,7 +283,7 @@ function getDropdownItems(session: EvaluationSession) {
         <UCard
           v-for="session in sortedSessions"
           :key="session.id"
-          class="cursor-pointer hover:shadow-lg transition-all duration-200"
+          class="cursor-pointer dark:ring-neutral-600 dark:bg-neutral-800 hover:ring-neutral-300 dark:hover:ring-neutral-500 transition-all"
           @click="openSession(session.id)"
         >
           <template #header>
@@ -313,21 +313,21 @@ function getDropdownItems(session: EvaluationSession) {
             </div>
           </template>
 
-          <div class="space-y-2">
+          <div class="space-y-2 ">
             <!-- Stats Row -->
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4 text-sm text-neutral-600">
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 dark:text-white">
                   <UIcon name="i-lucide:help-circle" class="w-3 h-3" />
                   <span>{{ session.dataset.items.length }}</span>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 dark:text-white">
                   <UIcon name="i-lucide:check-circle" class="w-3 h-3 text-green-600" />
                   <span>{{ session.results.length }}</span>
                 </div>
               </div>
-              <div class="text-right">
-                <div class="text-sm font-medium text-neutral-900">
+              <div class="text-right dark:text-white">
+                <div class="text-sm font-medium">
                   {{ Math.round((session.results.length / session.dataset.items.length) * 100) }}%
                 </div>
               </div>

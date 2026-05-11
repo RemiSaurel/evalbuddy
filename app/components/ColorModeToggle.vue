@@ -10,8 +10,10 @@ function toggleColorMode() {
 
 <template>
   <UButton
-    class="p-2 rounded-md transition-colors hover:bg-primary/75"
+    class="p-2 rounded-md"
     aria-label="Toggle color mode"
+    variant="ghost"
+    color="neutral"
     @click="toggleColorMode"
   >
     <Icon v-if="colorMode.preference === 'light'" name="lucide:moon" />
