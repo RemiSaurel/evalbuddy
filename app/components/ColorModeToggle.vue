@@ -10,7 +10,7 @@ function toggleColorMode() {
 
 <template>
   <UButton
-    class="p-2 rounded-md transition hover:bg-primary/75"
+    class="p-2 rounded-md transition-colors hover:bg-primary/75"
     aria-label="Toggle color mode"
     @click="toggleColorMode"
   >
