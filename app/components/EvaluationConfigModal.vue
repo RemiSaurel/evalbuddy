@@ -120,10 +120,10 @@ function removeMasteryLevel(index: number) {
 }
 
 const MASTERY_COLOR_CLASSES = [
-  'bg-red-300 text-red-800 hover:bg-red-400',
-  'bg-red-200 text-red-700 hover:bg-red-300',
-  'bg-orange-300 text-orange-800 hover:bg-orange-400',
-  'bg-orange-200 text-orange-700 hover:bg-orange-300',
+  'bg-red-400 text-red-900 hover:bg-red-400',
+  'bg-red-300 text-red-700 hover:bg-red-300',
+  'bg-orange-400 text-orange-800 hover:bg-orange-400',
+  'bg-orange-300 text-orange-700 hover:bg-orange-300',
   'bg-amber-300 text-amber-800 hover:bg-amber-400',
   'bg-yellow-300 text-yellow-800 hover:bg-yellow-400',
   'bg-lime-300 text-lime-800 hover:bg-lime-400',
