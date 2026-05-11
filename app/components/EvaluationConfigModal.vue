@@ -75,6 +75,10 @@ function validateAndSave() {
   if (!localConfig.value)
     return
 
+  if (localConfig.value.type === 'mastery' && localConfig.value.settings.masterySettings?.levels) {
+    syncMasteryLevelColors(localConfig.value.settings.masterySettings.levels)
+  }
+
   isSaving.value = true
   validationErrors.value = validateConfig(localConfig.value)
 
@@ -103,7 +107,7 @@ function addMasteryLevel() {
     id: `level_${Date.now()}`,
     label: `${t('configuration.modal.fields.level')} ${newOrder}`,
     description: '',
-    color: 'bg-neutral-300 text-neutral-800 hover:bg-neutral-400',
+    color: '',
     order: newOrder,
   })
 }
@@ -113,6 +117,36 @@ function removeMasteryLevel(index: number) {
   if (!localConfig.value?.settings.masterySettings?.levels || localConfig.value?.settings.masterySettings?.levels.length <= 2) // 2 levels minimum required
     return
   localConfig.value?.settings.masterySettings?.levels.splice(index, 1)
+}
+
+const MASTERY_COLOR_CLASSES = [
+  'bg-red-300 text-red-800 hover:bg-red-400',
+  'bg-red-200 text-red-700 hover:bg-red-300',
+  'bg-orange-300 text-orange-800 hover:bg-orange-400',
+  'bg-orange-200 text-orange-700 hover:bg-orange-300',
+  'bg-amber-300 text-amber-800 hover:bg-amber-400',
+  'bg-yellow-300 text-yellow-800 hover:bg-yellow-400',
+  'bg-lime-300 text-lime-800 hover:bg-lime-400',
+  'bg-green-200 text-green-700 hover:bg-green-300',
+  'bg-green-300 text-green-800 hover:bg-green-400',
+  'bg-emerald-300 text-emerald-800 hover:bg-emerald-400',
+]
+
+function getMasteryLevelColor(index: number, total: number): string {
+  if (total <= 1) {
+    return MASTERY_COLOR_CLASSES[0]
+  }
+
+  const paletteLength = MASTERY_COLOR_CLASSES.length
+  const paletteIndex = Math.round((index / (total - 1)) * (paletteLength - 1))
+  return MASTERY_COLOR_CLASSES[paletteIndex] ?? MASTERY_COLOR_CLASSES[paletteLength - 1]
+}
+
+function syncMasteryLevelColors(levels: MasteryLevelDefinition[]) {
+  const total = levels.length
+  levels.forEach((level, index) => {
+    level.color = getMasteryLevelColor(index, total)
+  })
 }
 
 // Swap mastery levels with drag-and-drop
