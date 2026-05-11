@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { EvaluationConfig, EvaluationType, MasteryLevelDefinition } from '~/models'
 import { useSortable } from '@vueuse/integrations/useSortable'
+import { MASTERY_COLOR_CLASSES } from '~/models'
 
 const props = defineProps<{
   modelValue: EvaluationConfig | null
@@ -12,6 +13,9 @@ const emit = defineEmits<{
   'update:open': [open: boolean]
   'save': [config: EvaluationConfig]
 }>()
+
+// Maximum number of levels for mastery level evaluation
+const MAXIMUM_LEVELS = 10
 
 const { t } = useI18n()
 const { getDefaultConfig, validateConfig } = useEvaluationConfig()
@@ -99,7 +103,7 @@ function cancel() {
 function addMasteryLevel() {
   const levels = localConfig.value?.settings.masterySettings?.levels
 
-  if (!levels || levels.length >= 10) // maximum capacity of 10 levels
+  if (!levels || levels.length >= MAXIMUM_LEVELS) // maximum capacity of 10 levels
     return
 
   const newOrder = Math.max(...levels.map(l => l.order), 0) + 1
@@ -120,19 +124,6 @@ function removeMasteryLevel(index: number) {
   localConfig.value?.settings.masterySettings?.levels.splice(index, 1)
 }
 
-const MASTERY_COLOR_CLASSES = [
-  'bg-red-400 text-red-900 hover:bg-red-400',
-  'bg-red-300 text-red-700 hover:bg-red-300',
-  'bg-orange-400 text-orange-800 hover:bg-orange-400',
-  'bg-orange-300 text-orange-700 hover:bg-orange-300',
-  'bg-amber-300 text-amber-800 hover:bg-amber-400',
-  'bg-yellow-300 text-yellow-800 hover:bg-yellow-400',
-  'bg-lime-300 text-lime-800 hover:bg-lime-400',
-  'bg-green-200 text-green-700 hover:bg-green-300',
-  'bg-green-300 text-green-800 hover:bg-green-400',
-  'bg-emerald-300 text-emerald-800 hover:bg-emerald-400',
-]
-
 function getMasteryLevelColor(index: number, total: number): string {
   if (total <= 1) {
     return MASTERY_COLOR_CLASSES[0]
@@ -140,7 +131,7 @@ function getMasteryLevelColor(index: number, total: number): string {
 
   const paletteLength = MASTERY_COLOR_CLASSES.length
   const paletteIndex = Math.round((index / (total - 1)) * (paletteLength - 1))
-  return MASTERY_COLOR_CLASSES[paletteIndex] ?? MASTERY_COLOR_CLASSES[paletteLength - 1]
+  return MASTERY_COLOR_CLASSES[paletteIndex] ?? MASTERY_COLOR_CLASSES[paletteLength - 1]!
 }
 
 function syncMasteryLevelColors(levels: MasteryLevelDefinition[]) {
