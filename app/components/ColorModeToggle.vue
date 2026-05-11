@@ -10,7 +10,7 @@ function toggleColorMode() {
 
 <template>
   <UButton
-    class="p-2 rounded-md transition-colors hover:bg-primary/75"
+    class="p-2 rounded-md transition-colors"
     aria-label="Toggle color mode"
     variant="ghost"
     color="neutral"
