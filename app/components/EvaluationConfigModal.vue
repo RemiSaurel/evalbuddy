@@ -93,7 +93,7 @@ function cancel() {
 
 // Add mastery level
 function addMasteryLevel() {
-  if (!localConfig.value?.settings.masterySettings)
+  if (!localConfig.value?.settings.masterySettings || localConfig.value?.settings.masterySettings?.levels.length >= 10) // maximum capacity of 10 levels
     return
 
   const levels = localConfig.value.settings.masterySettings.levels
@@ -109,10 +109,10 @@ function addMasteryLevel() {
 }
 
 // Remove mastery level
-function removeMasteryLevel(index: number) {
-  if (!localConfig.value?.settings.masterySettings)
+function removeMasteryLevel(index: number) {  
+  if (!localConfig.value?.settings.masterySettings?.levels || localConfig.value?.settings.masterySettings?.levels.length <= 2) // 2 levels minimum required
     return
-  localConfig.value.settings.masterySettings.levels.splice(index, 1)
+  localConfig.value?.settings.masterySettings?.levels.splice(index, 1)
 }
 
 // Swap mastery levels with drag-and-drop
