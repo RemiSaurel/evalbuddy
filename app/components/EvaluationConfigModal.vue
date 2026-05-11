@@ -109,7 +109,7 @@ function addMasteryLevel() {
 }
 
 // Remove mastery level
-function removeMasteryLevel(index: number) {  
+function removeMasteryLevel(index: number) {
   if (!localConfig.value?.settings.masterySettings?.levels || localConfig.value?.settings.masterySettings?.levels.length <= 2) // 2 levels minimum required
     return
   localConfig.value?.settings.masterySettings?.levels.splice(index, 1)
