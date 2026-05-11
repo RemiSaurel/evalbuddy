@@ -97,10 +97,11 @@ function cancel() {
 
 // Add mastery level
 function addMasteryLevel() {
-  if (!localConfig.value?.settings.masterySettings || localConfig.value?.settings.masterySettings?.levels.length >= 10) // maximum capacity of 10 levels
+  const levels = localConfig.value?.settings.masterySettings?.levels
+
+  if (!levels || levels.length >= 10) // maximum capacity of 10 levels
     return
 
-  const levels = localConfig.value.settings.masterySettings.levels
   const newOrder = Math.max(...levels.map(l => l.order), 0) + 1
 
   levels.push({
