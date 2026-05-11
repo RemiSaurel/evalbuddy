@@ -9,13 +9,13 @@ function toggleColorMode() {
 </script>
 
 <template>
-  <button
-    class="p-2 rounded-md transition hover:bg-gray-200 dark:hover:bg-gray-700"
+  <UButton
+    class="p-2 rounded-md transition hover:bg-primary/75"
     aria-label="Toggle color mode"
     @click="toggleColorMode"
   >
     <Icon v-if="colorMode.preference === 'light'" name="lucide:moon" />
     <Icon v-else-if="colorMode.preference === 'dark'" name="lucide:sun" />
     <Icon v-else name="lucide:monitor" />
-  </button>
+  </UButton>
 </template>
