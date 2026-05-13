@@ -11,7 +11,7 @@ interface ShortcutOptions {
 /**
  * Keyboard shortcuts for fast evaluation using Nuxt UI's defineShortcuts.
  *
- * - 1-9: Select option by index (mastery/boolean)
+ * - 0-9: Select option by index (mastery/boolean)
  * - +/=: Increment score (only without meta/ctrl to preserve browser zoom)
  * - -: Decrement score (only without meta/ctrl to preserve browser zoom)
  * - Enter: Confirm evaluation
@@ -27,14 +27,14 @@ export function useEvaluationShortcuts(options: ShortcutOptions) {
     enabled = ref(true),
   } = options
 
-  // Number keys 1-9 for option selection
-  for (let i = 1; i <= 9; i++) {
+  // Number keys 0-9 for option selection
+  for (let i = 0; i <= 9; i++) {
     defineShortcuts({
       [String(i)]: () => {
         if (!enabled.value || isScoreMode.value)
           return
-        if (i - 1 < optionCount.value)
-          onSelectOption(i - 1)
+        if (i < optionCount.value)
+          onSelectOption(i)
       },
     })
   }
