@@ -74,6 +74,7 @@ class EvaluationStorage {
         questionId: result.questionId,
         value: result.value,
         comment: result.comment,
+        elapsedTime: result.elapsedTime,
         evaluatedAt: result.evaluatedAt,
       })),
       config: session.config,
@@ -81,6 +82,7 @@ class EvaluationStorage {
       updatedAt: session.updatedAt,
       evaluatorName: session.evaluatorName,
       isCompleted: session.isCompleted,
+      elapsedTime: session.elapsedTime ?? {},
     }
 
     return new Promise((resolve, reject) => {
@@ -151,6 +153,7 @@ class EvaluationStorage {
       settings: {
         allowComments: true,
         requireComments: false,
+        timerEnabled: false,
         masterySettings: DEFAULT_MASTERY_CONFIG,
       },
       createdAt: new Date().toISOString(),
@@ -164,6 +167,7 @@ class EvaluationStorage {
       dataset,
       results: [],
       config: defaultConfig,
+      elapsedTime: {},
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       evaluatorName,

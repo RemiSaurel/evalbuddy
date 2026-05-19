@@ -29,7 +29,8 @@
       "tabs": {
         "basic": "Basic Settings",
         "evaluation": "Evaluation Options",
-        "comments": "Comments"
+        "comments": "Comments",
+        "others": "Others"
       },
       "types": {
         "mastery": {
@@ -69,7 +70,9 @@
         "passingScorePlaceholder": "e.g., 60",
         "commentSettings": "Comment Settings",
         "allowComments": "Allow comments",
-        "requireComments": "Require comments"
+        "requireComments": "Require comments",
+        "timerSettings": "Timer",
+        "addTimer": "Add a Timer"
       },
       "buttons": {
         "addLevel": "Add Level",

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
+import type { EvaluationSession } from '@/models'
 import { ImportExportService } from '@/utils/importExport'
 
 definePageMeta({
@@ -13,7 +14,7 @@ const router = useRouter()
 const sessionId = route.params.uuid as string
 const { evaluationStorage } = await import('@/utils/storage')
 
-const session = await evaluationStorage.getSession(sessionId)
+const session = await evaluationStorage.getSession(sessionId) as EvaluationSession
 if (!session) {
   throw createError({
     statusCode: 404,
@@ -38,10 +39,6 @@ const {
   goToNextItem,
   evaluateAndGoNext,
 } = useEvaluation(session)
-
-async function handleEvaluateAndGoNext(value: any, comment?: string) {
-  await evaluateAndGoNext(value, comment)
-}
 
 const evaluationConfig = computed(() => session?.config || null)
 const isGenericEvaluation = computed(() => !!evaluationConfig.value)
@@ -111,6 +108,7 @@ const sessionMenuItems = computed<DropdownMenuItem[][]>(() => [
 ])
 
 async function handleExport() {
+  await persistElapsedTime(currentItem.value?.id)
   const blob = await ImportExportService.exportSession(session.id)
   const filename = ImportExportService.generateExportFilename(session.name)
   ImportExportService.downloadBlob(blob, filename)
@@ -121,6 +119,51 @@ async function handleDelete() {
   isDeleteModalOpen.value = false
   router.push('/')
 }
+
+const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
+const elapsedTime = ref<Record<number, number>>(session.elapsedTime ?? {})
+
+const {
+  formatted,
+  elapsed,
+  setElapsed,
+} = useTimer(isTimerEnabled)
+
+async function handleEvaluateAndGoNext(value: any, comment?: string) {
+  await evaluateAndGoNext(value, comment, undefined, formatted.value)
+}
+
+async function persistElapsedTime(itemId?: number) {
+  if (!isTimerEnabled.value || itemId == null)
+    return
+
+  elapsedTime.value[itemId] = elapsed.value
+  session.elapsedTime = { ...elapsedTime.value }
+  await evaluationStorage.saveSession(session)
+}
+
+watch(
+  () => currentItem.value?.id,
+  async (newItemId, oldItemId) => {
+    if (!isTimerEnabled.value)
+      return
+
+    if (oldItemId != null) {
+      await persistElapsedTime(oldItemId)
+    }
+
+    const stored = newItemId != null
+      ? elapsedTime.value[newItemId] ?? 0
+      : 0
+
+    setElapsed(stored)
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => {
+  void persistElapsedTime(currentItem.value?.id)
+})
 </script>
 
 <template>
@@ -135,6 +178,9 @@ async function handleDelete() {
         :label="$t('evaluation.displayContext')"
         :context="session.dataset.context"
       />
+      <div v-if="isTimerEnabled">
+        {{ formatted }}
+      </div>
       <div class="ml-auto">
         <UDropdownMenu :items="sessionMenuItems" :modal="false">
           <UButton

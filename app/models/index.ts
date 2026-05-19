@@ -39,6 +39,7 @@ export interface EvaluationSettings {
   allowComments: boolean
   requireComments: boolean
   instructions?: string
+  timerEnabled: boolean
 
   // Type-specific settings
   masterySettings?: MasterySettings
@@ -80,6 +81,7 @@ export interface EvaluationResult {
   questionId: number // The question this item belongs to
   value: any // The actual evaluation value (mastery level, boolean, score, etc.)
   comment?: string
+  elapsedTime?: string
   evaluatedAt: string // ISO timestamp
 }
 
@@ -94,6 +96,7 @@ export interface EvaluationSession {
   updatedAt: string
   evaluatorName?: string
   isCompleted: boolean
+  elapsedTime?: Record<number, number>
 }
 
 export interface ExportData {

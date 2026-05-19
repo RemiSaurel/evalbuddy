@@ -197,7 +197,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   }
 
   // Evaluation functions
-  async function saveEvaluationResult(value: any, comment?: string, masteryLevel?: string) {
+  async function saveEvaluationResult(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string) {
     if (!currentItem.value || !evaluationSession)
       return
 
@@ -214,6 +214,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
       questionId: currentItem.value.questionID,
       value,
       comment: comment || '',
+      elapsedTime,
       evaluatedAt: new Date().toISOString(),
     }
 
@@ -236,8 +237,8 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     }
   }
 
-  async function evaluateAndGoNext(value: any, comment?: string, masteryLevel?: string) {
-    await saveEvaluationResult(value, comment, masteryLevel)
+  async function evaluateAndGoNext(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string) {
+    await saveEvaluationResult(value, comment, masteryLevel, elapsedTime)
     goToNextItem()
   }
 

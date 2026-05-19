@@ -29,7 +29,8 @@
       "tabs": {
         "basic": "Paramètres",
         "evaluation": "Options",
-        "comments": "Commentaires"
+        "comments": "Commentaires",
+        "others": "Autres"
       },
       "types": {
         "mastery": {
@@ -69,7 +70,9 @@
         "passingScorePlaceholder": "ex. : 60",
         "commentSettings": "Paramètres des commentaires",
         "allowComments": "Autoriser les commentaires",
-        "requireComments": "Commentaires obligatoires"
+        "requireComments": "Commentaires obligatoires",
+        "timerSettings": "Chronomètre",
+        "addTimer": "Ajouter un Chronomètre"
       },
       "buttons": {
         "addLevel": "Ajouter un niveau",

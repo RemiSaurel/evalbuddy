@@ -209,6 +209,7 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
                 { label: t('configuration.modal.tabs.basic'), value: 'basic', slot: 'basic', icon: 'i-lucide:settings' },
                 { label: t('configuration.modal.tabs.evaluation'), value: 'evaluation', slot: 'evaluation', icon: 'i-lucide:clipboard-list' },
                 { label: t('configuration.modal.tabs.comments'), value: 'comments', slot: 'comments', icon: 'i-lucide:message-circle' },
+                { label: t('configuration.modal.tabs.others'), value: 'others', slot: 'others', icon: 'i-lucide:list-filter-plus' },
               ]"
             >
               <!-- Basic Settings Tab -->
@@ -379,6 +380,25 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
                     <UCheckbox
                       v-model="localConfig.settings.requireComments"
                       :disabled="!localConfig.settings.allowComments" :label="t('configuration.modal.fields.requireComments')"
+                    />
+                  </div>
+                </div>
+              </template>
+
+              <!-- Others Tab -->
+              <template #others>
+                <div class="space-y-4 mt-4">
+                  <div class="flex items-center gap-2">
+                    <UIcon name="i-lucide:timer" class="w-5 h-5 text-primary-500" />
+                    <h5 class="font-medium">
+                      {{ t('configuration.modal.fields.timerSettings') }}
+                    </h5>
+                  </div>
+
+                  <div class="space-y-3">
+                    <UCheckbox
+                      v-model="localConfig.settings.timerEnabled"
+                      :label="t('configuration.modal.fields.addTimer')"
                     />
                   </div>
                 </div>
