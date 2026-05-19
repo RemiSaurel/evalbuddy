@@ -311,7 +311,7 @@ useEvaluationShortcuts({
                     </div>
                   </div>
                   <UKbd class="opacity-50 ml-2">
-                    {{ index + 1 }}
+                    {{ index }}
                   </UKbd>
                 </div>
               </UButton>
@@ -320,7 +320,7 @@ useEvaluationShortcuts({
 
           <!-- Keyboard shortcut hint -->
           <div class="text-xs text-neutral-400 dark:text-neutral-500 transition-colors mt-2">
-            <UKbd>1</UKbd>–<UKbd>{{ evaluationOptions.length }}</UKbd> {{ t('evaluation.shortcuts.selectOption', 'select') }}
+            <UKbd>0</UKbd>–<UKbd>{{ evaluationOptions.length - 1 }}</UKbd> {{ t('evaluation.shortcuts.selectOption', 'select') }}
             &middot; <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm', 'confirm') }}
           </div>
         </div>

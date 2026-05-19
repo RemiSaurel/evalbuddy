@@ -1,16 +1,18 @@
-<script setup>
+<script setup lang="ts">
+type ColorModePreference = 'light' | 'dark' | 'system'
+
 const colorMode = useColorMode()
 
 function toggleColorMode() {
-  const modes = ['light', 'dark', 'system']
-  const current = modes.indexOf(colorMode.preference)
-  colorMode.preference = modes[(current + 1) % modes.length]
+  const modes: ColorModePreference[] = ['light', 'dark', 'system']
+  const current = modes.indexOf(colorMode.preference as ColorModePreference)
+  colorMode.preference = modes[(current + 1) % modes.length] as ColorModePreference
 }
 </script>
 
 <template>
   <UButton
-    class="p-2 rounded-md"
+    class="p-2 rounded-md transition-colors"
     aria-label="Toggle color mode"
     variant="ghost"
     color="neutral"

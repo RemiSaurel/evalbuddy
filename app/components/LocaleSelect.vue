@@ -10,6 +10,7 @@ const { languages, languageValue } = useLanguage()
     class="w-fit"
     placeholder=" "
     :ui="{ content: 'min-w-32' }"
+    variant="ghost"
   >
     <!-- Override default slot to show only short language code -->
     <template #default="{ modelValue }">

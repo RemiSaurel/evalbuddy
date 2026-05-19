@@ -104,6 +104,20 @@ export interface ExportData {
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
+// Mastery levels color definiton
+export const MASTERY_COLOR_CLASSES = [
+  'bg-red-400 text-red-900 hover:bg-red-400',
+  'bg-red-300 text-red-700 hover:bg-red-300',
+  'bg-orange-400 text-orange-800 hover:bg-orange-400',
+  'bg-orange-300 text-orange-700 hover:bg-orange-300',
+  'bg-amber-300 text-amber-800 hover:bg-amber-400',
+  'bg-yellow-300 text-yellow-800 hover:bg-yellow-400',
+  'bg-lime-300 text-lime-800 hover:bg-lime-400',
+  'bg-green-200 text-green-700 hover:bg-green-300',
+  'bg-green-300 text-green-800 hover:bg-green-400',
+  'bg-emerald-300 text-emerald-800 hover:bg-emerald-400',
+] as const
+
 // Default mastery level configuration
 export const DEFAULT_MASTERY_CONFIG: MasterySettings = {
   levels: [
@@ -111,28 +125,28 @@ export const DEFAULT_MASTERY_CONFIG: MasterySettings = {
       id: 'NOT_ATTAINED',
       label: 'Not Attained',
       description: 'Learning objective not achieved',
-      color: 'bg-red-300 text-red-800 hover:bg-red-400',
+      color: MASTERY_COLOR_CLASSES[0],
       order: 1,
     },
     {
       id: 'INSUFFICIENT',
       label: 'Insufficient',
       description: 'Partial understanding but needs improvement',
-      color: 'bg-orange-300 text-orange-800 hover:bg-orange-400',
+      color: MASTERY_COLOR_CLASSES[3],
       order: 2,
     },
     {
       id: 'SUFFICIENT',
       label: 'Sufficient',
       description: 'Adequate understanding achieved',
-      color: 'bg-yellow-300 text-yellow-800 hover:bg-yellow-400',
+      color: MASTERY_COLOR_CLASSES[5],
       order: 3,
     },
     {
       id: 'TOTAL',
       label: 'Total',
       description: 'Complete mastery demonstrated',
-      color: 'bg-green-300 text-green-800 hover:bg-green-400',
+      color: MASTERY_COLOR_CLASSES[9],
       order: 4,
     },
   ],

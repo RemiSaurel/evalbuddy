@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { EvaluationConfig, EvaluationType, MasteryLevelDefinition } from '~/models'
 import { useSortable } from '@vueuse/integrations/useSortable'
+import { MASTERY_COLOR_CLASSES } from '~/models'
 
 const props = defineProps<{
   modelValue: EvaluationConfig | null
@@ -12,6 +13,9 @@ const emit = defineEmits<{
   'update:open': [open: boolean]
   'save': [config: EvaluationConfig]
 }>()
+
+// Maximum number of levels for mastery level evaluation
+const MAXIMUM_LEVELS = 10
 
 const { t } = useI18n()
 const { getDefaultConfig, validateConfig } = useEvaluationConfig()
@@ -75,6 +79,10 @@ function validateAndSave() {
   if (!localConfig.value)
     return
 
+  if (localConfig.value.type === 'mastery' && localConfig.value.settings.masterySettings?.levels) {
+    syncMasteryLevelColors(localConfig.value.settings.masterySettings.levels)
+  }
+
   isSaving.value = true
   validationErrors.value = validateConfig(localConfig.value)
 
@@ -93,26 +101,44 @@ function cancel() {
 
 // Add mastery level
 function addMasteryLevel() {
-  if (!localConfig.value?.settings.masterySettings)
+  const levels = localConfig.value?.settings.masterySettings?.levels
+
+  if (!levels || levels.length >= MAXIMUM_LEVELS) // maximum capacity of 10 levels
     return
 
-  const levels = localConfig.value.settings.masterySettings.levels
   const newOrder = Math.max(...levels.map(l => l.order), 0) + 1
 
   levels.push({
     id: `level_${Date.now()}`,
     label: `${t('configuration.modal.fields.level')} ${newOrder}`,
     description: '',
-    color: 'bg-neutral-300 text-neutral-800 hover:bg-neutral-400',
+    color: '',
     order: newOrder,
   })
 }
 
 // Remove mastery level
 function removeMasteryLevel(index: number) {
-  if (!localConfig.value?.settings.masterySettings)
+  if (!localConfig.value?.settings.masterySettings?.levels || localConfig.value?.settings.masterySettings?.levels.length <= 2) // 2 levels minimum required
     return
-  localConfig.value.settings.masterySettings.levels.splice(index, 1)
+  localConfig.value?.settings.masterySettings?.levels.splice(index, 1)
+}
+
+function getMasteryLevelColor(index: number, total: number): string {
+  if (total <= 1) {
+    return MASTERY_COLOR_CLASSES[0]
+  }
+
+  const paletteLength = MASTERY_COLOR_CLASSES.length
+  const paletteIndex = Math.round((index / (total - 1)) * (paletteLength - 1))
+  return MASTERY_COLOR_CLASSES[paletteIndex] ?? MASTERY_COLOR_CLASSES[paletteLength - 1]!
+}
+
+function syncMasteryLevelColors(levels: MasteryLevelDefinition[]) {
+  const total = levels.length
+  levels.forEach((level, index) => {
+    level.color = getMasteryLevelColor(index, total)
+  })
 }
 
 // Swap mastery levels with drag-and-drop
