@@ -79,12 +79,14 @@ export function useTimer(enabled: Ref<boolean>) {
   }, { immediate: true })
 
   const stop = () => {
+    const wasRunning = interval !== null
+
     if (interval) {
       clearInterval(interval)
       interval = null
     }
 
-    elapsed.value = accumulated + (Date.now() - startTime)
+    elapsed.value = wasRunning ? accumulated + (Date.now() - startTime) : accumulated
   }
 
   const setElapsed = (value: number) => {

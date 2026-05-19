@@ -39,7 +39,7 @@ export interface EvaluationSettings {
   allowComments: boolean
   requireComments: boolean
   instructions?: string
-  timerEnabled: boolean
+  timerEnabled?: boolean
 
   // Type-specific settings
   masterySettings?: MasterySettings
@@ -107,7 +107,7 @@ export interface ExportData {
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
-// Mastery levels color definiton
+// Mastery levels color definition
 export const MASTERY_COLOR_CLASSES = [
   'bg-red-400 text-red-900 hover:bg-red-400',
   'bg-red-300 text-red-700 hover:bg-red-300',
