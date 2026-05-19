@@ -72,7 +72,7 @@
         "allowComments": "Allow comments",
         "requireComments": "Require comments",
         "timerSettings": "Timer",
-        "addTimer": "Add a Timer"
+        "addTimer": "Record the time spent evaluating responses"
       },
       "buttons": {
         "addLevel": "Add Level",

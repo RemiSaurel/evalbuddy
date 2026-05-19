@@ -72,7 +72,7 @@
         "allowComments": "Autoriser les commentaires",
         "requireComments": "Commentaires obligatoires",
         "timerSettings": "Chronomètre",
-        "addTimer": "Ajouter un Chronomètre"
+        "addTimer": "Enregistrer le temps d'évaluation des réponses"
       },
       "buttons": {
         "addLevel": "Ajouter un niveau",
