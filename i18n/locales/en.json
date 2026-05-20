@@ -214,6 +214,11 @@
     "settings": {
       "hideProgressBar": "Hide Progress Bar"
     },
+    "timerAlertModal": {
+      "title": "Information",
+      "body": "The configuration records the response evaluation times.",
+      "button": "Proceed to the evaluation"
+    },
     "error": "Error",
     "title": "Evaluation",
     "instructions": "Instructions",

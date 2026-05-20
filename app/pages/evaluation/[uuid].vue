@@ -122,12 +122,14 @@ async function handleDelete() {
 
 const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
 const elapsedTime = ref<Record<number, number>>(session.elapsedTime ?? {})
+const isStartModalOpen = ref(false)
+const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
 
 const {
   formatted,
   elapsed,
   setElapsed,
-} = useTimer(isTimerEnabled)
+} = useTimer(timerActive)
 
 async function handleEvaluateAndGoNext(value: any, comment?: string) {
   await evaluateAndGoNext(value, comment, undefined, formatted.value)
@@ -161,12 +163,40 @@ watch(
   { immediate: true },
 )
 
+watch(
+  isTimerEnabled,
+  (enabled) => {
+    if (enabled) {
+      isStartModalOpen.value = true
+    }
+  },
+  { immediate: true },
+)
+
 onUnmounted(() => {
   void persistElapsedTime(currentItem.value?.id)
 })
 </script>
 
 <template>
+  <UModal
+    v-model:open="isStartModalOpen"
+    :title="$t('evaluation.timerAlertModal.title')"
+    :description="$t('evaluation.timerAlertModal.body')"
+    :close="false"
+    :dismissible="false"
+  >
+    <template #footer>
+      <UButton
+        icon="i-lucide:play"
+        color="primary"
+        @click="isStartModalOpen = false"
+      >
+        {{ $t('evaluation.timerAlertModal.button') }}
+      </UButton>
+    </template>
+  </UModal>
+
   <div class="flex flex-col flex-1 min-h-0">
     <!-- Session title bar spanning full width -->
     <div class="flex shrink-0 items-center gap-2 px-4 py-2 border-b border-neutral-200 bg-white dark:bg-neutral-900 transition-colors">

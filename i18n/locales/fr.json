@@ -214,6 +214,11 @@
     "settings": {
       "hideProgressBar": "Masquer la barre de progression"
     },
+    "timerAlertModal": {
+      "title": "Information",
+      "body": "La configuration enregistre les temps d'évaluation des réponses.",
+      "button": "Passer à l'évaluation"
+    },
     "error": "Erreur",
     "title": "Évaluation",
     "instructions": "Consignes d'évaluation",
