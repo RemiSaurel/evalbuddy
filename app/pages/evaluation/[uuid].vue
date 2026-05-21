@@ -121,7 +121,7 @@ async function handleDelete() {
 }
 
 const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
-const elapsedTime = ref<Record<number, number>>(session.elapsedTime ?? {})
+const elapsedTime = ref<Record<number, number>>(session.elapsedTimeMsByItemId ?? {})
 const isStartModalOpen = ref(false)
 const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
 
@@ -140,8 +140,8 @@ async function persistElapsedTime(itemId?: number) {
     return
 
   elapsedTime.value[itemId] = elapsed.value
-  session.elapsedTime = { ...elapsedTime.value }
-  await evaluationStorage.saveSessionElapsedTime(session.id, session.elapsedTime)
+  session.elapsedTimeMsByItemId = { ...elapsedTime.value }
+  await evaluationStorage.saveSessionElapsedTime(session.id, session.elapsedTimeMsByItemId)
 }
 
 let queue = Promise.resolve()
@@ -150,18 +150,23 @@ watch(
   () => currentItem.value?.id,
   (newItemId, oldItemId) => {
     queue = queue.then(async () => {
-      if (!isTimerEnabled.value)
-        return
+      try {
+        if (!isTimerEnabled.value)
+          return
 
-      if (oldItemId != null) {
-        await persistElapsedTime(oldItemId)
+        if (oldItemId != null) {
+          await persistElapsedTime(oldItemId)
+        }
+
+        const stored = newItemId != null
+          ? elapsedTime.value[newItemId] ?? 0
+          : 0
+
+        setElapsed(stored)
       }
-
-      const stored = newItemId != null
-        ? elapsedTime.value[newItemId] ?? 0
-        : 0
-
-      setElapsed(stored)
+      catch (err) {
+        console.error('[timer queue error]', err)
+      }
     })
   },
   { immediate: true },
@@ -178,8 +183,13 @@ watch(
 )
 
 onUnmounted(async () => {
-  session.elapsedTime = { ...elapsedTime.value }
-  await evaluationStorage.saveSessionElapsedTime(session.id, session.elapsedTime)
+  queue = queue.then(async () => {
+    await persistElapsedTime(currentItem.value?.id)
+    session.elapsedTimeMsByItemId = { ...elapsedTime.value }
+    await evaluationStorage.saveSessionElapsedTime(session.id, session.elapsedTimeMsByItemId)
+  })
+
+  await queue
 })
 </script>
 

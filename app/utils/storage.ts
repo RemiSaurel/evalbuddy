@@ -43,8 +43,7 @@ class EvaluationStorage {
 
         // Create elapsed times store for lightweight timer persistence
         if (!db.objectStoreNames.contains(ELAPSED_TIMES_STORE)) {
-          const elapsedTimesStore = db.createObjectStore(ELAPSED_TIMES_STORE, { keyPath: 'sessionId' })
-          elapsedTimesStore.createIndex('sessionId', 'sessionId', { unique: true })
+          db.createObjectStore(ELAPSED_TIMES_STORE, { keyPath: 'sessionId' })
         }
       }
     })
@@ -113,7 +112,7 @@ class EvaluationStorage {
       updatedAt: session.updatedAt,
       evaluatorName: session.evaluatorName,
       isCompleted: session.isCompleted,
-      elapsedTime: session.elapsedTime ?? {},
+      elapsedTimeMsByItemId: session.elapsedTimeMsByItemId ?? {},
     }
 
     return new Promise((resolve, reject) => {
@@ -138,7 +137,8 @@ class EvaluationStorage {
         }
 
         try {
-          session.elapsedTime = await this.getSessionElapsedTime(id)
+          const storedElapsedTime = await this.getSessionElapsedTime(id)
+          session.elapsedTime = storedElapsedTime ?? session.elapsedTime ?? {}
           resolve(session)
         }
         catch (error) {
@@ -179,13 +179,26 @@ class EvaluationStorage {
 
   async deleteSession(id: string): Promise<void> {
     const db = await this.initDB()
-    const transaction = db.transaction([SESSIONS_STORE], 'readwrite')
+    const transaction = db.transaction([SESSIONS_STORE, ELAPSED_TIMES_STORE], 'readwrite')
     const store = transaction.objectStore(SESSIONS_STORE)
+    const timeStore = transaction.objectStore(ELAPSED_TIMES_STORE)
 
     return new Promise((resolve, reject) => {
-      const request = store.delete(id)
-      request.onsuccess = () => resolve()
-      request.onerror = () => reject(request.error)
+      const sessionReq = store.delete(id)
+      const elapsedReq = timeStore.delete(id)
+
+      let done = 0
+      const check = () => {
+        done++
+        if (done === 2)
+          resolve()
+      }
+
+      sessionReq.onsuccess = check
+      elapsedReq.onsuccess = check
+
+      elapsedReq.onsuccess = () => resolve()
+      elapsedReq.onerror = () => reject(elapsedReq.error)
     })
   }
 
@@ -212,7 +225,7 @@ class EvaluationStorage {
       dataset,
       results: [],
       config: defaultConfig,
-      elapsedTime: {},
+      elapsedTimeMsByItemId: {},
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       evaluatorName,
