@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
-import type { EvaluationSession } from '@/models'
+import type { EvaluationSession } from '@/models/index'
 import { ImportExportService } from '@/utils/importExport'
 
 definePageMeta({
@@ -141,24 +141,28 @@ async function persistElapsedTime(itemId?: number) {
 
   elapsedTime.value[itemId] = elapsed.value
   session.elapsedTime = { ...elapsedTime.value }
-  await evaluationStorage.saveSession(session)
+  await evaluationStorage.saveSessionElapsedTime(session.id, session.elapsedTime)
 }
+
+let queue = Promise.resolve()
 
 watch(
   () => currentItem.value?.id,
-  async (newItemId, oldItemId) => {
-    if (!isTimerEnabled.value)
-      return
+  (newItemId, oldItemId) => {
+    queue = queue.then(async () => {
+      if (!isTimerEnabled.value)
+        return
 
-    if (oldItemId != null) {
-      await persistElapsedTime(oldItemId)
-    }
+      if (oldItemId != null) {
+        await persistElapsedTime(oldItemId)
+      }
 
-    const stored = newItemId != null
-      ? elapsedTime.value[newItemId] ?? 0
-      : 0
+      const stored = newItemId != null
+        ? elapsedTime.value[newItemId] ?? 0
+        : 0
 
-    setElapsed(stored)
+      setElapsed(stored)
+    })
   },
   { immediate: true },
 )
@@ -173,8 +177,9 @@ watch(
   { immediate: true },
 )
 
-onUnmounted(() => {
-  void persistElapsedTime(currentItem.value?.id)
+onUnmounted(async () => {
+  session.elapsedTime = { ...elapsedTime.value }
+  await evaluationStorage.saveSessionElapsedTime(session.id, session.elapsedTime)
 })
 </script>
 

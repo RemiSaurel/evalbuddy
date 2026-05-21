@@ -1,4 +1,4 @@
-import type { DatasetStructure, EvaluationConfig, EvaluationSession, ExportData } from '~/models'
+import type { DatasetStructure, EvaluationConfig, ExportData } from '~/models'
 import { evaluationStorage } from './storage'
 
 // Configuration export/import data structure
@@ -44,10 +44,8 @@ export class ImportExportService {
       throw new Error('Session not found')
     }
 
-    const { elapsedTime, ...sessionWithoutElapsedTime } = session
-
     const exportData: ExportData = {
-      session: sessionWithoutElapsedTime as EvaluationSession,
+      session,
       exportedAt: new Date().toISOString(),
       version: '1.0',
     }

@@ -43,20 +43,6 @@ export function useTimer(enabled: Ref<boolean>) {
     startInterval()
   }
 
-  // auto pause/resume based on the window focus
-  watch(isFocused, (focused) => {
-    if (!enabled.value) {
-      return
-    }
-
-    if (focused) {
-      resume()
-    }
-    else {
-      pause()
-    }
-  })
-
   const formatted = computed(() => {
     const total = Math.floor(elapsed.value / 1000)
 
@@ -69,8 +55,8 @@ export function useTimer(enabled: Ref<boolean>) {
       .join(':')
   })
 
-  watch(enabled, (isEnabled) => {
-    if (isEnabled) {
+  watch([enabled, isFocused], ([isEnabled, focused]) => {
+    if (isEnabled && focused) {
       resume()
     }
     else {

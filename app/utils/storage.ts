@@ -2,9 +2,10 @@ import type { DatasetStructure, EvaluationConfig, EvaluationSession } from '@/mo
 import { DEFAULT_MASTERY_CONFIG } from '@/models/index'
 
 const DB_NAME = 'EvalBuddyDB'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const SESSIONS_STORE = 'sessions'
 const CONFIGS_STORE = 'configs'
+const ELAPSED_TIMES_STORE = 'elapsedTimes'
 
 class EvaluationStorage {
   private db: IDBDatabase | null = null
@@ -39,7 +40,37 @@ class EvaluationStorage {
           configsStore.createIndex('name', 'name', { unique: false })
           configsStore.createIndex('type', 'type', { unique: false })
         }
+
+        // Create elapsed times store for lightweight timer persistence
+        if (!db.objectStoreNames.contains(ELAPSED_TIMES_STORE)) {
+          const elapsedTimesStore = db.createObjectStore(ELAPSED_TIMES_STORE, { keyPath: 'sessionId' })
+          elapsedTimesStore.createIndex('sessionId', 'sessionId', { unique: true })
+        }
       }
+    })
+  }
+
+  async saveSessionElapsedTime(sessionId: string, elapsedTime: Record<number, number>): Promise<void> {
+    const db = await this.initDB()
+    const transaction = db.transaction([ELAPSED_TIMES_STORE], 'readwrite')
+    const store = transaction.objectStore(ELAPSED_TIMES_STORE)
+
+    return new Promise((resolve, reject) => {
+      const request = store.put({ sessionId, elapsedTime })
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  async getSessionElapsedTime(sessionId: string): Promise<Record<number, number> | undefined> {
+    const db = await this.initDB()
+    const transaction = db.transaction([ELAPSED_TIMES_STORE], 'readonly')
+    const store = transaction.objectStore(ELAPSED_TIMES_STORE)
+
+    return new Promise((resolve, reject) => {
+      const request = store.get(sessionId)
+      request.onsuccess = () => resolve(request.result?.elapsedTime)
+      request.onerror = () => reject(request.error)
     })
   }
 
@@ -99,7 +130,21 @@ class EvaluationStorage {
 
     return new Promise((resolve, reject) => {
       const request = store.get(id)
-      request.onsuccess = () => resolve(request.result || null)
+      request.onsuccess = async () => {
+        const session = request.result || null
+        if (!session) {
+          resolve(null)
+          return
+        }
+
+        try {
+          session.elapsedTime = await this.getSessionElapsedTime(id)
+          resolve(session)
+        }
+        catch (error) {
+          reject(error)
+        }
+      }
       request.onerror = () => reject(request.error)
     })
   }
