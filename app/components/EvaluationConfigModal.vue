@@ -167,7 +167,7 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
 </script>
 
 <template>
-  <UModal v-model:open="isOpen" title="Evaluation Config Modal" description="Evaluation Config Modal" @after:leave="onAfterLeave">
+  <UModal v-model:open="isOpen" title="Evaluation Config Modal" description="Evaluation Config Modal" :ui="{ content: 'max-w-2xl' }" @after:leave="onAfterLeave">
     <template #content>
       <UCard>
         <template #header>
