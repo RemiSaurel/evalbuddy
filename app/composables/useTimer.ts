@@ -1,15 +1,13 @@
 import type { Ref } from 'vue'
-import { useWindowFocus } from '@vueuse/core'
 import { computed, onUnmounted, ref, watch } from 'vue'
 
 export function useTimer(enabled: Ref<boolean>) {
   const elapsed = ref(0)
 
-  const isFocused = useWindowFocus()
-
   let startTime = 0
   let accumulated = 0
   let interval: ReturnType<typeof setInterval> | null = null
+  const running = ref(false)
 
   const tick = () => {
     elapsed.value = accumulated + (Date.now() - startTime)
@@ -24,6 +22,7 @@ export function useTimer(enabled: Ref<boolean>) {
     interval = setInterval(() => {
       tick()
     }, 1000)
+    running.value = true
   }
 
   const pause = () => {
@@ -34,6 +33,7 @@ export function useTimer(enabled: Ref<boolean>) {
     interval = null
 
     accumulated += Date.now() - startTime
+    running.value = false
   }
 
   const resume = () => {
@@ -55,8 +55,8 @@ export function useTimer(enabled: Ref<boolean>) {
       .join(':')
   })
 
-  watch([enabled, isFocused], ([isEnabled, focused]) => {
-    if (isEnabled && focused) {
+  watch(enabled, (isEnabled) => {
+    if (isEnabled) {
       resume()
     }
     else {
@@ -71,6 +71,7 @@ export function useTimer(enabled: Ref<boolean>) {
       clearInterval(interval)
       interval = null
     }
+    running.value = false
 
     elapsed.value = wasRunning ? accumulated + (Date.now() - startTime) : accumulated
   }
@@ -85,5 +86,5 @@ export function useTimer(enabled: Ref<boolean>) {
     stop()
   })
 
-  return { elapsed, setElapsed, formatted }
+  return { elapsed, setElapsed, formatted, pause, resume, running }
 }

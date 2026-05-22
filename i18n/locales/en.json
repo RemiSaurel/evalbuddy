@@ -131,7 +131,9 @@
       "confirm": "Confirm",
       "save": "Save",
       "saveComment": "Confirm Evaluation",
-      "selectMasteryLevel": "Select a mastery level"
+      "selectMasteryLevel": "Select a mastery level",
+      "pause": "Pause",
+      "resume": "Resume"
     },
     "overview": {
       "resumeTitle": "Resume Evaluation",
@@ -218,6 +220,12 @@
       "title": "Information",
       "body": "The configuration records the response evaluation times.",
       "button": "Proceed to the evaluation"
+    },
+    "blurPauseModal": {
+      "title": "Pause evaluation?",
+      "body": "Focus was lost. Do you want to pause the evaluation?",
+      "pauseButton": "Pause",
+      "continueButton": "Continue"
     },
     "error": "Error",
     "title": "Evaluation",

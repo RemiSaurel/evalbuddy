@@ -45,6 +45,7 @@ const isGenericEvaluation = computed(() => !!evaluationConfig.value)
 
 const isCompletionModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
+const isBlurPauseModalOpen = ref(false)
 
 const totalEvaluated = computed(() =>
   Object.values(evaluatedItems.value).filter(
@@ -81,6 +82,57 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
 // View settings (persisted in localStorage)
 const hideProgressBar = useLocalStorage('evalbuddy-hide-progress', false)
 
+async function handleExport() {
+  await persistElapsedTime(currentItem.value?.id)
+  const blob = await ImportExportService.exportSession(session.id)
+  const filename = ImportExportService.generateExportFilename(session.name)
+  ImportExportService.downloadBlob(blob, filename)
+}
+
+async function handleDelete() {
+  await evaluationStorage.deleteSession(session.id)
+  isDeleteModalOpen.value = false
+  router.push('/')
+}
+
+const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
+const elapsedTime = ref<Record<number, number>>(session.elapsedTimeMsByItemId ?? {})
+const isStartModalOpen = ref(false)
+const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
+
+const {
+  formatted,
+  elapsed,
+  setElapsed,
+  pause,
+  resume,
+  running,
+} = useTimer(timerActive)
+
+function handleWindowBlur() {
+  if (!timerActive.value || !running.value || isBlurPauseModalOpen.value)
+    return
+
+  isBlurPauseModalOpen.value = true
+}
+
+function confirmPauseOnBlur() {
+  pause()
+  isBlurPauseModalOpen.value = false
+}
+
+function cancelPauseOnBlur() {
+  isBlurPauseModalOpen.value = false
+}
+
+onMounted(() => {
+  window.addEventListener('blur', handleWindowBlur)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('blur', handleWindowBlur)
+})
+
 // Session dropdown menu
 const sessionMenuItems = computed<DropdownMenuItem[][]>(() => [
   [
@@ -106,30 +158,6 @@ const sessionMenuItems = computed<DropdownMenuItem[][]>(() => [
     },
   ],
 ])
-
-async function handleExport() {
-  await persistElapsedTime(currentItem.value?.id)
-  const blob = await ImportExportService.exportSession(session.id)
-  const filename = ImportExportService.generateExportFilename(session.name)
-  ImportExportService.downloadBlob(blob, filename)
-}
-
-async function handleDelete() {
-  await evaluationStorage.deleteSession(session.id)
-  isDeleteModalOpen.value = false
-  router.push('/')
-}
-
-const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
-const elapsedTime = ref<Record<number, number>>(session.elapsedTimeMsByItemId ?? {})
-const isStartModalOpen = ref(false)
-const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
-
-const {
-  formatted,
-  elapsed,
-  setElapsed,
-} = useTimer(timerActive)
 
 async function handleEvaluateAndGoNext(value: any, comment?: string) {
   await evaluateAndGoNext(value, comment, undefined, formatted.value)
@@ -212,6 +240,31 @@ onUnmounted(async () => {
     </template>
   </UModal>
 
+  <UModal
+    v-model:open="isBlurPauseModalOpen"
+    :title="$t('evaluation.blurPauseModal.title')"
+    :description="$t('evaluation.blurPauseModal.body')"
+    :close="false"
+    :dismissible="false"
+  >
+    <template #footer>
+      <UButton
+        icon="i-lucide:pause"
+        color="primary"
+        @click="confirmPauseOnBlur"
+      >
+        {{ $t('evaluation.blurPauseModal.pauseButton') }}
+      </UButton>
+      <UButton
+        icon="i-lucide:play"
+        variant="ghost"
+        @click="cancelPauseOnBlur"
+      >
+        {{ $t('evaluation.blurPauseModal.continueButton') }}
+      </UButton>
+    </template>
+  </UModal>
+
   <div class="flex flex-col flex-1 min-h-0">
     <!-- Session title bar spanning full width -->
     <div class="flex shrink-0 items-center gap-2 px-4 py-2 border-b border-neutral-200 bg-white dark:bg-neutral-900 transition-colors">
@@ -226,7 +279,16 @@ onUnmounted(async () => {
       <div v-if="isTimerEnabled">
         {{ formatted }}
       </div>
-      <div class="ml-auto">
+      <div class="ml-auto flex items-center gap-2">
+        <UButton
+          v-if="isTimerEnabled"
+          :icon="running ? 'i-lucide:pause' : 'i-lucide:play'"
+          variant="ghost"
+          color="neutral"
+          @click="running ? pause() : resume()"
+        >
+          {{ running ? $t('evaluation.actions.pause') : $t('evaluation.actions.resume') }}
+        </UButton>
         <UDropdownMenu :items="sessionMenuItems" :modal="false">
           <UButton
             icon="i-lucide:more-vertical"
