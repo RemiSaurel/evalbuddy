@@ -221,11 +221,17 @@
       "body": "The configuration records the response evaluation times.",
       "button": "Proceed to the evaluation"
     },
+    "pausedModal": {
+      "title": "Evaluation paused",
+      "body": "The evaluation is paused.",
+      "resumeButton": "Resume",
+      "homeButton": "Go home"
+    },
     "blurPauseModal": {
       "title": "Pause evaluation?",
       "body": "Focus was lost. Do you want to pause the evaluation?",
       "pauseButton": "Pause",
-      "continueButton": "Continue"
+      "continueButton": "Resume"
     },
     "error": "Error",
     "title": "Evaluation",

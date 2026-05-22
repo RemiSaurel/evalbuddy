@@ -46,6 +46,7 @@ const isGenericEvaluation = computed(() => !!evaluationConfig.value)
 const isCompletionModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isBlurPauseModalOpen = ref(false)
+const isPausedModalOpen = ref(false)
 
 const totalEvaluated = computed(() =>
   Object.values(evaluatedItems.value).filter(
@@ -119,6 +120,12 @@ function handleWindowBlur() {
 function confirmPauseOnBlur() {
   pause()
   isBlurPauseModalOpen.value = false
+  isPausedModalOpen.value = true
+}
+
+function handlePauseClick() {
+  pause()
+  isPausedModalOpen.value = true
 }
 
 function cancelPauseOnBlur() {
@@ -222,48 +229,15 @@ onUnmounted(async () => {
 </script>
 
 <template>
-  <UModal
-    v-model:open="isStartModalOpen"
-    :title="$t('evaluation.timerAlertModal.title')"
-    :description="$t('evaluation.timerAlertModal.body')"
-    :close="false"
-    :dismissible="false"
-  >
-    <template #footer>
-      <UButton
-        icon="i-lucide:play"
-        color="primary"
-        @click="isStartModalOpen = false"
-      >
-        {{ $t('evaluation.timerAlertModal.button') }}
-      </UButton>
-    </template>
-  </UModal>
+  <StartEvaluationModal
+    v-model:is-start-modal-open="isStartModalOpen"
+  />
 
-  <UModal
+  <PauseConfirmationModal
     v-model:open="isBlurPauseModalOpen"
-    :title="$t('evaluation.blurPauseModal.title')"
-    :description="$t('evaluation.blurPauseModal.body')"
-    :close="false"
-    :dismissible="false"
-  >
-    <template #footer>
-      <UButton
-        icon="i-lucide:pause"
-        color="primary"
-        @click="confirmPauseOnBlur"
-      >
-        {{ $t('evaluation.blurPauseModal.pauseButton') }}
-      </UButton>
-      <UButton
-        icon="i-lucide:play"
-        variant="ghost"
-        @click="cancelPauseOnBlur"
-      >
-        {{ $t('evaluation.blurPauseModal.continueButton') }}
-      </UButton>
-    </template>
-  </UModal>
+    @confirm="confirmPauseOnBlur"
+    @cancel="cancelPauseOnBlur"
+  />
 
   <div class="flex flex-col flex-1 min-h-0">
     <!-- Session title bar spanning full width -->
@@ -285,7 +259,7 @@ onUnmounted(async () => {
           :icon="running ? 'i-lucide:pause' : 'i-lucide:play'"
           variant="ghost"
           color="neutral"
-          @click="running ? pause() : resume()"
+          @click="running ? handlePauseClick() : resume()"
         >
           {{ running ? $t('evaluation.actions.pause') : $t('evaluation.actions.resume') }}
         </UButton>
@@ -299,6 +273,12 @@ onUnmounted(async () => {
         </UDropdownMenu>
       </div>
     </div>
+
+    <PausedModal
+      v-model:open="isPausedModalOpen"
+      @resume="() => { resume(); isPausedModalOpen = false }"
+      @go-home="goToHomePage"
+    />
 
     <!-- Desktop: side-by-side resizable panels -->
     <UDashboardGroup

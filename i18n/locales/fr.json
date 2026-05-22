@@ -223,6 +223,12 @@
       "body": "La configuration enregistre les temps d'évaluation des réponses.",
       "button": "Passer à l'évaluation"
     },
+    "pausedModal": {
+      "title": "Évaluation en pause",
+      "body": "L'évaluation est en pause.",
+      "resumeButton": "Reprendre",
+      "homeButton": "Aller à l'accueil"
+    },
     "blurPauseModal": {
       "title": "Mettre en pause ?",
       "body": "Le focus a été perdu. Voulez-vous mettre l'évaluation en pause ?",
