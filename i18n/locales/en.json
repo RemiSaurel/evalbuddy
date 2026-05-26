@@ -91,7 +91,9 @@
       "delete": "Delete",
       "cancel": "Cancel",
       "export": "Export",
-      "import": "Import"
+      "import": "Import",
+      "pause": "Pause",
+      "resume": "Resume"
     },
     "viewModal": {
       "title": "View Configuration"
@@ -232,6 +234,11 @@
       "body": "Focus was lost. Do you want to pause the evaluation?",
       "pauseButton": "Pause",
       "continueButton": "Resume"
+    },
+    "aiEvaluation": {
+      "title": "AI Evaluation",
+      "score": "Score",
+      "justification": "Justification"
     },
     "error": "Error",
     "title": "Evaluation",

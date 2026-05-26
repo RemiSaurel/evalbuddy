@@ -235,6 +235,11 @@
       "pauseButton": "Mettre en pause",
       "continueButton": "Continuer"
     },
+    "aiEvaluation": {
+      "title": "Évaluation de l'IA",
+      "score": "Score",
+      "justification": "Justification"
+    },
     "error": "Erreur",
     "title": "Évaluation",
     "instructions": "Consignes d'évaluation",
