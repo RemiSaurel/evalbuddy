@@ -84,7 +84,7 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
 const hideProgressBar = useLocalStorage('evalbuddy-hide-progress', false)
 
 async function handleExport() {
-  await persistElapsedTime(currentItem.value?.id)
+  await persistCurrentElapsedTime(currentItem.value?.id)
   const blob = await ImportExportService.exportSession(session.id)
   const filename = ImportExportService.generateExportFilename(session.name)
   ImportExportService.downloadBlob(blob, filename)
@@ -97,7 +97,7 @@ async function handleDelete() {
 }
 
 const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
-const elapsedTime = ref<Record<number, number>>(session.elapsedTimeMsByItemId ?? {})
+const persistedElapsedTimes = ref<Record<number, number>>({})
 const isStartModalOpen = ref(false)
 const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
 
@@ -108,7 +108,22 @@ const {
   pause,
   resume,
   running,
+  sync,
 } = useTimer(timerActive)
+
+async function loadPersistedElapsedTimes() {
+  if (!isTimerEnabled.value)
+    return
+
+  persistedElapsedTimes.value = await evaluationStorage.getSessionElapsedTimes(session.id)
+
+  const currentItemId = currentItem.value?.id
+  if (currentItemId != null) {
+    setElapsed(persistedElapsedTimes.value[currentItemId] ?? 0)
+  }
+}
+
+await loadPersistedElapsedTimes()
 
 function handleWindowBlur() {
   if (!timerActive.value || !running.value || isBlurPauseModalOpen.value)
@@ -170,39 +185,33 @@ async function handleEvaluateAndGoNext(value: any, comment?: string) {
   await evaluateAndGoNext(value, comment, undefined, formatted.value)
 }
 
-async function persistElapsedTime(itemId?: number) {
+async function persistCurrentElapsedTime(itemId?: number) {
   if (!isTimerEnabled.value || itemId == null)
     return
 
-  elapsedTime.value[itemId] = elapsed.value
-  session.elapsedTimeMsByItemId = { ...elapsedTime.value }
-  await evaluationStorage.saveSessionElapsedTime(session.id, session.elapsedTimeMsByItemId)
-}
+  sync()
 
-let queue = Promise.resolve()
+  if (persistedElapsedTimes.value[itemId] === elapsed.value)
+    return
+
+  persistedElapsedTimes.value[itemId] = elapsed.value
+  await evaluationStorage.saveSessionElapsedTime(session.id, itemId, elapsed.value)
+}
 
 watch(
   () => currentItem.value?.id,
-  (newItemId, oldItemId) => {
-    queue = queue.then(async () => {
-      try {
-        if (!isTimerEnabled.value)
-          return
+  async (newItemId, oldItemId) => {
+    if (!isTimerEnabled.value)
+      return
 
-        if (oldItemId != null) {
-          await persistElapsedTime(oldItemId)
-        }
+    if (oldItemId != null) {
+      await persistCurrentElapsedTime(oldItemId)
+    }
 
-        const stored = newItemId != null
-          ? elapsedTime.value[newItemId] ?? 0
-          : 0
-
-        setElapsed(stored)
-      }
-      catch (err) {
-        console.error('[timer queue error]', err)
-      }
-    })
+    setElapsed(newItemId != null
+      ? persistedElapsedTimes.value[newItemId] ?? 0
+      : 0,
+    )
   },
   { immediate: true },
 )
@@ -218,13 +227,7 @@ watch(
 )
 
 onUnmounted(async () => {
-  queue = queue.then(async () => {
-    await persistElapsedTime(currentItem.value?.id)
-    session.elapsedTimeMsByItemId = { ...elapsedTime.value }
-    await evaluationStorage.saveSessionElapsedTime(session.id, session.elapsedTimeMsByItemId)
-  })
-
-  await queue
+  await persistCurrentElapsedTime(currentItem.value?.id)
 })
 </script>
 

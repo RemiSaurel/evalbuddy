@@ -96,7 +96,6 @@ export interface EvaluationSession {
   updatedAt: string
   evaluatorName?: string
   isCompleted: boolean
-  elapsedTimeMsByItemId?: Record<number, number>
 }
 
 export interface ExportData {

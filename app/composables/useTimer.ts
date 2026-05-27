@@ -9,8 +9,16 @@ export function useTimer(enabled: Ref<boolean>) {
   let interval: ReturnType<typeof setInterval> | null = null
   const running = ref(false)
 
+  const sync = () => {
+    elapsed.value = interval
+      ? accumulated + (Date.now() - startTime)
+      : accumulated
+
+    return elapsed.value
+  }
+
   const tick = () => {
-    elapsed.value = accumulated + (Date.now() - startTime)
+    sync()
   }
 
   const startInterval = () => {
@@ -29,10 +37,12 @@ export function useTimer(enabled: Ref<boolean>) {
     if (!interval)
       return
 
+    sync()
+
     clearInterval(interval)
     interval = null
 
-    accumulated += Date.now() - startTime
+    accumulated = elapsed.value
     running.value = false
   }
 
@@ -68,23 +78,31 @@ export function useTimer(enabled: Ref<boolean>) {
     const wasRunning = interval !== null
 
     if (interval) {
+      sync()
       clearInterval(interval)
       interval = null
     }
     running.value = false
 
-    elapsed.value = wasRunning ? accumulated + (Date.now() - startTime) : accumulated
+    elapsed.value = wasRunning ? elapsed.value : accumulated
   }
 
   const setElapsed = (value: number) => {
+    const wasRunning = interval !== null
+
+    if (wasRunning)
+      pause()
+
     elapsed.value = value
     accumulated = value
-    startTime = Date.now()
+
+    if (wasRunning)
+      resume()
   }
 
   onUnmounted(() => {
     stop()
   })
 
-  return { elapsed, setElapsed, formatted, pause, resume, running }
+  return { elapsed, setElapsed, formatted, pause, resume, running, sync }
 }
