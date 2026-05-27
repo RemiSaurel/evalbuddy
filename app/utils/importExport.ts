@@ -51,7 +51,7 @@ export class ImportExportService {
         ...session,
         results: session.results.map(result => ({
           ...result,
-          elapsedTime: result.elapsedTime ?? formatElapsedTime(storedElapsedTimes[result.itemId]),
+          elapsedTime: formatElapsedTime(storedElapsedTimes[result.itemId]) ?? result.elapsedTime,
         })),
       },
       exportedAt: new Date().toISOString(),

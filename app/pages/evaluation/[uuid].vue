@@ -98,7 +98,7 @@ async function handleDelete() {
 
 const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
 const persistedElapsedTimes = ref<Record<number, number>>({})
-const isStartModalOpen = ref(false)
+const isStartModalOpen = ref(isTimerEnabled.value)
 const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
 
 const {
@@ -182,7 +182,7 @@ const sessionMenuItems = computed<DropdownMenuItem[][]>(() => [
 ])
 
 async function handleEvaluateAndGoNext(value: any, comment?: string) {
-  await evaluateAndGoNext(value, comment, undefined, formatted.value)
+  await evaluateAndGoNext(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined)
 }
 
 async function persistCurrentElapsedTime(itemId?: number) {
@@ -212,16 +212,6 @@ watch(
       ? persistedElapsedTimes.value[newItemId] ?? 0
       : 0,
     )
-  },
-  { immediate: true },
-)
-
-watch(
-  isTimerEnabled,
-  (enabled) => {
-    if (enabled) {
-      isStartModalOpen.value = true
-    }
   },
   { immediate: true },
 )
