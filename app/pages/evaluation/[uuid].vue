@@ -13,7 +13,7 @@ const router = useRouter()
 const sessionId = route.params.uuid as string
 const { evaluationStorage } = await import('@/utils/storage')
 
-const session = await evaluationStorage.getSession(sessionId) as EvaluationSession
+const session = await evaluationStorage.getSession(sessionId) as EvaluationSession | null
 if (!session) {
   throw createError({
     statusCode: 404,
@@ -223,6 +223,9 @@ const sessionMenuItems = computed(() => [
 ])
 
 async function handleEvaluateAndGoNext(value: any, comment?: string) {
+  if (isTimerEnabled.value)
+    sync()
+
   await evaluateAndGoNext(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined)
 }
 
