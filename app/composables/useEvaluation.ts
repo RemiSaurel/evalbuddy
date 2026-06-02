@@ -18,7 +18,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   const evaluatorComment = ref('')
   const isSingleEvaluation = ref(true)
   const evaluationMode = computed<EvaluationMode>(
-    () => evaluationSession?.config?.settings?.evaluationMode ?? 'with-ai',
+    () => evaluationSession?.config?.settings?.evaluationMode ?? 'without-ai',
   )
 
   function isComposedEvaluationMode() {

@@ -195,7 +195,7 @@ class EvaluationStorage {
         })),
       },
       results: session.results.map((result: ExportResult) => ({
-        itemId: result.itemId,
+        itemId: result.itemId ?? result.questionId,
         questionId: result.questionId,
         evaluations: JSON.parse(JSON.stringify(result.evaluations)),
         evaluatedAt: result.evaluatedAt,
@@ -330,7 +330,7 @@ class EvaluationStorage {
         allowComments: true,
         requireComments: false,
         timerEnabled: false,
-        evaluationMode: 'with-ai',
+        evaluationMode: 'without-ai',
         masterySettings: DEFAULT_MASTERY_CONFIG,
       },
       createdAt: new Date().toISOString(),

@@ -75,7 +75,7 @@ const isScoreEvaluation = computed(() => {
 })
 
 const evaluationMode = computed<EvaluationMode>(
-  () => props.evaluationConfig?.settings?.evaluationMode ?? 'with-ai',
+  () => props.evaluationConfig?.settings?.evaluationMode ?? 'without-ai',
 )
 
 const isComposedMode = computed(() => evaluationMode.value === 'without-then-with-ai')
@@ -202,7 +202,7 @@ const aiScoreDisplay = computed(() => {
 const aiJustificationDisplay = computed(() => {
   const item = props.currentItem as any
   const justification = item?.aiEvaluation?.justification ?? item?.aiJustification
-  return justification || 'No AI justification available.'
+  return justification || '—'
 })
 </script>
 

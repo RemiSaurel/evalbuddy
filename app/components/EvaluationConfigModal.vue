@@ -171,6 +171,13 @@ const evaluationModes = computed(() => [
   { label: t('configuration.modal.modes.withAi'), value: 'with-ai' },
   { label: t('configuration.modal.modes.withoutThenWithAi'), value: 'without-then-with-ai' },
 ])
+
+// Ensure a default evaluation mode is set when a local config is initialized
+watch(() => localConfig.value, (cfg) => {
+  if (cfg && !cfg.settings.evaluationMode) {
+    cfg.settings.evaluationMode = 'without-ai'
+  }
+}, { immediate: true })
 </script>
 
 <template>

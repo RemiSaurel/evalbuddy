@@ -83,8 +83,9 @@
         "title": "Veuillez corriger les erreurs suivantes :"
       },
       "configurationSuffix": "Configuration",
+      "evaluationMode": "Mode d'évaluation",
       "modes": {
-        "withoutAi": "Sans Evaluation de l'IA",
+        "withoutAi": "Sans évaluation de l'IA",
         "withAi": "Avec l'évaluation de l'IA",
         "withoutThenWithAi": "D'abord sans l'évaluation de l'IA, ensuite avec"
       }

@@ -83,6 +83,7 @@
         "title": "Please fix the following errors:"
       },
       "configurationSuffix": "Configuration",
+      "evaluationMode": "Evaluation Mode",
       "modes": {
         "withoutAi": "Without AI Evaluation",
         "withAi": "With AI Evaluation",
@@ -238,7 +239,7 @@
       "title": "Pause evaluation?",
       "body": "Focus was lost. Do you want to pause the evaluation?",
       "pauseButton": "Pause",
-      "continueButton": "Resume"
+      "continueButton": "Continue"
     },
     "aiEvaluation": {
       "title": "AI Evaluation",
