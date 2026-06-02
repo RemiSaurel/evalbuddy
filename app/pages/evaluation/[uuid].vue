@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EvaluationSession } from '@/models/index'
 import { ImportExportService } from '@/utils/importExport'
 
@@ -47,6 +46,27 @@ const isCompletionModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
 const isBlurPauseModalOpen = ref(false)
 const isPausedModalOpen = ref(false)
+const startEvaluationActions = computed(() => [
+  {
+    label: t('evaluation.timerAlertModal.button'),
+    icon: 'i-lucide:play',
+    variant: 'soft' as const,
+  },
+])
+const blurPauseActions = computed(() => [
+  {
+    label: t('evaluation.blurPauseModal.pauseButton'),
+    icon: 'i-lucide:pause',
+    variant: 'soft' as const,
+    onClick: confirmPauseOnBlur,
+  },
+  {
+    label: t('evaluation.blurPauseModal.continueButton'),
+    icon: 'i-lucide:play',
+    variant: 'ghost' as const,
+    onClick: cancelPauseOnBlur,
+  },
+])
 
 const totalEvaluated = computed(() =>
   Object.values(evaluatedItems.value).filter(
@@ -111,6 +131,27 @@ const {
   sync,
 } = useTimer(timerActive)
 
+const pausedActions = computed(() => [
+  {
+    label: t('evaluation.pausedModal.resumeButton'),
+    icon: 'i-lucide:play',
+    variant: 'soft' as const,
+    onClick: () => {
+      resume()
+      isPausedModalOpen.value = false
+    },
+  },
+  {
+    label: t('evaluation.pausedModal.homeButton'),
+    icon: 'i-lucide:home',
+    variant: 'ghost' as const,
+    onClick: () => {
+      goToHomePage()
+      isPausedModalOpen.value = false
+    },
+  },
+])
+
 async function loadPersistedElapsedTimes() {
   if (!isTimerEnabled.value)
     return
@@ -156,7 +197,7 @@ onBeforeUnmount(() => {
 })
 
 // Session dropdown menu
-const sessionMenuItems = computed<DropdownMenuItem[][]>(() => [
+const sessionMenuItems = computed(() => [
   [
     {
       label: t('evaluation.settings.hideProgressBar'),
@@ -222,14 +263,18 @@ onUnmounted(async () => {
 </script>
 
 <template>
-  <StartEvaluationModal
-    v-model:is-start-modal-open="isStartModalOpen"
+  <ConfirmationModal
+    v-model:open="isStartModalOpen"
+    :title="$t('evaluation.timerAlertModal.title')"
+    :description="$t('evaluation.timerAlertModal.body')"
+    :actions="startEvaluationActions"
   />
 
-  <PauseConfirmationModal
+  <ConfirmationModal
     v-model:open="isBlurPauseModalOpen"
-    @confirm="confirmPauseOnBlur"
-    @cancel="cancelPauseOnBlur"
+    :title="$t('evaluation.blurPauseModal.title')"
+    :description="$t('evaluation.blurPauseModal.body')"
+    :actions="blurPauseActions"
   />
 
   <div class="flex flex-col flex-1 min-h-0">
@@ -267,10 +312,11 @@ onUnmounted(async () => {
       </div>
     </div>
 
-    <PausedModal
+    <ConfirmationModal
       v-model:open="isPausedModalOpen"
-      @resume="() => { resume(); isPausedModalOpen = false }"
-      @go-home="goToHomePage"
+      :title="$t('evaluation.pausedModal.title')"
+      :description="$t('evaluation.pausedModal.body')"
+      :actions="pausedActions"
     />
 
     <!-- Desktop: side-by-side resizable panels -->
