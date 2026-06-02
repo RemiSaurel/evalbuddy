@@ -82,7 +82,12 @@
       "validation": {
         "title": "Veuillez corriger les erreurs suivantes :"
       },
-      "configurationSuffix": "Configuration"
+      "configurationSuffix": "Configuration",
+      "modes": {
+        "withoutAi": "Sans Evaluation de l'IA",
+        "withAi": "Avec l'évaluation de l'IA",
+        "withoutThenWithAi": "D'abord sans l'évaluation de l'IA, ensuite avec"
+      }
     },
     "actions": {
       "edit": "Modifier",

@@ -37,6 +37,7 @@ const {
   goToItem,
   goToPreviousItem,
   goToNextItem,
+  saveEvaluationResult,
   evaluateAndGoNext,
 } = useEvaluation(session)
 
@@ -98,6 +99,7 @@ async function handleDelete() {
 
 const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
 const persistedElapsedTimes = ref<Record<number, number>>({})
+const secondPassActiveItems = ref<Record<number, boolean>>({})
 const isStartModalOpen = ref(isTimerEnabled.value)
 const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
 
@@ -181,8 +183,12 @@ const sessionMenuItems = computed<DropdownMenuItem[][]>(() => [
   ],
 ])
 
-async function handleEvaluateAndGoNext(value: any, comment?: string) {
-  await evaluateAndGoNext(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined)
+async function handleEvaluateAndGoNext(value: any, comment?: string, isSecond?: boolean) {
+  await evaluateAndGoNext(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined, isSecond)
+}
+
+async function handleSaveEvaluation(value: any, comment?: string, isSecond?: boolean) {
+  await saveEvaluationResult(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined, isSecond)
 }
 
 async function persistCurrentElapsedTime(itemId?: number) {
@@ -195,7 +201,24 @@ async function persistCurrentElapsedTime(itemId?: number) {
     return
 
   persistedElapsedTimes.value[itemId] = elapsed.value
-  await evaluationStorage.saveSessionElapsedTime(session.id, itemId, elapsed.value)
+  const pass: 'first' | 'second' = secondPassActiveItems.value[itemId] ? 'second' : 'first'
+  await evaluationStorage.saveSessionElapsedTime(session.id, itemId, elapsed.value, pass)
+
+  if (pass === 'second')
+    delete secondPassActiveItems.value[itemId]
+}
+
+async function handleComposedEvaluationPassChange(pass: 1 | 2) {
+  if (!isTimerEnabled.value || pass !== 2)
+    return
+
+  const currentItemId = currentItem.value?.id
+  if (currentItemId == null)
+    return
+
+  await persistCurrentElapsedTime(currentItemId)
+  secondPassActiveItems.value[currentItemId] = true
+  setElapsed(0)
 }
 
 watch(
@@ -372,7 +395,9 @@ onUnmounted(async () => {
               :evaluator-comment="evaluatorComment"
               :evaluated-items="evaluatedItems"
               :evaluation-config="evaluationConfig || undefined"
+              :save-evaluation="handleSaveEvaluation"
               :evaluate-generic-and-go-next="isGenericEvaluation ? handleEvaluateAndGoNext : undefined"
+              @evaluation-pass-change="handleComposedEvaluationPassChange"
               @update:evaluator-comment="evaluatorComment = $event"
             />
           </div>
@@ -492,7 +517,9 @@ onUnmounted(async () => {
         :evaluator-comment="evaluatorComment"
         :evaluated-items="evaluatedItems"
         :evaluation-config="evaluationConfig || undefined"
+        :save-evaluation="handleSaveEvaluation"
         :evaluate-generic-and-go-next="isGenericEvaluation ? handleEvaluateAndGoNext : undefined"
+        @evaluation-pass-change="handleComposedEvaluationPassChange"
         @update:evaluator-comment="evaluatorComment = $event"
       />
     </div>

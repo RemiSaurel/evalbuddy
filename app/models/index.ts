@@ -9,11 +9,23 @@ export interface Question {
   context?: ContextData // Optional - supports string and string[] for display
 }
 
+export interface AiEvaluation {
+  score?: number
+  justification?: string
+}
+
+export interface EvaluationEntry {
+  value: any
+  comment?: string
+  elapsedTime?: string
+}
+
 export interface EvaluationItem {
   id: number
   questionID: number
   submittedAnswer: string
   context?: ContextData // Optional - supports string and string[] for display
+  aiEvaluation?: AiEvaluation // Optional
 }
 
 export interface DatasetStructure {
@@ -34,12 +46,15 @@ export interface EvaluationConfig {
 
 export type EvaluationType = 'mastery' | 'boolean' | 'score'
 
+export type EvaluationMode = 'without-ai' | 'with-ai' | 'without-then-with-ai'
+
 export interface EvaluationSettings {
   // Common settings
   allowComments: boolean
   requireComments: boolean
   instructions?: string
   timerEnabled?: boolean
+  evaluationMode: EvaluationMode
 
   // Type-specific settings
   masterySettings?: MasterySettings
@@ -90,12 +105,25 @@ export interface EvaluationSession {
   name: string
   description?: string
   dataset: DatasetStructure
-  results: EvaluationResult[]
+  results: ExportResult[]
   config: EvaluationConfig
   createdAt: string
   updatedAt: string
   evaluatorName?: string
   isCompleted: boolean
+}
+
+export interface ExportEvaluationEntry {
+  value: any
+  comment?: string
+  elapsedTime?: string
+}
+
+export interface ExportResult {
+  itemId: number
+  questionId: number
+  evaluations: Record<string, ExportEvaluationEntry>
+  evaluatedAt: string
 }
 
 export interface ExportData {

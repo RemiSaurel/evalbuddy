@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import type { EvaluationConfig, EvaluationItem } from '~/models'
+import type { EvaluationConfig, EvaluationItem, EvaluationMode } from '~/models'
 
 interface Props {
   currentItem: EvaluationItem & { questionText?: string, referenceAnswer?: string }
   evaluatorComment: string
   evaluatedItems: { [itemId: string]: { value?: any, masteryLevel?: any, comment?: string } }
   evaluationConfig?: EvaluationConfig | any
-  evaluateGenericAndGoNext?: (value: any, comment?: string) => void
-  saveEvaluation?: (value: any, comment?: string) => void
+  evaluateGenericAndGoNext?: (value: any, comment?: string, isSecond?: boolean) => void
+  saveEvaluation?: (value: any, comment?: string, isSecond?: boolean) => void
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
   'update:evaluatorComment': [comment: string]
+  'evaluationPassChange': [pass: 1 | 2]
 }>()
 
 const { t } = useI18n()
@@ -72,6 +73,14 @@ const isScoreEvaluation = computed(() => {
   }
   return false
 })
+
+const evaluationMode = computed<EvaluationMode>(
+  () => props.evaluationConfig?.settings?.evaluationMode ?? 'with-ai',
+)
+
+const isComposedMode = computed(() => evaluationMode.value === 'without-then-with-ai')
+const evaluationPass = ref<1 | 2>(1)
+const showAiEvaluation = computed(() => evaluationMode.value !== 'without-ai' && (!isComposedMode.value || evaluationPass.value === 2))
 
 const commentsAllowed = computed(() => {
   if (props.evaluationConfig) {
@@ -136,9 +145,20 @@ function confirmEvaluation() {
   if (!canConfirmEvaluation.value)
     return
 
+  const comment = commentsAllowed.value ? localComment.value : undefined
+
+  if (isComposedMode.value && evaluationPass.value === 1) {
+    props.saveEvaluation?.(selectedValue.value, comment, false)
+    evaluationPass.value = 2
+    emit('evaluationPassChange', 2)
+    selectedValue.value = null
+    localComment.value = ''
+    return
+  }
+
   if (props.evaluateGenericAndGoNext) {
-    const comment = commentsAllowed.value ? localComment.value : undefined
-    props.evaluateGenericAndGoNext(selectedValue.value, comment)
+    const isSecond = isComposedMode.value ? true : undefined
+    props.evaluateGenericAndGoNext(selectedValue.value, comment, isSecond)
   }
 
   selectedValue.value = null
@@ -159,6 +179,31 @@ useEvaluationShortcuts({
   optionCount: computed(() => evaluationOptions.value.length),
   isScoreMode: isScoreEvaluation,
 })
+
+watch(() => props.currentItem?.id, () => {
+  if (isComposedMode.value) {
+    evaluationPass.value = 1
+  }
+})
+
+const aiScoreDisplay = computed(() => {
+  const item = props.currentItem as any
+  const score = item?.aiEvaluation?.score ?? item?.aiScore
+  if (score === undefined || score === null)
+    return '—'
+
+  const numericScore = Number(score)
+  if (Number.isNaN(numericScore))
+    return String(score)
+
+  return String(numericScore)
+})
+
+const aiJustificationDisplay = computed(() => {
+  const item = props.currentItem as any
+  const justification = item?.aiEvaluation?.justification ?? item?.aiJustification
+  return justification || 'No AI justification available.'
+})
 </script>
 
 <template>
@@ -172,12 +217,11 @@ useEvaluationShortcuts({
     </div>
 
     <template #footer>
-      <div class="grid grid-cols-[2fr_1fr] gap-5">
-        <div class="gap-2">
+      <div :class="showAiEvaluation ? 'grid grid-cols-2 gap-5' : 'grid grid-cols-1 gap-5'">
+        <div v-if="showAiEvaluation" class="gap-2">
           <!-- AI Evaluation Informations -->
-          <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
+          <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold pb-2">
             <UIcon name="i-lucide-bot" />
-
             {{ t('evaluation.aiEvaluation.title') }}
           </div>
           <div class="grid grid-cols-[1fr_3fr] gap-2">
@@ -185,16 +229,16 @@ useEvaluationShortcuts({
               <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 {{ t('evaluation.aiEvaluation.score') }}
               </div>
-              <div class="rounded-lg bg-neutral-200 p-2">
-                \8
+              <div class="rounded-lg bg-neutral-200 dark:bg-neutral-900 p-2">
+                {{ aiScoreDisplay }}
               </div>
             </div>
             <div>
               <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 {{ t('evaluation.aiEvaluation.justification') }}
               </div>
-              <div class="rounded-lg bg-neutral-200 p-2">
-                \Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur iste minima repellendus facilis.
+              <div class="rounded-lg bg-neutral-200 dark:bg-neutral-900 p-2">
+                {{ aiJustificationDisplay }}
               </div>
             </div>
           </div>
@@ -202,9 +246,9 @@ useEvaluationShortcuts({
 
         <div>
           <!-- Evaluation Type Header -->
-          <div class="flex justify-between items-center">
+          <div class="flex justify-between items-center pb-2">
             <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
-              <UIcon name="i-lucide-bot" />
+              <UIcon name="i-lucide-user-round-pen" />
               {{ t('evaluation.title') }}
             </div>
             <div v-if="evaluationConfig" class="text-xs text-neutral-500 dark:text-neutral-400">

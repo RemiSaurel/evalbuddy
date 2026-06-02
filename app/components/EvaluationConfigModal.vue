@@ -164,6 +164,13 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
     sortableInstance.value = null
   }
 })
+
+// List of evaluation modes
+const evaluationModes = computed(() => [
+  { label: t('configuration.modal.modes.withoutAi'), value: 'without-ai' },
+  { label: t('configuration.modal.modes.withAi'), value: 'with-ai' },
+  { label: t('configuration.modal.modes.withoutThenWithAi'), value: 'without-then-with-ai' },
+])
 </script>
 
 <template>
@@ -399,6 +406,20 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
                     <UCheckbox
                       v-model="localConfig.settings.timerEnabled"
                       :label="t('configuration.modal.fields.addTimer')"
+                    />
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <UIcon name="i-lucide:bot" class="w-5 h-5 text-primary-500" />
+                    <h5 class="font-medium">
+                      {{ t('configuration.modal.evaluationMode') }}
+                    </h5>
+                  </div>
+
+                  <div class="space-y-3">
+                    <URadioGroup
+                      v-model="localConfig.settings.evaluationMode"
+                      :items="evaluationModes"
                     />
                   </div>
                 </div>

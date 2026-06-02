@@ -1,4 +1,4 @@
-import type { EvaluationItem, EvaluationResult, EvaluationSession, Question } from '~/models'
+import type { EvaluationItem, EvaluationMode, EvaluationSession, ExportResult, Question } from '~/models'
 import { evaluationStorage } from '@/utils/storage'
 
 /**
@@ -17,6 +17,21 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   const evaluatedItems = ref<{ [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } }>({})
   const evaluatorComment = ref('')
   const isSingleEvaluation = ref(true)
+  const evaluationMode = computed<EvaluationMode>(
+    () => evaluationSession?.config?.settings?.evaluationMode ?? 'with-ai',
+  )
+
+  function isComposedEvaluationMode() {
+    return evaluationMode.value === 'without-then-with-ai'
+  }
+
+  function isFinalResult(result: ExportResult | any) {
+    if (!isComposedEvaluationMode())
+      return true
+
+    const secondEntry = result?.evaluations?.[1] ?? result?.evaluations?.['1'] ?? result?.secondValue
+    return secondEntry !== undefined
+  }
 
   // Initialize data from session
   function initializeFromSession(session: EvaluationSession) {
@@ -97,23 +112,57 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
 
   // Load existing evaluation results
   function loadExistingResults(session: EvaluationSession) {
-    if (session.results) {
-      const evaluated: { [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } } = {}
-
-      session.results.forEach((result) => {
-        // Handle cases where itemId might be undefined (legacy data)
-        const itemId = result.itemId ?? result.questionId
-        if (itemId) {
-          evaluated[itemId.toString()] = {
-            value: result.value,
-            masteryLevel: result.value, // For backward compatibility
-            comment: result.comment,
-          }
-        }
-      })
-
-      evaluatedItems.value = evaluated
+    if (!session.results) {
+      evaluatedItems.value = {}
+      return
     }
+
+    const seen = new Map<number, { value?: any, masteryLevel?: string, comment?: string, isFinal: boolean }>()
+
+    session.results.forEach((r: any) => {
+      const itemId = (r as any).itemId ?? (r as any).questionId
+      if (!itemId)
+        return
+
+      const firstEntry = r.evaluations?.[0] ?? r.evaluations?.['0']
+      const secondEntry = r.evaluations?.[1] ?? r.evaluations?.['1']
+      const legacyEntry = r.secondValue !== undefined
+        ? { value: r.secondValue, comment: r.secondComment, elapsedTime: r.secondElapsedTime }
+        : { value: r.value, comment: r.comment, elapsedTime: r.elapsedTime }
+      const displayEntry = secondEntry ?? firstEntry ?? legacyEntry
+      const displayValue = displayEntry?.value
+      const displayComment = displayEntry?.comment
+      const isFinal = isFinalResult(r)
+
+      if (isComposedEvaluationMode() && !isFinal)
+        return
+
+      const existing = seen.get(itemId)
+      if (!existing) {
+        seen.set(itemId, { value: displayValue, masteryLevel: displayValue, comment: displayComment, isFinal })
+        return
+      }
+
+      if (isFinal && !existing.isFinal) {
+        seen.set(itemId, { value: displayValue, masteryLevel: displayValue, comment: displayComment, isFinal })
+      }
+      else if (isFinal && existing.isFinal) {
+        seen.set(itemId, { value: displayValue, masteryLevel: displayValue, comment: displayComment, isFinal })
+      }
+      else if (!existing.isFinal) {
+        seen.set(itemId, { value: displayValue, masteryLevel: displayValue, comment: displayComment, isFinal })
+      }
+    })
+
+    const evaluated: { [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } } = {}
+    for (const [id, entry] of seen.entries()) {
+      evaluated[id.toString()] = {
+        value: entry.value,
+        masteryLevel: entry.masteryLevel,
+        comment: entry.comment,
+      }
+    }
+    evaluatedItems.value = evaluated
   }
 
   // Helper function to find the first unevaluated item
@@ -197,35 +246,62 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   }
 
   // Evaluation functions
-  async function saveEvaluationResult(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string) {
+  async function saveEvaluationResult(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string, isSecond?: boolean) {
     if (!currentItem.value || !evaluationSession)
       return
 
-    // Update local state
-    evaluatedItems.value[currentItem.value.id.toString()] = {
-      value,
-      masteryLevel,
-      comment: comment || '',
+    const composedMode = evaluationMode.value === 'without-then-with-ai'
+    const finalForUi = !composedMode || !!isSecond
+
+    if (finalForUi) {
+      // Update local state only for the final pass in composed mode
+      evaluatedItems.value[currentItem.value.id.toString()] = {
+        value,
+        masteryLevel,
+        comment: comment || '',
+      }
     }
 
-    // Create evaluation result
-    const result: EvaluationResult = {
-      itemId: currentItem.value.id,
-      questionId: currentItem.value.questionID,
+    const evaluationEntry = {
       value,
       comment: comment || '',
       elapsedTime,
+    }
+
+    const result: ExportResult = {
+      itemId: currentItem.value.id,
+      questionId: currentItem.value.questionID,
+      evaluations: {
+        ...(isSecond ? {} : { 0: evaluationEntry }),
+        ...(isSecond ? { 1: evaluationEntry } : {}),
+      },
       evaluatedAt: new Date().toISOString(),
     }
 
-    // Update session results
-    if (!evaluationSession.results) {
-      evaluationSession.results = []
+    const existingIndex = (evaluationSession.results || []).findIndex(r => r.itemId === result.itemId)
+    if (existingIndex >= 0) {
+      const existingResult = evaluationSession.results[existingIndex]
+      if (!existingResult) {
+        evaluationSession.results.push(result)
+      }
+      else {
+        const currentItemId = currentItem.value.id
+        const currentQuestionId = currentItem.value.questionID
+        evaluationSession.results[existingIndex] = {
+          ...existingResult,
+          itemId: currentItemId,
+          questionId: currentQuestionId,
+          evaluatedAt: result.evaluatedAt,
+          evaluations: {
+            ...existingResult.evaluations,
+            ...result.evaluations,
+          },
+        }
+      }
     }
-
-    // Remove existing result for this item
-    evaluationSession.results = evaluationSession.results.filter(r => r.itemId !== result.itemId)
-    evaluationSession.results.push(result)
+    else {
+      evaluationSession.results.push(result)
+    }
 
     // Save to storage
     try {
@@ -237,8 +313,8 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     }
   }
 
-  async function evaluateAndGoNext(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string) {
-    await saveEvaluationResult(value, comment, masteryLevel, elapsedTime)
+  async function evaluateAndGoNext(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string, isSecond?: boolean) {
+    await saveEvaluationResult(value, comment, masteryLevel, elapsedTime, isSecond)
     goToNextItem()
   }
 
