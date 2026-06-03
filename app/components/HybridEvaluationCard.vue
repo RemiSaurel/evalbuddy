@@ -141,14 +141,14 @@ function decrementScore() {
   selectedValue.value = next
 }
 
-function confirmEvaluation() {
+async function confirmEvaluation() {
   if (!canConfirmEvaluation.value)
     return
 
   const comment = commentsAllowed.value ? localComment.value : undefined
 
   if (isComposedMode.value && evaluationPass.value === 1) {
-    props.saveEvaluation?.(selectedValue.value, comment, false)
+    await props.saveEvaluation?.(selectedValue.value, comment, false)
     evaluationPass.value = 2
     emit('evaluationPassChange', 2)
     selectedValue.value = null
@@ -158,7 +158,7 @@ function confirmEvaluation() {
 
   if (props.evaluateGenericAndGoNext) {
     const isSecond = isComposedMode.value ? true : undefined
-    props.evaluateGenericAndGoNext(selectedValue.value, comment, isSecond)
+    await props.evaluateGenericAndGoNext(selectedValue.value, comment, isSecond)
   }
 
   selectedValue.value = null

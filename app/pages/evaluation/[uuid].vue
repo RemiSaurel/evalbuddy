@@ -224,11 +224,15 @@ const sessionMenuItems = computed(() => [
   ],
 ])
 
-async function handleEvaluateAndGoNext(value: any, comment?: string) {
+async function handleEvaluateAndGoNext(value: any, comment?: string, isSecond?: boolean) {
   if (isTimerEnabled.value)
     sync()
 
-  await evaluateAndGoNext(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined)
+  await evaluateAndGoNext(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined, isSecond)
+}
+
+async function handleSaveEvaluation(value: any, comment?: string, isSecond?: boolean) {
+  await saveEvaluationResult(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined, isSecond)
 }
 
 async function persistCurrentElapsedTime(itemId?: number) {
