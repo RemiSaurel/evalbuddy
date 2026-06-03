@@ -135,38 +135,6 @@ class EvaluationStorage {
     })
   }
 
-  async deleteSessionElapsedTimes(sessionId: string): Promise<void> {
-    const db = await this.initDB()
-    const transaction = db.transaction([ELAPSED_TIME_ITEMS_STORE], 'readwrite')
-    const store = transaction.objectStore(ELAPSED_TIME_ITEMS_STORE)
-    const index = store.index('sessionId')
-
-    return new Promise((resolve, reject) => {
-      const request = index.getAllKeys(sessionId)
-      request.onsuccess = () => {
-        const keys = request.result || []
-
-        if (keys.length === 0) {
-          resolve()
-          return
-        }
-
-        let completed = 0
-
-        for (const key of keys) {
-          const deleteRequest = store.delete(key)
-          deleteRequest.onsuccess = () => {
-            completed += 1
-            if (completed === keys.length)
-              resolve()
-          }
-          deleteRequest.onerror = () => reject(deleteRequest.error)
-        }
-      }
-      request.onerror = () => reject(request.error)
-    })
-  }
-
   async saveSession(session: EvaluationSession): Promise<void> {
     const db = await this.initDB()
     const transaction = db.transaction([SESSIONS_STORE], 'readwrite')
