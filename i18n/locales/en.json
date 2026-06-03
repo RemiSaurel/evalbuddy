@@ -29,7 +29,8 @@
       "tabs": {
         "basic": "Basic Settings",
         "evaluation": "Evaluation Options",
-        "comments": "Comments"
+        "comments": "Comments",
+        "others": "Others"
       },
       "types": {
         "mastery": {
@@ -69,7 +70,9 @@
         "passingScorePlaceholder": "e.g., 60",
         "commentSettings": "Comment Settings",
         "allowComments": "Allow comments",
-        "requireComments": "Require comments"
+        "requireComments": "Require comments",
+        "timerSettings": "Timer",
+        "addTimer": "Record the time spent evaluating responses"
       },
       "buttons": {
         "addLevel": "Add Level",
@@ -128,7 +131,9 @@
       "confirm": "Confirm",
       "save": "Save",
       "saveComment": "Confirm Evaluation",
-      "selectMasteryLevel": "Select a mastery level"
+      "selectMasteryLevel": "Select a mastery level",
+      "pause": "Pause",
+      "resume": "Resume"
     },
     "overview": {
       "resumeTitle": "Resume Evaluation",
@@ -210,6 +215,23 @@
     },
     "settings": {
       "hideProgressBar": "Hide Progress Bar"
+    },
+    "timerAlertModal": {
+      "title": "Information",
+      "body": "The configuration records the response evaluation times.",
+      "button": "Proceed to the evaluation"
+    },
+    "pausedModal": {
+      "title": "Evaluation paused",
+      "body": "The evaluation is paused.",
+      "resumeButton": "Resume",
+      "homeButton": "Go home"
+    },
+    "blurPauseModal": {
+      "title": "Pause evaluation?",
+      "body": "Focus was lost. Do you want to pause the evaluation?",
+      "pauseButton": "Pause",
+      "continueButton": "Resume"
     },
     "error": "Error",
     "title": "Evaluation",

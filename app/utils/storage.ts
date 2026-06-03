@@ -2,9 +2,10 @@ import type { DatasetStructure, EvaluationConfig, EvaluationSession } from '@/mo
 import { DEFAULT_MASTERY_CONFIG } from '@/models/index'
 
 const DB_NAME = 'EvalBuddyDB'
-const DB_VERSION = 2
+const DB_VERSION = 4
 const SESSIONS_STORE = 'sessions'
 const CONFIGS_STORE = 'configs'
+const ELAPSED_TIME_ITEMS_STORE = 'elapsedTimeItems'
 
 class EvaluationStorage {
   private db: IDBDatabase | null = null
@@ -39,7 +40,50 @@ class EvaluationStorage {
           configsStore.createIndex('name', 'name', { unique: false })
           configsStore.createIndex('type', 'type', { unique: false })
         }
+
+        // Create elapsed-time items store for lightweight timer persistence
+        if (!db.objectStoreNames.contains(ELAPSED_TIME_ITEMS_STORE)) {
+          const elapsedTimesStore = db.createObjectStore(ELAPSED_TIME_ITEMS_STORE, { keyPath: 'id' })
+          elapsedTimesStore.createIndex('sessionId', 'sessionId', { unique: false })
+        }
       }
+    })
+  }
+
+  async saveSessionElapsedTime(sessionId: string, itemId: number, elapsedTime: number): Promise<void> {
+    const db = await this.initDB()
+    const transaction = db.transaction([ELAPSED_TIME_ITEMS_STORE], 'readwrite')
+    const store = transaction.objectStore(ELAPSED_TIME_ITEMS_STORE)
+
+    return new Promise((resolve, reject) => {
+      const request = store.put({
+        id: `${sessionId}:${itemId}`,
+        sessionId,
+        itemId,
+        elapsedTime,
+      })
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  async getSessionElapsedTimes(sessionId: string): Promise<Record<number, number>> {
+    const db = await this.initDB()
+    const transaction = db.transaction([ELAPSED_TIME_ITEMS_STORE], 'readonly')
+    const store = transaction.objectStore(ELAPSED_TIME_ITEMS_STORE)
+    const index = store.index('sessionId')
+
+    return new Promise((resolve, reject) => {
+      const request = index.getAll(sessionId)
+      request.onsuccess = () => {
+        const elapsedTimes = (request.result || []).reduce((accumulator: Record<number, number>, entry: any) => {
+          accumulator[entry.itemId] = entry.elapsedTime
+          return accumulator
+        }, {})
+
+        resolve(elapsedTimes)
+      }
+      request.onerror = () => reject(request.error)
     })
   }
 
@@ -74,6 +118,7 @@ class EvaluationStorage {
         questionId: result.questionId,
         value: result.value,
         comment: result.comment,
+        elapsedTime: result.elapsedTime,
         evaluatedAt: result.evaluatedAt,
       })),
       config: session.config,
@@ -97,7 +142,21 @@ class EvaluationStorage {
 
     return new Promise((resolve, reject) => {
       const request = store.get(id)
-      request.onsuccess = () => resolve(request.result || null)
+      request.onsuccess = async () => {
+        const session = request.result || null
+        if (!session) {
+          resolve(null)
+          return
+        }
+
+        try {
+          const { elapsedTimeMsByItemId: _elapsedTimeMsByItemId, ...plainSession } = session as EvaluationSession & { elapsedTimeMsByItemId?: Record<number, number> }
+          resolve(plainSession)
+        }
+        catch (error) {
+          reject(error)
+        }
+      }
       request.onerror = () => reject(request.error)
     })
   }
@@ -132,13 +191,53 @@ class EvaluationStorage {
 
   async deleteSession(id: string): Promise<void> {
     const db = await this.initDB()
-    const transaction = db.transaction([SESSIONS_STORE], 'readwrite')
+    const transaction = db.transaction([SESSIONS_STORE, ELAPSED_TIME_ITEMS_STORE], 'readwrite')
     const store = transaction.objectStore(SESSIONS_STORE)
+    const timeStore = transaction.objectStore(ELAPSED_TIME_ITEMS_STORE)
 
     return new Promise((resolve, reject) => {
-      const request = store.delete(id)
-      request.onsuccess = () => resolve()
-      request.onerror = () => reject(request.error)
+      const sessionReq = store.delete(id)
+      const elapsedReq = timeStore.index('sessionId').getAllKeys(id)
+
+      let sessionDeleted = false
+      let elapsedDeleted = false
+
+      const maybeResolve = () => {
+        if (sessionDeleted && elapsedDeleted)
+          resolve()
+      }
+
+      sessionReq.onsuccess = () => {
+        sessionDeleted = true
+        maybeResolve()
+      }
+
+      elapsedReq.onsuccess = () => {
+        const keys = elapsedReq.result || []
+
+        if (keys.length === 0) {
+          elapsedDeleted = true
+          maybeResolve()
+          return
+        }
+
+        let completed = 0
+
+        for (const key of keys) {
+          const deleteRequest = timeStore.delete(key)
+          deleteRequest.onsuccess = () => {
+            completed += 1
+            if (completed === keys.length) {
+              elapsedDeleted = true
+              maybeResolve()
+            }
+          }
+          deleteRequest.onerror = () => reject(deleteRequest.error)
+        }
+      }
+
+      sessionReq.onerror = () => reject(sessionReq.error)
+      elapsedReq.onerror = () => reject(elapsedReq.error)
     })
   }
 
@@ -151,6 +250,7 @@ class EvaluationStorage {
       settings: {
         allowComments: true,
         requireComments: false,
+        timerEnabled: false,
         masterySettings: DEFAULT_MASTERY_CONFIG,
       },
       createdAt: new Date().toISOString(),

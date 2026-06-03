@@ -29,7 +29,8 @@
       "tabs": {
         "basic": "Paramètres",
         "evaluation": "Options",
-        "comments": "Commentaires"
+        "comments": "Commentaires",
+        "others": "Autres"
       },
       "types": {
         "mastery": {
@@ -69,7 +70,9 @@
         "passingScorePlaceholder": "ex. : 60",
         "commentSettings": "Paramètres des commentaires",
         "allowComments": "Autoriser les commentaires",
-        "requireComments": "Commentaires obligatoires"
+        "requireComments": "Commentaires obligatoires",
+        "timerSettings": "Chronomètre",
+        "addTimer": "Enregistrer le temps d'évaluation des réponses"
       },
       "buttons": {
         "addLevel": "Ajouter un niveau",
@@ -88,7 +91,9 @@
       "delete": "Supprimer",
       "cancel": "Annuler",
       "export": "Exporter",
-      "import": "Importer"
+      "import": "Importer",
+      "pause": "Pause",
+      "resume": "Continuer"
     },
     "viewModal": {
       "title": "Consulter la configuration"
@@ -128,7 +133,9 @@
       "confirm": "Confirmer",
       "save": "Enregistrer",
       "saveComment": "Confirmer l'évaluation",
-      "selectMasteryLevel": "Sélectionnez un niveau de maîtrise"
+      "selectMasteryLevel": "Sélectionnez un niveau de maîtrise",
+      "pause": "Mettre en pause",
+      "resume": "Reprendre"
     },
     "overview": {
       "resumeTitle": "Reprendre une évaluation",
@@ -210,6 +217,23 @@
     },
     "settings": {
       "hideProgressBar": "Masquer la barre de progression"
+    },
+    "timerAlertModal": {
+      "title": "Information",
+      "body": "La configuration enregistre les temps d'évaluation des réponses.",
+      "button": "Passer à l'évaluation"
+    },
+    "pausedModal": {
+      "title": "Évaluation en pause",
+      "body": "L'évaluation est en pause.",
+      "resumeButton": "Reprendre",
+      "homeButton": "Aller à l'accueil"
+    },
+    "blurPauseModal": {
+      "title": "Mettre en pause ?",
+      "body": "Le focus a été perdu. Voulez-vous mettre l'évaluation en pause ?",
+      "pauseButton": "Mettre en pause",
+      "continueButton": "Continuer"
     },
     "error": "Erreur",
     "title": "Évaluation",

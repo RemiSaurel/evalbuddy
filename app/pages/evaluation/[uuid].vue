@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DropdownMenuItem } from '@nuxt/ui'
+import type { EvaluationSession } from '@/models/index'
 import { ImportExportService } from '@/utils/importExport'
 
 definePageMeta({
@@ -13,7 +13,7 @@ const router = useRouter()
 const sessionId = route.params.uuid as string
 const { evaluationStorage } = await import('@/utils/storage')
 
-const session = await evaluationStorage.getSession(sessionId)
+const session = await evaluationStorage.getSession(sessionId) as EvaluationSession
 if (!session) {
   throw createError({
     statusCode: 404,
@@ -39,15 +39,34 @@ const {
   evaluateAndGoNext,
 } = useEvaluation(session)
 
-async function handleEvaluateAndGoNext(value: any, comment?: string) {
-  await evaluateAndGoNext(value, comment)
-}
-
 const evaluationConfig = computed(() => session?.config || null)
 const isGenericEvaluation = computed(() => !!evaluationConfig.value)
 
 const isCompletionModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
+const isBlurPauseModalOpen = ref(false)
+const isPausedModalOpen = ref(false)
+const startEvaluationActions = computed(() => [
+  {
+    label: t('evaluation.timerAlertModal.button'),
+    icon: 'i-lucide:play',
+    variant: 'soft' as const,
+  },
+])
+const blurPauseActions = computed(() => [
+  {
+    label: t('evaluation.blurPauseModal.pauseButton'),
+    icon: 'i-lucide:pause',
+    variant: 'soft' as const,
+    onClick: confirmPauseOnBlur,
+  },
+  {
+    label: t('evaluation.blurPauseModal.continueButton'),
+    icon: 'i-lucide:play',
+    variant: 'ghost' as const,
+    onClick: cancelPauseOnBlur,
+  },
+])
 
 const totalEvaluated = computed(() =>
   Object.values(evaluatedItems.value).filter(
@@ -84,8 +103,101 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
 // View settings (persisted in localStorage)
 const hideProgressBar = useLocalStorage('evalbuddy-hide-progress', false)
 
+async function handleExport() {
+  await persistCurrentElapsedTime(currentItem.value?.id)
+  const blob = await ImportExportService.exportSession(session.id)
+  const filename = ImportExportService.generateExportFilename(session.name)
+  ImportExportService.downloadBlob(blob, filename)
+}
+
+async function handleDelete() {
+  await evaluationStorage.deleteSession(session.id)
+  isDeleteModalOpen.value = false
+  router.push('/')
+}
+
+const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
+const persistedElapsedTimes = ref<Record<number, number>>({})
+const isStartModalOpen = ref(isTimerEnabled.value)
+const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
+
+const {
+  formatted,
+  elapsed,
+  setElapsed,
+  pause,
+  resume,
+  running,
+  sync,
+} = useTimer(timerActive)
+
+const pausedActions = computed(() => [
+  {
+    label: t('evaluation.pausedModal.resumeButton'),
+    icon: 'i-lucide:play',
+    variant: 'soft' as const,
+    onClick: () => {
+      resume()
+      isPausedModalOpen.value = false
+    },
+  },
+  {
+    label: t('evaluation.pausedModal.homeButton'),
+    icon: 'i-lucide:home',
+    variant: 'ghost' as const,
+    onClick: () => {
+      goToHomePage()
+      isPausedModalOpen.value = false
+    },
+  },
+])
+
+async function loadPersistedElapsedTimes() {
+  if (!isTimerEnabled.value)
+    return
+
+  persistedElapsedTimes.value = await evaluationStorage.getSessionElapsedTimes(session.id)
+
+  const currentItemId = currentItem.value?.id
+  if (currentItemId != null) {
+    setElapsed(persistedElapsedTimes.value[currentItemId] ?? 0)
+  }
+}
+
+await loadPersistedElapsedTimes()
+
+function handleWindowBlur() {
+  if (!timerActive.value || !running.value || isBlurPauseModalOpen.value)
+    return
+
+  isBlurPauseModalOpen.value = true
+}
+
+function confirmPauseOnBlur() {
+  pause()
+  isBlurPauseModalOpen.value = false
+  isPausedModalOpen.value = true
+}
+
+function handlePauseClick() {
+  pause()
+  isPausedModalOpen.value = true
+}
+
+function cancelPauseOnBlur() {
+  isBlurPauseModalOpen.value = false
+}
+
+onMounted(() => {
+  window.addEventListener('blur', handleWindowBlur)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('blur', handleWindowBlur)
+})
+
 // Session dropdown menu
-const sessionMenuItems = computed<DropdownMenuItem[][]>(() => [
+const sessionMenuItems = computed(() => [
   [
     {
       label: t('evaluation.settings.hideProgressBar'),
@@ -110,20 +222,64 @@ const sessionMenuItems = computed<DropdownMenuItem[][]>(() => [
   ],
 ])
 
-async function handleExport() {
-  const blob = await ImportExportService.exportSession(session.id)
-  const filename = ImportExportService.generateExportFilename(session.name)
-  ImportExportService.downloadBlob(blob, filename)
+async function handleEvaluateAndGoNext(value: any, comment?: string) {
+  if (isTimerEnabled.value)
+    sync()
+
+  await evaluateAndGoNext(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined)
 }
 
-async function handleDelete() {
-  await evaluationStorage.deleteSession(session.id)
-  isDeleteModalOpen.value = false
-  router.push('/')
+async function persistCurrentElapsedTime(itemId?: number) {
+  if (!isTimerEnabled.value || itemId == null)
+    return
+
+  sync()
+
+  if (persistedElapsedTimes.value[itemId] === elapsed.value)
+    return
+
+  persistedElapsedTimes.value[itemId] = elapsed.value
+  await evaluationStorage.saveSessionElapsedTime(session.id, itemId, elapsed.value)
 }
+
+watch(
+  () => currentItem.value?.id,
+  async (newItemId, oldItemId) => {
+    if (!isTimerEnabled.value)
+      return
+
+    if (oldItemId != null) {
+      await persistCurrentElapsedTime(oldItemId)
+    }
+
+    setElapsed(newItemId != null
+      ? persistedElapsedTimes.value[newItemId] ?? 0
+      : 0,
+    )
+  },
+  { immediate: true },
+)
+
+onBeforeUnmount(async () => {
+  await persistCurrentElapsedTime(currentItem.value?.id)
+})
 </script>
 
 <template>
+  <ConfirmationModal
+    v-model:open="isStartModalOpen"
+    :title="$t('evaluation.timerAlertModal.title')"
+    :description="$t('evaluation.timerAlertModal.body')"
+    :actions="startEvaluationActions"
+  />
+
+  <ConfirmationModal
+    v-model:open="isBlurPauseModalOpen"
+    :title="$t('evaluation.blurPauseModal.title')"
+    :description="$t('evaluation.blurPauseModal.body')"
+    :actions="blurPauseActions"
+  />
+
   <div class="flex flex-col flex-1 min-h-0">
     <!-- Session title bar spanning full width -->
     <div class="flex shrink-0 items-center gap-2 px-4 py-2 border-b border-neutral-200 bg-white dark:bg-neutral-900 transition-colors">
@@ -135,7 +291,19 @@ async function handleDelete() {
         :label="$t('evaluation.displayContext')"
         :context="session.dataset.context"
       />
-      <div class="ml-auto">
+      <div v-if="isTimerEnabled">
+        {{ formatted }}
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <UButton
+          v-if="isTimerEnabled"
+          :icon="running ? 'i-lucide:pause' : 'i-lucide:play'"
+          variant="ghost"
+          color="neutral"
+          @click="running ? handlePauseClick() : resume()"
+        >
+          {{ running ? $t('evaluation.actions.pause') : $t('evaluation.actions.resume') }}
+        </UButton>
         <UDropdownMenu :items="sessionMenuItems" :modal="false">
           <UButton
             icon="i-lucide:more-vertical"
@@ -146,6 +314,13 @@ async function handleDelete() {
         </UDropdownMenu>
       </div>
     </div>
+
+    <ConfirmationModal
+      v-model:open="isPausedModalOpen"
+      :title="$t('evaluation.pausedModal.title')"
+      :description="$t('evaluation.pausedModal.body')"
+      :actions="pausedActions"
+    />
 
     <!-- Desktop: side-by-side resizable panels -->
     <UDashboardGroup

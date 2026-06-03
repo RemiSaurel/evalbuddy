@@ -44,8 +44,16 @@ export class ImportExportService {
       throw new Error('Session not found')
     }
 
+    const storedElapsedTimes = await evaluationStorage.getSessionElapsedTimes(sessionId)
+
     const exportData: ExportData = {
-      session,
+      session: {
+        ...session,
+        results: session.results.map(result => ({
+          ...result,
+          elapsedTime: formatElapsedTime(storedElapsedTimes[result.itemId]) ?? result.elapsedTime,
+        })),
+      },
       exportedAt: new Date().toISOString(),
       version: '1.0',
     }
@@ -211,6 +219,20 @@ export class ImportExportService {
     const safeName = configName.replace(/[^a-z0-9]/gi, '_')
     return `${safeName}.conf`
   }
+}
+
+function formatElapsedTime(elapsedTimeMs?: number): string | undefined {
+  if (elapsedTimeMs == null)
+    return undefined
+
+  const totalSeconds = Math.floor(elapsedTimeMs / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  return [hours, minutes, seconds]
+    .map(value => String(value).padStart(2, '0'))
+    .join(':')
 }
 
 /**
