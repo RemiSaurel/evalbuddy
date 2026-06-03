@@ -13,7 +13,7 @@ const router = useRouter()
 const sessionId = route.params.uuid as string
 const { evaluationStorage } = await import('@/utils/storage')
 
-const session = await evaluationStorage.getSession(sessionId) as EvaluationSession | null
+const session = await evaluationStorage.getSession(sessionId) as EvaluationSession
 if (!session) {
   throw createError({
     statusCode: 404,
@@ -260,7 +260,7 @@ watch(
   { immediate: true },
 )
 
-onUnmounted(async () => {
+onBeforeUnmount(async () => {
   await persistCurrentElapsedTime(currentItem.value?.id)
 })
 </script>
