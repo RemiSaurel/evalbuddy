@@ -90,16 +90,6 @@ export interface ScoreSettings {
   passingScore?: number
 }
 
-// Generic evaluation result that can handle any evaluation type
-export interface EvaluationResult {
-  itemId: number // The specific item that was evaluated
-  questionId: number // The question this item belongs to
-  value: any // The actual evaluation value (mastery level, boolean, score, etc.)
-  comment?: string
-  elapsedTime?: string
-  evaluatedAt: string // ISO timestamp
-}
-
 export interface EvaluationSession {
   id: string
   name: string

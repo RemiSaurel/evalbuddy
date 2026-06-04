@@ -1,4 +1,4 @@
-import type { EvaluationItem, EvaluationMode, EvaluationSession, ExportResult, Question } from '~/models'
+import type { EvaluationItem, EvaluationMode, EvaluationSession, ExportEvaluationEntry, ExportResult, Question } from '~/models'
 import { evaluationStorage } from '@/utils/storage'
 
 /**
@@ -14,7 +14,14 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   const currentItemIndexInGroup = ref(0)
   const currentItem = ref<EvaluationItem | null>(null)
   const currentItemGroup = ref<EvaluationItem[]>([])
-  const evaluatedItems = ref<{ [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } }>({})
+  type EvaluatedValue = ExportEvaluationEntry['value']
+  interface EvaluatedItem {
+    value?: EvaluatedValue
+    masteryLevel?: string
+    comment?: string
+  }
+
+  const evaluatedItems = ref<Record<string, EvaluatedItem>>({})
   const evaluatorComment = ref('')
   const isSingleEvaluation = ref(true)
   const evaluationMode = computed<EvaluationMode>(
@@ -25,11 +32,26 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     return evaluationMode.value === 'without-then-with-ai'
   }
 
-  function isFinalResult(result: ExportResult | any) {
+  function isFinalResult(result: ExportResult | unknown) {
     if (!isComposedEvaluationMode())
       return true
 
-    const secondEntry = result?.evaluations?.[1] ?? result?.evaluations?.['1'] ?? result?.secondValue
+    if (typeof result !== 'object' || result === null)
+      return true
+
+    const obj = result as Record<string, unknown>
+
+    let secondEntry: unknown
+    const evaluations = obj.evaluations
+    if (evaluations && typeof evaluations === 'object') {
+      const ev = evaluations as Record<string, unknown>
+      secondEntry = ev[1 as unknown as string] ?? ev['1'] ?? ev['1']
+    }
+
+    if (secondEntry === undefined && 'secondValue' in obj) {
+      secondEntry = obj.secondValue
+    }
+
     return secondEntry !== undefined
   }
 
@@ -105,9 +127,6 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
         currentItem.value = currentItemGroup.value[currentItemIndexInGroup.value] ?? null
       }
     }
-
-    // Load existing evaluation results (called again to ensure state is consistent)
-    loadExistingResults(session)
   }
 
   // Load existing evaluation results
@@ -117,44 +136,64 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
       return
     }
 
-    const seen = new Map<number, { value?: any, masteryLevel?: string, comment?: string, isFinal: boolean }>()
+    const seen = new Map<number, { value?: EvaluatedValue, masteryLevel?: string, comment?: string, isFinal: boolean }>()
 
-    session.results.forEach((r: any) => {
-      const itemId = (r as any).itemId ?? (r as any).questionId
+    session.results.forEach((r: unknown) => {
+      if (typeof r !== 'object' || r === null)
+        return
+
+      const res = r as Record<string, unknown>
+      const rawItemId = res.itemId ?? res.questionId
+      let itemId: number | undefined
+      if (typeof rawItemId === 'number') {
+        itemId = rawItemId
+      }
+      else if (typeof rawItemId === 'string') {
+        const parsed = Number(rawItemId)
+        if (!Number.isNaN(parsed))
+          itemId = parsed
+      }
+
       if (!itemId)
         return
 
-      const firstEntry = r.evaluations?.[0] ?? r.evaluations?.['0']
-      const secondEntry = r.evaluations?.[1] ?? r.evaluations?.['1']
-      const legacyEntry = r.secondValue !== undefined
-        ? { value: r.secondValue, comment: r.secondComment, elapsedTime: r.secondElapsedTime }
-        : { value: r.value, comment: r.comment, elapsedTime: r.elapsedTime }
-      const displayEntry = secondEntry ?? firstEntry ?? legacyEntry
-      const displayValue = displayEntry?.value
-      const displayComment = displayEntry?.comment
-      const isFinal = isFinalResult(r)
+      let firstEntry: Record<string, unknown> | undefined
+      let secondEntry: Record<string, unknown> | undefined
+      const evaluations = res.evaluations
+      if (evaluations && typeof evaluations === 'object') {
+        const ev = evaluations as Record<string, unknown>
+        const e0 = ev[0 as unknown as string] ?? ev['0']
+        const e1 = ev[1 as unknown as string] ?? ev['1']
+        if (e0 && typeof e0 === 'object')
+          firstEntry = e0 as Record<string, unknown>
+        if (e1 && typeof e1 === 'object')
+          secondEntry = e1 as Record<string, unknown>
+      }
+
+      const legacyEntry = ('secondValue' in res)
+        ? { value: res.secondValue, comment: res.secondComment, elapsedTime: res.secondElapsedTime }
+        : { value: res.value, comment: res.comment, elapsedTime: res.elapsedTime }
+
+      const displayEntry = (secondEntry ?? firstEntry) ?? legacyEntry
+      const displayValue = displayEntry && typeof displayEntry === 'object' ? displayEntry.value : undefined
+      const displayComment = displayEntry && typeof displayEntry === 'object' ? displayEntry.comment as string | undefined : undefined
+      const isFinal = isFinalResult(res)
 
       if (isComposedEvaluationMode() && !isFinal)
         return
 
       const existing = seen.get(itemId)
       if (!existing) {
-        seen.set(itemId, { value: displayValue, masteryLevel: displayValue, comment: displayComment, isFinal })
+        seen.set(itemId, { value: displayValue, masteryLevel: typeof displayValue === 'string' ? displayValue : undefined, comment: displayComment, isFinal })
         return
       }
 
-      if (isFinal && !existing.isFinal) {
-        seen.set(itemId, { value: displayValue, masteryLevel: displayValue, comment: displayComment, isFinal })
-      }
-      else if (isFinal && existing.isFinal) {
-        seen.set(itemId, { value: displayValue, masteryLevel: displayValue, comment: displayComment, isFinal })
-      }
-      else if (!existing.isFinal) {
-        seen.set(itemId, { value: displayValue, masteryLevel: displayValue, comment: displayComment, isFinal })
+      if (!existing.isFinal || isFinal) {
+        seen.set(itemId, { value: displayValue, masteryLevel: typeof displayValue === 'string' ? displayValue : undefined, comment: displayComment, isFinal })
       }
     })
 
-    const evaluated: { [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } } = {}
+    const evaluated: Record<string, EvaluatedItem> = {}
     for (const [id, entry] of seen.entries()) {
       evaluated[id.toString()] = {
         value: entry.value,
@@ -246,7 +285,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   }
 
   // Evaluation functions
-  async function saveEvaluationResult(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string, isSecond?: boolean) {
+  async function saveEvaluationResult(value: unknown, comment?: string, masteryLevel?: string, elapsedTime?: string, isSecond?: boolean) {
     if (!currentItem.value || !evaluationSession)
       return
 
@@ -313,7 +352,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     }
   }
 
-  async function evaluateAndGoNext(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string, isSecond?: boolean) {
+  async function evaluateAndGoNext(value: unknown, comment?: string, masteryLevel?: string, elapsedTime?: string, isSecond?: boolean) {
     await saveEvaluationResult(value, comment, masteryLevel, elapsedTime, isSecond)
     goToNextItem()
   }
