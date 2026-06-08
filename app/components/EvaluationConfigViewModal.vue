@@ -232,6 +232,25 @@ function close() {
             </div>
           </div>
 
+          <!-- Timer Settings -->
+          <div class="space-y-3">
+            <USeparator />
+            <div class="flex items-center gap-2">
+              <UIcon name="i-lucide:timer" class="w-5 h-5 text-primary-500" />
+              <h5 class="text-sm font-medium text-neutral-700">
+                {{ t('configuration.modal.fields.timerSettings') }}
+              </h5>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <UIcon
+                :name="config.settings.timerEnabled ? 'i-lucide:check' : 'i-lucide:x'"
+                :class="config.settings.timerEnabled ? 'text-green-600' : 'text-neutral-400'"
+              />
+              <span class="text-sm">{{ t('configuration.modal.fields.addTimer') }}</span>
+            </div>
+          </div>
+
           <!-- Metadata -->
           <div class="space-y-3">
             <USeparator />
