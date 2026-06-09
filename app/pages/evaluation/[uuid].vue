@@ -118,7 +118,8 @@ async function handleDelete() {
 }
 
 const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
-const persistedElapsedTimes = ref<Record<number, number>>({})
+const firstPersistedElapsedTimes = ref<Record<number, number>>({})
+const secondPersistedElapsedTimes = ref<Record<number, number>>({})
 const secondPassActiveItems = ref<Record<number, boolean>>({})
 const isStartModalOpen = ref(isTimerEnabled.value)
 const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
@@ -158,11 +159,12 @@ async function loadPersistedElapsedTimes() {
   if (!isTimerEnabled.value)
     return
 
-  persistedElapsedTimes.value = await evaluationStorage.getSessionElapsedTimes(session.id)
+  firstPersistedElapsedTimes.value = await evaluationStorage.getSessionElapsedTimes(session.id)
+  secondPersistedElapsedTimes.value = await evaluationStorage.getSessionSecondElapsedTimes(session.id)
 
   const currentItemId = currentItem.value?.id
   if (currentItemId != null) {
-    setElapsed(persistedElapsedTimes.value[currentItemId] ?? 0)
+    setElapsed(firstPersistedElapsedTimes.value[currentItemId] ?? 0)
   }
 }
 
@@ -241,11 +243,16 @@ async function persistCurrentElapsedTime(itemId?: number) {
 
   sync()
 
-  if (persistedElapsedTimes.value[itemId] === elapsed.value)
+  const isSecondPass = !!secondPassActiveItems.value[itemId]
+  const elapsedByPass = isSecondPass
+    ? secondPersistedElapsedTimes.value
+    : firstPersistedElapsedTimes.value
+
+  if (elapsedByPass[itemId] === elapsed.value)
     return
 
-  persistedElapsedTimes.value[itemId] = elapsed.value
-  const pass: 'first' | 'second' = secondPassActiveItems.value[itemId] ? 'second' : 'first'
+  elapsedByPass[itemId] = elapsed.value
+  const pass: 'first' | 'second' = isSecondPass ? 'second' : 'first'
   await evaluationStorage.saveSessionElapsedTime(session.id, itemId, elapsed.value, pass)
 
   if (pass === 'second')
@@ -262,7 +269,7 @@ async function handleComposedEvaluationPassChange(pass: 1 | 2) {
 
   await persistCurrentElapsedTime(currentItemId)
   secondPassActiveItems.value[currentItemId] = true
-  setElapsed(0)
+  setElapsed(secondPersistedElapsedTimes.value[currentItemId] ?? 0)
 }
 
 watch(
@@ -276,7 +283,7 @@ watch(
     }
 
     setElapsed(newItemId != null
-      ? persistedElapsedTimes.value[newItemId] ?? 0
+      ? firstPersistedElapsedTimes.value[newItemId] ?? 0
       : 0,
     )
   },
