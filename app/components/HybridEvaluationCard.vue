@@ -1,26 +1,28 @@
 <script setup lang="ts">
-import type { EvaluationConfig, EvaluationItem, EvaluationMode } from '~/models'
+import type { EvaluatedItem, EvaluatedValue, EvaluationConfig, EvaluationItem, EvaluationMode } from '~/models'
 
 interface Props {
   currentItem: EvaluationItem & { questionText?: string, referenceAnswer?: string }
   evaluatorComment: string
-  evaluatedItems: { [itemId: string]: { value?: any, masteryLevel?: any, comment?: string } }
-  evaluationConfig?: EvaluationConfig | any
-  evaluateGenericAndGoNext?: (value: any, comment?: string, isSecond?: boolean) => void
-  saveEvaluation?: (value: any, comment?: string, isSecond?: boolean) => void
+  evaluatedItems: Record<string, EvaluatedItem>
+  evaluationConfig?: EvaluationConfig
+  evaluateGenericAndGoNext?: (value: EvaluatedValue, comment?: string) => void
+  saveEvaluation?: (value: EvaluatedValue, comment?: string) => void
+  evaluationPass?: 1 | 2
+  showAiEvaluation?: boolean
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
   'update:evaluatorComment': [comment: string]
-  'evaluationPassChange': [pass: 1 | 2]
+  'startSecondPass': []
 }>()
 
 const { t } = useI18n()
 const { getEvaluationOptions, isScoreType, getScoreSettings } = useEvaluationConfig()
 
-const selectedValue = ref<any>(null)
+const selectedValue = ref<EvaluatedValue>(null)
 const localComment = ref('')
 
 watch(() => props.currentItem, () => {
@@ -79,8 +81,6 @@ const evaluationMode = computed<EvaluationMode>(
 )
 
 const isComposedMode = computed(() => evaluationMode.value === 'without-then-with-ai')
-const evaluationPass = ref<1 | 2>(1)
-const showAiEvaluation = computed(() => evaluationMode.value !== 'without-ai' && (!isComposedMode.value || evaluationPass.value === 2))
 
 const commentsAllowed = computed(() => {
   if (props.evaluationConfig) {
@@ -106,7 +106,6 @@ const canConfirmEvaluation = computed(() => {
   return hasValue && hasRequiredComment
 })
 
-// Auto-advance: only when comments are not allowed at all
 const shouldAutoAdvance = computed(() => {
   return !commentsAllowed.value
 })
@@ -116,10 +115,9 @@ function onCommentUpdate(value: string) {
   emit('update:evaluatorComment', value)
 }
 
-function selectValue(value: any) {
+function selectValue(value: EvaluatedValue) {
   selectedValue.value = value
 
-  // Auto-advance for non-score types when comments not needed
   if (!isScoreEvaluation.value && shouldAutoAdvance.value) {
     nextTick(() => confirmEvaluation())
   }
@@ -147,25 +145,22 @@ async function confirmEvaluation() {
 
   const comment = commentsAllowed.value ? localComment.value : undefined
 
-  if (isComposedMode.value && evaluationPass.value === 1) {
-    await props.saveEvaluation?.(selectedValue.value, comment, false)
-    evaluationPass.value = 2
-    emit('evaluationPassChange', 2)
+  if (isComposedMode.value && props.evaluationPass === 1) {
+    await props.saveEvaluation?.(selectedValue.value, comment)
+    emit('startSecondPass')
     selectedValue.value = null
     localComment.value = ''
     return
   }
 
   if (props.evaluateGenericAndGoNext) {
-    const isSecond = isComposedMode.value ? true : undefined
-    await props.evaluateGenericAndGoNext(selectedValue.value, comment, isSecond)
+    await props.evaluateGenericAndGoNext(selectedValue.value, comment)
   }
 
   selectedValue.value = null
   localComment.value = ''
 }
 
-// Keyboard shortcuts
 useEvaluationShortcuts({
   onSelectOption: (index: number) => {
     const options = evaluationOptions.value
@@ -182,13 +177,14 @@ useEvaluationShortcuts({
 
 watch(() => props.currentItem?.id, () => {
   if (isComposedMode.value) {
-    evaluationPass.value = 1
+    selectedValue.value = null
+    localComment.value = ''
   }
 })
 
 const aiScoreDisplay = computed(() => {
-  const item = props.currentItem as any
-  const score = item?.aiEvaluation?.score ?? item?.aiScore
+  const item = props.currentItem as EvaluationItem & { aiEvaluation?: { score?: number, justification?: string } }
+  const score = item?.aiEvaluation?.score
   if (score === undefined || score === null)
     return '—'
 
@@ -200,9 +196,8 @@ const aiScoreDisplay = computed(() => {
 })
 
 const aiJustificationDisplay = computed(() => {
-  const item = props.currentItem as any
-  const justification = item?.aiEvaluation?.justification ?? item?.aiJustification
-  return justification || '—'
+  const item = props.currentItem as EvaluationItem & { aiEvaluation?: { score?: number, justification?: string } }
+  return item?.aiEvaluation?.justification || '—'
 })
 </script>
 
