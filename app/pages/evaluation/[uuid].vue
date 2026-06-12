@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EvaluationSession } from '@/models/index'
+import type { EvaluatedValue, EvaluationSession } from '@/models/index'
 import { ImportExportService } from '@/utils/importExport'
 
 definePageMeta({
@@ -39,6 +39,14 @@ const {
   saveEvaluationResult,
   evaluateAndGoNext,
 } = useEvaluation(session)
+
+const {
+  evaluationPass,
+  showAiEvaluation,
+  startSecondPass,
+  saveFirstPass,
+  saveSecondPass,
+} = useComposedEvaluation(session)
 
 const evaluationConfig = computed(() => session?.config || null)
 const isGenericEvaluation = computed(() => !!evaluationConfig.value)
@@ -226,15 +234,30 @@ const sessionMenuItems = computed(() => [
   ],
 ])
 
-async function handleEvaluateAndGoNext(value: any, comment?: string, isSecond?: boolean) {
+async function handleEvaluateAndGoNext(value: EvaluatedValue, comment?: string) {
   if (isTimerEnabled.value)
     sync()
 
-  await evaluateAndGoNext(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined, isSecond)
+  const elapsed = isTimerEnabled.value ? formatted.value : undefined
+
+  if (evaluationPass.value === 2 && currentItem.value) {
+    await saveSecondPass(currentItem.value, value, comment, elapsed)
+    goToNextItem()
+  }
+  else {
+    await evaluateAndGoNext(value, comment, elapsed)
+  }
 }
 
-async function handleSaveEvaluation(value: any, comment?: string, isSecond?: boolean) {
-  await saveEvaluationResult(value, comment, undefined, isTimerEnabled.value ? formatted.value : undefined, isSecond)
+async function handleSaveEvaluation(value: EvaluatedValue, comment?: string) {
+  const elapsed = isTimerEnabled.value ? formatted.value : undefined
+
+  if (evaluationPass.value === 1 && currentItem.value) {
+    await saveFirstPass(currentItem.value, value, comment, elapsed)
+  }
+  else {
+    await saveEvaluationResult(value, comment, elapsed)
+  }
 }
 
 async function persistCurrentElapsedTime(itemId?: number) {
@@ -254,13 +277,10 @@ async function persistCurrentElapsedTime(itemId?: number) {
   elapsedByPass[itemId] = elapsed.value
   const pass: 'first' | 'second' = isSecondPass ? 'second' : 'first'
   await evaluationStorage.saveSessionElapsedTime(session.id, itemId, elapsed.value, pass)
-
-  if (pass === 'second')
-    delete secondPassActiveItems.value[itemId]
 }
 
-async function handleComposedEvaluationPassChange(pass: 1 | 2) {
-  if (!isTimerEnabled.value || pass !== 2)
+async function handleStartSecondPass() {
+  if (!isTimerEnabled.value)
     return
 
   const currentItemId = currentItem.value?.id
@@ -268,6 +288,7 @@ async function handleComposedEvaluationPassChange(pass: 1 | 2) {
     return
 
   await persistCurrentElapsedTime(currentItemId)
+  startSecondPass()
   secondPassActiveItems.value[currentItemId] = true
   setElapsed(secondPersistedElapsedTimes.value[currentItemId] ?? 0)
 }
@@ -453,7 +474,9 @@ onBeforeUnmount(async () => {
               :evaluation-config="evaluationConfig || undefined"
               :save-evaluation="handleSaveEvaluation"
               :evaluate-generic-and-go-next="isGenericEvaluation ? handleEvaluateAndGoNext : undefined"
-              @evaluation-pass-change="handleComposedEvaluationPassChange"
+              :evaluation-pass="evaluationPass"
+              :show-ai-evaluation="showAiEvaluation"
+              @start-second-pass="handleStartSecondPass"
               @update:evaluator-comment="evaluatorComment = $event"
             />
           </div>
@@ -575,7 +598,9 @@ onBeforeUnmount(async () => {
         :evaluation-config="evaluationConfig || undefined"
         :save-evaluation="handleSaveEvaluation"
         :evaluate-generic-and-go-next="isGenericEvaluation ? handleEvaluateAndGoNext : undefined"
-        @evaluation-pass-change="handleComposedEvaluationPassChange"
+        :evaluation-pass="evaluationPass"
+        :show-ai-evaluation="showAiEvaluation"
+        @start-second-pass="handleStartSecondPass"
         @update:evaluator-comment="evaluatorComment = $event"
       />
     </div>

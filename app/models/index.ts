@@ -122,6 +122,36 @@ export interface ExportData {
   version: string
 }
 
+export type EvaluatedValue = ExportEvaluationEntry['value']
+
+export interface EvaluatedItem {
+  value?: EvaluatedValue
+  masteryLevel?: string
+  comment?: string
+}
+
+export interface ParsedEvaluationResult {
+  itemId: number
+  questionId: number
+  firstPass?: ExportEvaluationEntry
+  secondPass?: ExportEvaluationEntry
+  evaluatedAt: string
+}
+
+export function parseExportResult(result: ExportResult): ParsedEvaluationResult {
+  const evaluations = result.evaluations ?? {}
+  const e0 = evaluations['0']
+  const e1 = evaluations['1']
+
+  return {
+    itemId: result.itemId,
+    questionId: result.questionId,
+    firstPass: e0,
+    secondPass: e1,
+    evaluatedAt: result.evaluatedAt,
+  }
+}
+
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
 // Mastery levels color definition
