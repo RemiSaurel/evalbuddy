@@ -49,10 +49,12 @@ function handleAction(action: ConfirmationModalAction) {
     :close="close"
     :dismissible="dismissible"
   >
-    <slot />
+    <div @keydown.stop>
+      <slot />
+    </div>
 
     <template #footer>
-      <div class="flex flex-wrap justify-end gap-2">
+      <div class="flex flex-wrap justify-end gap-2" @keydown.stop>
         <UButton
           v-for="(action, index) in actions"
           :key="`${action.label}-${index}`"
