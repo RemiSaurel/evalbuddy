@@ -26,7 +26,7 @@
     "dompurify": "^3.2.6",
     "katex": "^0.16.22",
     "motion-v": "^2.2.1",
-    "nuxt": "^4.4.2",
+    "nuxt": "^4.4.6",
     "sortablejs": "^1.15.6",
     "tailwindcss": "^4.2.2",
     "vue": "^3.5.14"
