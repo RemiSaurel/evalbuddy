@@ -13,7 +13,7 @@ const processedContent = computed(() => processContent(props.content))
 
 <template>
   <div
-    class="whitespace-pre-line prose prose-neutral max-w-none"
+    class="whitespace-pre-line prose prose-neutral max-w-none [&_pre]:overflow-x-auto [&_pre]:max-w-full"
     v-html="processedContent"
   />
 </template>
