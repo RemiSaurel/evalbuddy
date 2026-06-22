@@ -9,237 +9,39 @@
     {
       "id": 1,
       "difficulty": "medium",
-      "question": "<h3>Java Streams & Collections</h3><p>Analyze the following Java code snippet and explain what it does:</p><pre><code class=\"language-java\">import java.util.*;
-import java.util.stream.*;
-
-public class StreamExample {
-    public static void main(String[] args) {
-        List&lt;String&gt; names = Arrays.asList(
-            \"Alice\", \"Bob\", \"Charlie\", \"David\", \"Eve\",
-            \"Frank\", \"Grace\", \"Heidi\", \"Ivan\", \"Judy\"
-        );
-
-        Map&lt;Boolean, List&lt;String&gt;&gt; partitioned = names.stream()
-            .filter(name -&gt; name.length() &gt; 4)
-            .collect(Collectors.partitioningBy(
-                name -&gt; name.startsWith(\"A\") || name.startsWith(\"B\") || name.startsWith(\"C\") || name.startsWith(\"D\") || name.startsWith(\"E\") || name.startsWith(\"F\")
-            ));
-
-        System.out.println(\"Matched: \" + partitioned.get(true));
-        System.out.println(\"Unmatched: \" + partitioned.get(false));
-    }
-}</code></pre>",
-      "referenceAnswer": "<p>This program demonstrates Java Streams with partitioning:</p><ul><li>Creates a list of 10 names</li><li>Filters names with length greater than 4 characters</li><li>Partitions the filtered names into two groups based on whether they start with letters A-F</li><li>Prints both groups</li></ul><p>Expected output:</p><pre><code class=\"language-java\">Matched: [Alice, Charlie, David, Eve, Frank]
-Unmatched: [Grace, Heidi, Ivan, Judy]</code></pre>"
+      "question": "<h3>Java Streams & Collections</h3><p>Analyze the following Java code snippet and explain what it does:</p><pre><code class=\"language-java\">import java.util.*;\nimport java.util.stream.*;\n\npublic class StreamExample {\n    public static void main(String[] args) {\n        List&lt;String&gt; names = Arrays.asList(\n            \"Alice\", \"Bob\", \"Charlie\", \"David\", \"Eve\",\n            \"Frank\", \"Grace\", \"Heidi\", \"Ivan\", \"Judy\"\n        );\n\n        Map&lt;Boolean, List&lt;String&gt;&gt; partitioned = names.stream()\n            .filter(name -&gt; name.length() &gt; 4)\n            .collect(Collectors.partitioningBy(\n                name -&gt; name.startsWith(\"A\") || name.startsWith(\"B\") || name.startsWith(\"C\") || name.startsWith(\"D\") || name.startsWith(\"E\") || name.startsWith(\"F\")\n            ));\n\n        System.out.println(\"Matched: \" + partitioned.get(true));\n        System.out.println(\"Unmatched: \" + partitioned.get(false));\n    }\n}</code></pre>",
+      "referenceAnswer": "<p>This program demonstrates Java Streams with partitioning:</p><ul><li>Creates a list of 10 names</li><li>Filters names with length greater than 4 characters</li><li>Partitions the filtered names into two groups based on whether they start with letters A-F</li><li>Prints both groups</li></ul><p>Expected output:</p><pre><code class=\"language-java\">Matched: [Alice, Charlie, David, Eve, Frank]\nUnmatched: [Grace, Heidi, Ivan, Judy]</code></pre>"
     },
     {
       "id": 2,
       "difficulty": "hard",
-      "question": "<h3>Design Patterns - Observer</h3><p>Review this Java implementation of the Observer pattern and identify any issues:</p><pre><code class=\"language-java\">import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-interface EventListener {
-    void update(String eventType, String message);
-}
-
-class EventManager {
-    private Map&lt;String, List&lt;EventListener&gt;&gt; listeners = new HashMap&lt;&gt;();
-
-    public void subscribe(String eventType, EventListener listener) {
-        listeners
-            .computeIfAbsent(eventType, k -&gt; new ArrayList&lt;&gt;())
-            .add(listener);
-    }
-
-    public void unsubscribe(String eventType, EventListener listener) {
-        List&lt;EventListener&gt; users = listeners.get(eventType);
-        if (users != null) {
-            users.remove(listener);
-        }
-    }
-
-    public void notify(String eventType, String message) {
-        List&lt;EventListener&gt; users = listeners.get(eventType);
-        if (users != null) {
-            for (EventListener listener : users) {
-                listener.update(eventType, message);
-            }
-        }
-    }
-}
-
-class EmailAlertListener implements EventListener {
-    private String email;
-
-    public EmailAlertListener(String email) {
-        this.email = email;
-    }
-
-    @Override
-    public void update(String eventType, String message) {
-        System.out.println(
-            \"Sending email to \" + email
-                + \" about \" + eventType + \": \" + message
-        );
-    }
-}
-
-class SmsAlertListener implements EventListener {
-    private String phoneNumber;
-
-    public SmsAlertListener(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    @Override
-    public void update(String eventType, String message) {
-        System.out.println(
-            \"Sending SMS to \" + phoneNumber
-                + \" about \" + eventType + \": \" + message
-        );
-    }
-}</code></pre>",
+      "question": "<h3>Design Patterns - Observer</h3><p>Review this Java implementation of the Observer pattern and identify any issues:</p><pre><code class=\"language-java\">import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.List;\nimport java.util.Map;\n\ninterface EventListener {\n    void update(String eventType, String message);\n}\n\nclass EventManager {\n    private Map&lt;String, List&lt;EventListener&gt;&gt; listeners = new HashMap&lt;&gt;();\n\n    public void subscribe(String eventType, EventListener listener) {\n        listeners\n            .computeIfAbsent(eventType, k -&gt; new ArrayList&lt;&gt;())\n            .add(listener);\n    }\n\n    public void unsubscribe(String eventType, EventListener listener) {\n        List&lt;EventListener&gt; users = listeners.get(eventType);\n        if (users != null) {\n            users.remove(listener);\n        }\n    }\n\n    public void notify(String eventType, String message) {\n        List&lt;EventListener&gt; users = listeners.get(eventType);\n        if (users != null) {\n            for (EventListener listener : users) {\n                listener.update(eventType, message);\n            }\n        }\n    }\n}\n\nclass EmailAlertListener implements EventListener {\n    private String email;\n\n    public EmailAlertListener(String email) {\n        this.email = email;\n    }\n\n    @Override\n    public void update(String eventType, String message) {\n        System.out.println(\n            \"Sending email to \" + email\n                + \" about \" + eventType + \": \" + message\n        );\n    }\n}\n\nclass SmsAlertListener implements EventListener {\n    private String phoneNumber;\n\n    public SmsAlertListener(String phoneNumber) {\n        this.phoneNumber = phoneNumber;\n    }\n\n    @Override\n    public void update(String eventType, String message) {\n        System.out.println(\n            \"Sending SMS to \" + phoneNumber\n                + \" about \" + eventType + \": \" + message\n        );\n    }\n}</code></pre>",
       "referenceAnswer": "<p>The Observer pattern implementation has the following issues:</p><ul><li><strong>Thread safety:</strong> The HashMap and ArrayList are not thread-safe. Use ConcurrentHashMap and CopyOnWriteArrayList for concurrent access</li><li><strong>Memory leaks:</strong> Listeners are never automatically removed. Consider using WeakReferences</li><li><strong>Null safety:</strong> The notify method doesn't handle null eventType gracefully</li><li><strong>Missing hashCode/equals:</strong> EventListener implementations don't override these methods, making unsubscribe unreliable</li></ul>"
     },
     {
       "id": 3,
       "difficulty": "easy",
-      "question": "<h3>Java Generics</h3><p>What is the output of this code?</p><pre><code class=\"language-java\">import java.util.*;
-
-public class GenericsTest {
-    public static &lt;T extends Comparable&lt;T&gt;&gt; T findMax(List&lt;T&gt; list) {
-        if (list == null || list.isEmpty()) {
-            throw new IllegalArgumentException(
-                \"List cannot be null or empty\"
-            );
-        }
-
-        T max = list.get(0);
-        for (T item : list) {
-            if (item.compareTo(max) &gt; 0) {
-                max = item;
-            }
-        }
-        return max;
-    }
-
-    public static void main(String[] args) {
-        List&lt;Integer&gt; numbers = Arrays.asList(
-            3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8,
-            9, 7, 9, 3, 2, 3, 8, 4, 6, 2, 6, 4,
-            3, 3, 8, 3, 2, 7, 9, 5, 0, 2, 8, 8,
-            4, 1, 9, 7
-        );
-        System.out.println(\"Max number: \" + findMax(numbers));
-
-        List&lt;String&gt; words = Arrays.asList(
-            \"apple\", \"zebra\", \"banana\", \"mango\",
-            \"cherry\", \"elderberry\", \"dragonfruit\"
-        );
-        System.out.println(\"Max word: \" + findMax(words));
-    }
-}</code></pre>",
-      "referenceAnswer": "<p>The output is:</p><pre><code class=\"language-java\">Max number: 9
-Max word: zebra</code></pre><p>The <code>findMax</code> method uses bounded type parameters (<code>T extends Comparable&lt;T&gt;</code>) to find the maximum element in a list. For integers, it returns 9. For strings, it returns \"zebra\" because String comparison is lexicographic (alphabetical order).</p>"
+      "question": "<h3>Java Generics</h3><p>What is the output of this code?</p><pre><code class=\"language-java\">import java.util.*;\n\npublic class GenericsTest {\n    public static &lt;T extends Comparable&lt;T&gt;&gt; T findMax(List&lt;T&gt; list) {\n        if (list == null || list.isEmpty()) {\n            throw new IllegalArgumentException(\n                \"List cannot be null or empty\"\n            );\n        }\n\n        T max = list.get(0);\n        for (T item : list) {\n            if (item.compareTo(max) &gt; 0) {\n                max = item;\n            }\n        }\n        return max;\n    }\n\n    public static void main(String[] args) {\n        List&lt;Integer&gt; numbers = Arrays.asList(\n            3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8,\n            9, 7, 9, 3, 2, 3, 8, 4, 6, 2, 6, 4,\n            3, 3, 8, 3, 2, 7, 9, 5, 0, 2, 8, 8,\n            4, 1, 9, 7\n        );\n        System.out.println(\"Max number: \" + findMax(numbers));\n\n        List&lt;String&gt; words = Arrays.asList(\n            \"apple\", \"zebra\", \"banana\", \"mango\",\n            \"cherry\", \"elderberry\", \"dragonfruit\"\n        );\n        System.out.println(\"Max word: \" + findMax(words));\n    }\n}</code></pre>",
+      "referenceAnswer": "<p>The output is:</p><pre><code class=\"language-java\">Max number: 9\nMax word: zebra</code></pre><p>The <code>findMax</code> method uses bounded type parameters (<code>T extends Comparable&lt;T&gt;</code>) to find the maximum element in a list. For integers, it returns 9. For strings, it returns \"zebra\" because String comparison is lexicographic (alphabetical order).</p>"
     },
     {
       "id": 4,
       "difficulty": "hard",
-      "question": "<h3>Concurrency - Thread Pool</h3><p>Explain what this concurrent program does and identify potential issues:</p><pre><code class=\"language-java\">import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.List;
-import java.util.ArrayList;
-
-public class ThreadPoolDemo {
-    private static final AtomicInteger counter = new AtomicInteger(0);
-
-    public static void main(String[] args)
-            throws InterruptedException, ExecutionException {
-        ExecutorService executor = Executors.newFixedThreadPool(4);
-        List&lt;Future&lt;Integer&gt;&gt; futures = new ArrayList&lt;&gt;();
-
-        for (int i = 0; i &lt; 20; i++) {
-            final int taskId = i;
-            futures.add(executor.submit(() -&gt; {
-                System.out.println(
-                    Thread.currentThread().getName()
-                        + \" processing task \" + taskId
-                );
-                Thread.sleep(100 + (long) (Math.random() * 200));
-                return counter.incrementAndGet();
-            }));
-        }
-
-        int total = 0;
-        for (Future&lt;Integer&gt; future : futures) {
-            total += future.get();
-        }
-        System.out.println(\"Total processed: \" + total);
-
-        executor.shutdown();
-        if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
-            executor.shutdownNow();
-        }
-    }
-}</code></pre>",
+      "question": "<h3>Concurrency - Thread Pool</h3><p>Explain what this concurrent program does and identify potential issues:</p><pre><code class=\"language-java\">import java.util.concurrent.*;\nimport java.util.concurrent.atomic.AtomicInteger;\nimport java.util.List;\nimport java.util.ArrayList;\n\npublic class ThreadPoolDemo {\n    private static final AtomicInteger counter = new AtomicInteger(0);\n\n    public static void main(String[] args)\n            throws InterruptedException, ExecutionException {\n        ExecutorService executor = Executors.newFixedThreadPool(4);\n        List&lt;Future&lt;Integer&gt;&gt; futures = new ArrayList&lt;&gt;();\n\n        for (int i = 0; i &lt; 20; i++) {\n            final int taskId = i;\n            futures.add(executor.submit(() -&gt; {\n                System.out.println(\n                    Thread.currentThread().getName()\n                        + \" processing task \" + taskId\n                );\n                Thread.sleep(100 + (long) (Math.random() * 200));\n                return counter.incrementAndGet();\n            }));\n        }\n\n        int total = 0;\n        for (Future&lt;Integer&gt; future : futures) {\n            total += future.get();\n        }\n        System.out.println(\"Total processed: \" + total);\n\n        executor.shutdown();\n        if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {\n            executor.shutdownNow();\n        }\n    }\n}</code></pre>",
       "referenceAnswer": "<p>This program demonstrates:</p><ul><li>Creates a fixed thread pool with 4 threads</li><li>Submits 20 tasks that simulate work with random sleep times</li><li>Each task increments an atomic counter and returns the new value</li><li>Main thread collects all results and sums them</li><li>Gracefully shuts down the executor</li></ul><p><strong>Potential issues:</strong></p><ul><li>The sum of returned values may not equal 20*21/2 due to race conditions in how results are collected</li><li>No timeout on individual <code>future.get()</code> calls could cause indefinite blocking</li><li>Exception handling in tasks is swallowed - should use <code>Callable</code> with proper error handling</li></ul>"
     },
     {
       "id": 5,
       "difficulty": "medium",
-      "question": "<h3>Java Records & Pattern Matching</h3><p>What does this Java 17+ code output?</p><pre><code class=\"language-java\">sealed interface Shape permits Circle, Rectangle, Triangle {}
-
-record Circle(double radius) implements Shape {}
-record Rectangle(double width, double height) implements Shape {}
-record Triangle(double base, double height) implements Shape {}
-
-public class PatternMatchingDemo {
-    static String describe(Shape shape) {
-        return switch (shape) {
-            case Circle c -&gt; String.format(
-                \"Circle with radius %.2f, area=%.2f, circumference=%.2f\",
-                c.radius,
-                Math.PI * c.radius * c.radius,
-                2 * Math.PI * c.radius
-            );
-            case Rectangle r -&gt; String.format(
-                \"Rectangle %.2fx%.2f, area=%.2f, perimeter=%.2f\",
-                r.width(), r.height(),
-                r.width() * r.height(),
-                2 * (r.width() + r.height())
-            );
-            case Triangle t -&gt; String.format(
-                \"Triangle base=%.2f height=%.2f, area=%.2f\",
-                t.base(), t.height(),
-                0.5 * t.base() * t.height()
-            );
-        };
-    }
-
-    public static void main(String[] args) {
-        Shape[] shapes = {
-            new Circle(5),
-            new Rectangle(4, 6),
-            new Triangle(3, 8)
-        };
-        for (Shape s : shapes) {
-            System.out.println(describe(s));
-        }
-    }
-}</code></pre>",
-      "referenceAnswer": "<p>Output:</p><pre><code class=\"language-java\">Circle with radius 5.00, area=78.54, circumference=31.42
-Rectangle 4.00x6.00, area=24.00, perimeter=20.00
-Triangle base=3.00 height=8.00, area=12.00</code></pre><p>This demonstrates Java 17+ features:</p><ul><li><strong>Sealed interfaces:</strong> <code>Shape</code> only permits three implementations</li><li><strong>Records:</strong> Immutable data classes with auto-generated getters, equals, hashCode, toString</li><li><strong>Pattern matching in switch:</strong> Type patterns with binding variables</li><li><strong>Arrow syntax:</strong> No fall-through, no break needed</li></ul>"
+      "question": "<h3>Java Records & Pattern Matching</h3><p>What does this Java 17+ code output?</p><pre><code class=\"language-java\">sealed interface Shape permits Circle, Rectangle, Triangle {}\n\nrecord Circle(double radius) implements Shape {}\nrecord Rectangle(double width, double height) implements Shape {}\nrecord Triangle(double base, double height) implements Shape {}\n\npublic class PatternMatchingDemo {\n    static String describe(Shape shape) {\n        return switch (shape) {\n            case Circle c -&gt; String.format(\n                \"Circle with radius %.2f, area=%.2f, circumference=%.2f\",\n                c.radius,\n                Math.PI * c.radius * c.radius,\n                2 * Math.PI * c.radius\n            );\n            case Rectangle r -&gt; String.format(\n                \"Rectangle %.2fx%.2f, area=%.2f, perimeter=%.2f\",\n                r.width(), r.height(),\n                r.width() * r.height(),\n                2 * (r.width() + r.height())\n            );\n            case Triangle t -&gt; String.format(\n                \"Triangle base=%.2f height=%.2f, area=%.2f\",\n                t.base(), t.height(),\n                0.5 * t.base() * t.height()\n            );\n        };\n    }\n\n    public static void main(String[] args) {\n        Shape[] shapes = {\n            new Circle(5),\n            new Rectangle(4, 6),\n            new Triangle(3, 8)\n        };\n        for (Shape s : shapes) {\n            System.out.println(describe(s));\n        }\n    }\n}</code></pre>",
+      "referenceAnswer": "<p>Output:</p><pre><code class=\"language-java\">Circle with radius 5.00, area=78.54, circumference=31.42\nRectangle 4.00x6.00, area=24.00, perimeter=20.00\nTriangle base=3.00 height=8.00, area=12.00</code></pre><p>This demonstrates Java 17+ features:</p><ul><li><strong>Sealed interfaces:</strong> <code>Shape</code> only permits three implementations</li><li><strong>Records:</strong> Immutable data classes with auto-generated getters, equals, hashCode, toString</li><li><strong>Pattern matching in switch:</strong> Type patterns with binding variables</li><li><strong>Arrow syntax:</strong> No fall-through, no break needed</li></ul>"
     }
   ],
   "items": [
     {
       "id": 1,
       "questionID": 1,
-      "submittedAnswer": "<p>This code creates a list of names and uses Java Streams to partition them. First it filters names longer than 4 characters, then separates them into two groups based on whether they start with letters A through F.</p><pre><code class=\"language-java\">Matched: [Alice, Charlie, David, Eve, Frank]
-Unmatched: [Grace, Heidi, Ivan, Judy]</code></pre>"
+      "submittedAnswer": "<p>This code creates a list of names and uses Java Streams to partition them. First it filters names longer than 4 characters, then separates them into two groups based on whether they start with letters A through F.</p><pre><code class=\"language-java\">Matched: [Alice, Charlie, David, Eve, Frank]\nUnmatched: [Grace, Heidi, Ivan, Judy]</code></pre>"
     },
     {
       "id": 2,
@@ -259,8 +61,7 @@ Unmatched: [Grace, Heidi, Ivan, Judy]</code></pre>"
     {
       "id": 5,
       "questionID": 3,
-      "submittedAnswer": "<p>The output is:</p><pre><code class=\"language-java\">Max number: 9
-Max word: zebra</code></pre><p>The findMax method finds the largest element using compareTo. For numbers it's 9, for strings it's \"zebra\" (last alphabetically).</p>"
+      "submittedAnswer": "<p>The output is:</p><pre><code class=\"language-java\">Max number: 9\nMax word: zebra</code></pre><p>The findMax method finds the largest element using compareTo. For numbers it's 9, for strings it's \"zebra\" (last alphabetically).</p>"
     },
     {
       "id": 6,
@@ -275,9 +76,7 @@ Max word: zebra</code></pre><p>The findMax method finds the largest element usin
     {
       "id": 8,
       "questionID": 5,
-      "submittedAnswer": "<p>This uses Java records and sealed interfaces with pattern matching switch expressions. The output calculates area and perimeter for different shapes.</p><pre><code class=\"language-java\">Circle with radius 5.00, area=78.54, circumference=31.42
-Rectangle 4.00x6.00, area=24.00, perimeter=20.00
-Triangle base=3.00 height=8.00, area=12.00</code></pre>"
+      "submittedAnswer": "<p>This uses Java records and sealed interfaces with pattern matching switch expressions. The output calculates area and perimeter for different shapes.</p><pre><code class=\"language-java\">Circle with radius 5.00, area=78.54, circumference=31.42\nRectangle 4.00x6.00, area=24.00, perimeter=20.00\nTriangle base=3.00 height=8.00, area=12.00</code></pre>"
     }
   ]
 }
