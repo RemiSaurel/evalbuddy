@@ -1,11 +1,8 @@
-import type { EvaluationItem, EvaluationResult, EvaluationSession, Question } from '~/models'
+import type { EvaluatedItem, EvaluatedValue, EvaluationItem, EvaluationSession, ExportResult, Question } from '~/models'
 import { evaluationStorage } from '@/utils/storage'
+import { parseExportResult } from '~/models'
 
-/**
- * Clean evaluation composable that matches component expectations
- */
 export function useEvaluation(evaluationSession?: EvaluationSession) {
-  // Core reactive state
   const items = ref<EvaluationItem[]>([])
   const questions = ref<Map<number, Question>>(new Map())
   const groupedItems = ref<{ [key: string]: EvaluationItem[] }>({})
@@ -14,22 +11,19 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
   const currentItemIndexInGroup = ref(0)
   const currentItem = ref<EvaluationItem | null>(null)
   const currentItemGroup = ref<EvaluationItem[]>([])
-  const evaluatedItems = ref<{ [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } }>({})
+  const evaluatedItems = ref<Record<string, EvaluatedItem>>({})
   const evaluatorComment = ref('')
   const isSingleEvaluation = ref(true)
 
-  // Initialize data from session
   function initializeFromSession(session: EvaluationSession) {
     if (!session?.dataset?.questionList || !session?.dataset?.items)
       return
 
-    // Get all questions and items from dataset
     const questionMap = new Map<number, Question>()
     session.dataset.questionList.forEach((question) => {
       questionMap.set(question.id, question)
     })
 
-    // Transform items to evaluation items with question data
     const allItems: EvaluationItem[] = []
     const grouped: { [key: string]: EvaluationItem[] } = {}
 
@@ -44,7 +38,6 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
         }
         allItems.push(evaluationItem)
 
-        // Group by questionID
         const groupKey = item.questionID.toString()
         if (!grouped[groupKey]) {
           grouped[groupKey] = []
@@ -58,67 +51,72 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     groupedItems.value = grouped
     groupKeys.value = Object.keys(grouped)
 
-    // Determine if single evaluation:
-    // 1. Only 1 question (regardless of how many student answers/items)
-    // 2. OR every question has exactly 1 evaluation item
     isSingleEvaluation.value = groupKeys.value.length === 1
       || Object.values(grouped).every(group => group.length === 1)
 
-    // Set current item to first unevaluated item or first item if all are evaluated
     if (allItems.length > 0 && groupKeys.value.length > 0 && groupKeys.value[0]) {
-      // Load existing evaluation results first
       loadExistingResults(session)
 
-      // Find the first unevaluated item
       const firstUnevaluated = findFirstUnevaluatedItem()
 
       if (firstUnevaluated) {
-        // Navigate to first unevaluated item
         currentGroupIndex.value = firstUnevaluated.groupIndex
         currentItemIndexInGroup.value = firstUnevaluated.itemIndexInGroup
       }
       else {
-        // All items are evaluated, default to first item
         currentGroupIndex.value = 0
         currentItemIndexInGroup.value = 0
       }
 
-      // Set current item group and current item based on the selected indices
       const currentGroupKey = groupKeys.value[currentGroupIndex.value]
       if (currentGroupKey) {
         currentItemGroup.value = grouped[currentGroupKey] || []
         currentItem.value = currentItemGroup.value[currentItemIndexInGroup.value] ?? null
       }
     }
-
-    // Load existing evaluation results (called again to ensure state is consistent)
-    loadExistingResults(session)
   }
 
-  // Load existing evaluation results
   function loadExistingResults(session: EvaluationSession) {
-    if (session.results) {
-      const evaluated: { [itemId: string]: { value?: any, masteryLevel?: string, comment?: string } } = {}
-
-      session.results.forEach((result) => {
-        // Handle cases where itemId might be undefined (legacy data)
-        const itemId = result.itemId ?? result.questionId
-        if (itemId) {
-          evaluated[itemId.toString()] = {
-            value: result.value,
-            masteryLevel: result.value, // For backward compatibility
-            comment: result.comment,
-          }
-        }
-      })
-
-      evaluatedItems.value = evaluated
+    if (!session.results) {
+      evaluatedItems.value = {}
+      return
     }
+
+    const seen = new Map<number, EvaluatedItem & { isFinal: boolean }>()
+
+    session.results.forEach((r) => {
+      const parsed = parseExportResult(r)
+      const itemId = parsed.itemId
+
+      const display = parsed.secondPass ?? parsed.firstPass
+      if (!display)
+        return
+
+      const isFinal = parsed.secondPass !== undefined
+
+      const existing = seen.get(itemId)
+      if (!existing || !existing.isFinal || isFinal) {
+        seen.set(itemId, {
+          value: display.value,
+          masteryLevel: typeof display.value === 'string' ? display.value : undefined,
+          comment: display.comment,
+          isFinal,
+        })
+      }
+    })
+
+    const evaluated: Record<string, EvaluatedItem> = {}
+    for (const [id, entry] of seen.entries()) {
+      evaluated[id.toString()] = {
+        value: entry.value,
+        masteryLevel: entry.masteryLevel,
+        comment: entry.comment,
+      }
+    }
+    evaluatedItems.value = evaluated
   }
 
-  // Helper function to find the first unevaluated item
   function findFirstUnevaluatedItem(): { groupIndex: number, itemIndexInGroup: number } | null {
-    // Iterate through all groups and items to find the first unevaluated one
     for (let groupIndex = 0; groupIndex < groupKeys.value.length; groupIndex++) {
       const groupKey = groupKeys.value[groupIndex]
       if (!groupKey)
@@ -133,29 +131,25 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
 
         const evaluation = evaluatedItems.value[item.id.toString()]
 
-        // Check if item is not evaluated (no value or masteryLevel)
         if (!evaluation || (evaluation.value === undefined && evaluation.masteryLevel === undefined)) {
           return { groupIndex, itemIndexInGroup }
         }
       }
     }
 
-    // If all items are evaluated, return null (will fall back to first item)
     return null
   }
 
-  // Navigation functions
   function goToItem(groupIndex: number, itemIndexInGroup: number) {
     const groupKey = groupKeys.value[groupIndex]
-    if (groupIndex >= 0 && groupIndex < groupKeys.value.length && groupKey // valid group index
+    if (groupIndex >= 0 && groupIndex < groupKeys.value.length && groupKey
       && itemIndexInGroup >= 0
-      && itemIndexInGroup < (groupedItems.value[groupKey]?.length ?? 0)) { // valid item index
+      && itemIndexInGroup < (groupedItems.value[groupKey]?.length ?? 0)) {
       currentGroupIndex.value = groupIndex
       currentItemGroup.value = groupedItems.value[groupKey] || []
       currentItemIndexInGroup.value = itemIndexInGroup
       currentItem.value = currentItemGroup.value[itemIndexInGroup] ?? null
 
-      // Load existing evaluation comment for this item (don't create new state)
       const item = currentItem.value
       if (item) {
         const existing = evaluatedItems.value[item.id.toString()]
@@ -196,38 +190,48 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     }
   }
 
-  // Evaluation functions
-  async function saveEvaluationResult(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string) {
+  async function saveEvaluationResult(value: EvaluatedValue, comment?: string, elapsedTime?: string) {
     if (!currentItem.value || !evaluationSession)
       return
 
-    // Update local state
     evaluatedItems.value[currentItem.value.id.toString()] = {
       value,
-      masteryLevel,
+      masteryLevel: typeof value === 'string' ? value : undefined,
       comment: comment || '',
     }
 
-    // Create evaluation result
-    const result: EvaluationResult = {
+    const evaluationEntry = { value, comment: comment || '', elapsedTime }
+
+    const result: ExportResult = {
       itemId: currentItem.value.id,
       questionId: currentItem.value.questionID,
-      value,
-      comment: comment || '',
-      elapsedTime,
+      evaluations: { 0: evaluationEntry },
       evaluatedAt: new Date().toISOString(),
     }
 
-    // Update session results
-    if (!evaluationSession.results) {
-      evaluationSession.results = []
+    const existingIndex = (evaluationSession.results || []).findIndex(r => r.itemId === result.itemId)
+    if (existingIndex >= 0) {
+      const existingResult = evaluationSession.results[existingIndex]
+      if (!existingResult) {
+        evaluationSession.results.push(result)
+      }
+      else {
+        evaluationSession.results[existingIndex] = {
+          ...existingResult,
+          itemId: currentItem.value.id,
+          questionId: currentItem.value.questionID,
+          evaluatedAt: result.evaluatedAt,
+          evaluations: {
+            ...existingResult.evaluations,
+            ...result.evaluations,
+          },
+        }
+      }
+    }
+    else {
+      evaluationSession.results.push(result)
     }
 
-    // Remove existing result for this item
-    evaluationSession.results = evaluationSession.results.filter(r => r.itemId !== result.itemId)
-    evaluationSession.results.push(result)
-
-    // Save to storage
     try {
       await evaluationStorage.saveSession(evaluationSession)
     }
@@ -237,20 +241,17 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     }
   }
 
-  async function evaluateAndGoNext(value: any, comment?: string, masteryLevel?: string, elapsedTime?: string) {
-    await saveEvaluationResult(value, comment, masteryLevel, elapsedTime)
+  async function evaluateAndGoNext(value: EvaluatedValue, comment?: string, elapsedTime?: string) {
+    await saveEvaluationResult(value, comment, elapsedTime)
     goToNextItem()
   }
 
-  // Initialize if session provided
   if (evaluationSession) {
     initializeFromSession(evaluationSession)
   }
 
-  // Computed properties
   const progress = computed(() => {
     const totalItems = items.value.length
-    // Only count items that have actual evaluation values (not just navigation)
     const evaluatedCount = Object.values(evaluatedItems.value).filter(
       item => item.value !== undefined || item.masteryLevel !== undefined,
     ).length
@@ -264,9 +265,8 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     return evaluation && (evaluation.value !== undefined || evaluation.masteryLevel !== undefined)
   })
 
-  const currentAbsoluteQuestionIndex = computed(() => { // index in all groupedItems values
+  const currentAbsoluteQuestionIndex = computed(() => {
     let previousItemsCount = 0
-    // Sum of all previous groups' items
     for (let i = 0; i < currentGroupIndex.value; i++) {
       const groupKey = groupKeys.value[i]
       previousItemsCount += groupKey
@@ -282,15 +282,15 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     const groupKey = groupKeys.value[groupIndex]
     const group = groupKey ? groupedItems.value[groupKey] || [] : []
 
-    return (itemIndexInGroup < group.length - 1) // has next item in current group
-      || (groupIndex < groupKeys.value.length - 1) // has next group
+    return (itemIndexInGroup < group.length - 1)
+      || (groupIndex < groupKeys.value.length - 1)
   })
+
   const hasPreviousItem = computed(() => {
     return currentItemIndexInGroup.value > 0 || currentGroupIndex.value > 0
   })
 
   return {
-    // State
     items,
     questions,
     groupedItems,
@@ -303,14 +303,12 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     isSingleEvaluation,
     currentItemIndexInGroup,
 
-    // Computed
     progress,
     isCurrentItemEvaluated,
     currentAbsoluteQuestionIndex,
     hasNextItem,
     hasPreviousItem,
 
-    // Methods
     initializeFromSession,
     goToItem,
     goToNextItem,

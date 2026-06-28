@@ -82,7 +82,13 @@
       "validation": {
         "title": "Veuillez corriger les erreurs suivantes :"
       },
-      "configurationSuffix": "Configuration"
+      "configurationSuffix": "Configuration",
+      "evaluationMode": "Mode d'évaluation",
+      "modes": {
+        "withoutAi": "Sans évaluation de l'IA",
+        "withAi": "Avec l'évaluation de l'IA",
+        "withoutThenWithAi": "D'abord sans l'évaluation de l'IA, ensuite avec"
+      }
     },
     "actions": {
       "edit": "Modifier",
@@ -234,6 +240,11 @@
       "body": "Le focus a été perdu. Voulez-vous mettre l'évaluation en pause ?",
       "pauseButton": "Mettre en pause",
       "continueButton": "Continuer"
+    },
+    "aiEvaluation": {
+      "title": "Évaluation de l'IA",
+      "score": "Score",
+      "justification": "Justification"
     },
     "error": "Erreur",
     "title": "Évaluation",

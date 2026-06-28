@@ -9,11 +9,23 @@ export interface Question {
   context?: ContextData // Optional - supports string and string[] for display
 }
 
+export interface AiEvaluation {
+  score?: number
+  justification?: string
+}
+
+export interface EvaluationEntry {
+  value: any
+  comment?: string
+  elapsedTime?: string
+}
+
 export interface EvaluationItem {
   id: number
   questionID: number
   submittedAnswer: string
   context?: ContextData // Optional - supports string and string[] for display
+  aiEvaluation?: AiEvaluation // Optional
 }
 
 export interface DatasetStructure {
@@ -34,12 +46,15 @@ export interface EvaluationConfig {
 
 export type EvaluationType = 'mastery' | 'boolean' | 'score'
 
+export type EvaluationMode = 'without-ai' | 'with-ai' | 'without-then-with-ai'
+
 export interface EvaluationSettings {
   // Common settings
   allowComments: boolean
   requireComments: boolean
   instructions?: string
   timerEnabled?: boolean
+  evaluationMode: EvaluationMode
 
   // Type-specific settings
   masterySettings?: MasterySettings
@@ -75,22 +90,12 @@ export interface ScoreSettings {
   passingScore?: number
 }
 
-// Generic evaluation result that can handle any evaluation type
-export interface EvaluationResult {
-  itemId: number // The specific item that was evaluated
-  questionId: number // The question this item belongs to
-  value: any // The actual evaluation value (mastery level, boolean, score, etc.)
-  comment?: string
-  elapsedTime?: string
-  evaluatedAt: string // ISO timestamp
-}
-
 export interface EvaluationSession {
   id: string
   name: string
   description?: string
   dataset: DatasetStructure
-  results: EvaluationResult[]
+  results: ExportResult[]
   config: EvaluationConfig
   createdAt: string
   updatedAt: string
@@ -98,10 +103,53 @@ export interface EvaluationSession {
   isCompleted: boolean
 }
 
+export interface ExportEvaluationEntry {
+  value: any
+  comment?: string
+  elapsedTime?: string
+}
+
+export interface ExportResult {
+  itemId: number
+  questionId: number
+  evaluations: Record<string, ExportEvaluationEntry>
+  evaluatedAt: string
+}
+
 export interface ExportData {
   session: EvaluationSession
   exportedAt: string
   version: string
+}
+
+export type EvaluatedValue = ExportEvaluationEntry['value']
+
+export interface EvaluatedItem {
+  value?: EvaluatedValue
+  masteryLevel?: string
+  comment?: string
+}
+
+export interface ParsedEvaluationResult {
+  itemId: number
+  questionId: number
+  firstPass?: ExportEvaluationEntry
+  secondPass?: ExportEvaluationEntry
+  evaluatedAt: string
+}
+
+export function parseExportResult(result: ExportResult): ParsedEvaluationResult {
+  const evaluations = result.evaluations ?? {}
+  const e0 = evaluations['0']
+  const e1 = evaluations['1']
+
+  return {
+    itemId: result.itemId,
+    questionId: result.questionId,
+    firstPass: e0,
+    secondPass: e1,
+    evaluatedAt: result.evaluatedAt,
+  }
 }
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
