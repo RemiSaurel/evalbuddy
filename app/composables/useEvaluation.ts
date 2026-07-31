@@ -310,6 +310,7 @@ export function useEvaluation(evaluationSession?: EvaluationSession) {
     hasPreviousItem,
 
     initializeFromSession,
+    loadExistingResults,
     goToItem,
     goToNextItem,
     goToPreviousItem,

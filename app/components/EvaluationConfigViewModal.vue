@@ -23,7 +23,7 @@ const isOpen = computed({
 const typeMeta = computed(() => {
   if (!props.config)
     return null
-  return getEvaluationTypeMeta(props.config.type as any)
+  return getEvaluationTypeMeta(props.config.type)
 })
 
 function close() {

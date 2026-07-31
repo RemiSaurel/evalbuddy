@@ -285,6 +285,17 @@ function validateDataset(dataset: any): string[] {
     if (item.context && !validateContextData(item.context)) {
       errors.push(`Item at index ${index}: context must be an object with string or string[] values`)
     }
+
+    // Validate aiEvaluation if present
+    if (item.aiEvaluation !== undefined) {
+      const { score, justification } = item.aiEvaluation
+      if (score !== undefined && (typeof score !== 'number' || !Number.isInteger(score) || score < 0 || score > 10)) {
+        errors.push(`Item at index ${index}: aiEvaluation.score must be an integer between 0 and 10`)
+      }
+      if (justification !== undefined && typeof justification !== 'string') {
+        errors.push(`Item at index ${index}: aiEvaluation.justification must be a string`)
+      }
+    }
   })
 
   return errors

@@ -36,6 +36,7 @@ const {
   goToItem,
   goToPreviousItem,
   goToNextItem,
+  loadExistingResults,
   saveEvaluationResult,
   evaluateAndGoNext,
 } = useEvaluation(session)
@@ -44,6 +45,7 @@ const {
   evaluationPass,
   showAiEvaluation,
   startSecondPass,
+  setPassForItem,
   saveFirstPass,
   saveSecondPass,
 } = useComposedEvaluation(session)
@@ -128,7 +130,6 @@ async function handleDelete() {
 const isTimerEnabled = computed(() => evaluationConfig.value?.settings.timerEnabled ?? false)
 const firstPersistedElapsedTimes = ref<Record<number, number>>({})
 const secondPersistedElapsedTimes = ref<Record<number, number>>({})
-const secondPassActiveItems = ref<Record<number, boolean>>({})
 const isStartModalOpen = ref(isTimerEnabled.value)
 const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
 
@@ -163,17 +164,18 @@ const pausedActions = computed(() => [
   },
 ])
 
+function elapsedTimeFor(itemId: number, pass: 1 | 2): number {
+  return pass === 2
+    ? secondPersistedElapsedTimes.value[itemId] ?? 0
+    : firstPersistedElapsedTimes.value[itemId] ?? 0
+}
+
 async function loadPersistedElapsedTimes() {
   if (!isTimerEnabled.value)
     return
 
   firstPersistedElapsedTimes.value = await evaluationStorage.getSessionElapsedTimes(session.id)
   secondPersistedElapsedTimes.value = await evaluationStorage.getSessionSecondElapsedTimes(session.id)
-
-  const currentItemId = currentItem.value?.id
-  if (currentItemId != null) {
-    setElapsed(firstPersistedElapsedTimes.value[currentItemId] ?? 0)
-  }
 }
 
 await loadPersistedElapsedTimes()
@@ -242,6 +244,7 @@ async function handleEvaluateAndGoNext(value: EvaluatedValue, comment?: string) 
 
   if (evaluationPass.value === 2 && currentItem.value) {
     await saveSecondPass(currentItem.value, value, comment, elapsed)
+    loadExistingResults(session)
     goToNextItem()
   }
   else {
@@ -254,6 +257,7 @@ async function handleSaveEvaluation(value: EvaluatedValue, comment?: string) {
 
   if (evaluationPass.value === 1 && currentItem.value) {
     await saveFirstPass(currentItem.value, value, comment, elapsed)
+    loadExistingResults(session)
   }
   else {
     await saveEvaluationResult(value, comment, elapsed)
@@ -266,7 +270,7 @@ async function persistCurrentElapsedTime(itemId?: number) {
 
   sync()
 
-  const isSecondPass = !!secondPassActiveItems.value[itemId]
+  const isSecondPass = evaluationPass.value === 2
   const elapsedByPass = isSecondPass
     ? secondPersistedElapsedTimes.value
     : firstPersistedElapsedTimes.value
@@ -289,24 +293,24 @@ async function handleStartSecondPass() {
 
   await persistCurrentElapsedTime(currentItemId)
   startSecondPass()
-  secondPassActiveItems.value[currentItemId] = true
-  setElapsed(secondPersistedElapsedTimes.value[currentItemId] ?? 0)
+  setElapsed(elapsedTimeFor(currentItemId, 2))
 }
 
 watch(
   () => currentItem.value?.id,
   async (newItemId, oldItemId) => {
-    if (!isTimerEnabled.value)
-      return
-
-    if (oldItemId != null) {
+    if (isTimerEnabled.value && oldItemId != null) {
       await persistCurrentElapsedTime(oldItemId)
     }
 
-    setElapsed(newItemId != null
-      ? firstPersistedElapsedTimes.value[newItemId] ?? 0
-      : 0,
-    )
+    if (newItemId != null) {
+      setPassForItem(newItemId)
+    }
+
+    if (!isTimerEnabled.value)
+      return
+
+    setElapsed(newItemId != null ? elapsedTimeFor(newItemId, evaluationPass.value) : 0)
   },
   { immediate: true },
 )
@@ -629,7 +633,7 @@ onBeforeUnmount(async () => {
               <UButton
                 color="neutral"
                 variant="outline"
-                @click="isDeleteModalOpen = false"
+                @click="() => { isDeleteModalOpen = false }"
               >
                 {{ $t('evaluation.actions.cancel') }}
               </UButton>

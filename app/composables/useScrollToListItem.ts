@@ -1,3 +1,5 @@
+import type { EvaluationItem } from '~/models'
+
 /**
  * Composable for handling scroll to list items in navigation components
  */
@@ -43,8 +45,8 @@ export function useScrollToListItem() {
     questionContainer: Ref<HTMLElement | undefined>,
     groupContainer: Ref<HTMLElement | undefined>,
     questionIndex: number,
-    currentQuestionGroup: readonly any[],
-    groupedQuestions: { [key: string]: readonly any[] },
+    currentQuestionGroup: readonly EvaluationItem[],
+    groupedQuestions: { [key: string]: readonly EvaluationItem[] },
   ) => {
     if (isSingleEvaluation) {
       // For single evaluation mode, scroll in the questions container
@@ -53,9 +55,9 @@ export function useScrollToListItem() {
     else {
       // For grouped evaluations, scroll to the current group
       const currentGroup = currentQuestionGroup[0]?.questionID
-      if (currentGroup) {
+      if (currentGroup != null) {
         const groupNames = Object.keys(groupedQuestions)
-        const groupIndex = groupNames.indexOf(currentGroup)
+        const groupIndex = groupNames.indexOf(currentGroup.toString())
         if (groupIndex >= 0) {
           scrollToItem(groupContainer, groupIndex)
         }

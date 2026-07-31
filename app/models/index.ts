@@ -14,12 +14,6 @@ export interface AiEvaluation {
   justification?: string
 }
 
-export interface EvaluationEntry {
-  value: any
-  comment?: string
-  elapsedTime?: string
-}
-
 export interface EvaluationItem {
   id: number
   questionID: number
@@ -103,8 +97,12 @@ export interface EvaluationSession {
   isCompleted: boolean
 }
 
+// The raw evaluation value: a mastery level id (string), a boolean verdict,
+// or a numeric score, depending on the EvaluationConfig type. Null means unset.
+export type EvaluatedValue = string | number | boolean | null
+
 export interface ExportEvaluationEntry {
-  value: any
+  value: EvaluatedValue
   comment?: string
   elapsedTime?: string
 }
@@ -121,8 +119,6 @@ export interface ExportData {
   exportedAt: string
   version: string
 }
-
-export type EvaluatedValue = ExportEvaluationEntry['value']
 
 export interface EvaluatedItem {
   value?: EvaluatedValue

@@ -108,7 +108,7 @@
       "questionID": 3,
       "submittedAnswer": "Tropical, arid, temperate, continental, and polar climate zones.",
       "context": { "studentId": "student_004", "studentName": "David Brown", "submissionTime": "2025-01-14T10:35:00Z", "attempt": "1" },
-      "aiEvaluation": { "score": 1, "justification": "Perfect answer listing all five standard climate zones correctly." }
+      "aiEvaluation": { "score": 10, "justification": "Perfect answer listing all five standard climate zones correctly." }
     },
     {
       "id": 11,

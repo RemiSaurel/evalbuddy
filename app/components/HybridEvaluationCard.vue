@@ -126,7 +126,7 @@ function selectValue(value: EvaluatedValue) {
 function incrementScore() {
   if (!scoreSettings.value)
     return
-  const current = selectedValue.value ?? scoreSettings.value.minValue
+  const current = Number(selectedValue.value ?? scoreSettings.value.minValue)
   const next = Math.min(current + scoreSettings.value.step, scoreSettings.value.maxValue)
   selectedValue.value = next
 }
@@ -134,7 +134,7 @@ function incrementScore() {
 function decrementScore() {
   if (!scoreSettings.value)
     return
-  const current = selectedValue.value ?? scoreSettings.value.minValue
+  const current = Number(selectedValue.value ?? scoreSettings.value.minValue)
   const next = Math.max(current - scoreSettings.value.step, scoreSettings.value.minValue)
   selectedValue.value = next
 }
@@ -175,16 +175,8 @@ useEvaluationShortcuts({
   isScoreMode: isScoreEvaluation,
 })
 
-watch(() => props.currentItem?.id, () => {
-  if (isComposedMode.value) {
-    selectedValue.value = null
-    localComment.value = ''
-  }
-})
-
 const aiScoreDisplay = computed(() => {
-  const item = props.currentItem as EvaluationItem & { aiEvaluation?: { score?: number, justification?: string } }
-  const score = item?.aiEvaluation?.score
+  const score = props.currentItem?.aiEvaluation?.score
   if (score === undefined || score === null)
     return '—'
 
@@ -196,8 +188,7 @@ const aiScoreDisplay = computed(() => {
 })
 
 const aiJustificationDisplay = computed(() => {
-  const item = props.currentItem as EvaluationItem & { aiEvaluation?: { score?: number, justification?: string } }
-  return item?.aiEvaluation?.justification || '—'
+  return props.currentItem?.aiEvaluation?.justification || '—'
 })
 </script>
 
@@ -285,7 +276,7 @@ const aiJustificationDisplay = computed(() => {
                   color="neutral"
                   variant="soft"
                   size="lg"
-                  :disabled="selectedValue !== null && selectedValue <= scoreSettings.minValue"
+                  :disabled="selectedValue !== null && Number(selectedValue) <= scoreSettings.minValue"
                   @click="decrementScore"
                 />
 
@@ -311,7 +302,7 @@ const aiJustificationDisplay = computed(() => {
                   color="neutral"
                   variant="soft"
                   size="lg"
-                  :disabled="selectedValue !== null && selectedValue >= scoreSettings.maxValue"
+                  :disabled="selectedValue !== null && Number(selectedValue) >= scoreSettings.maxValue"
                   @click="incrementScore"
                 />
               </div>

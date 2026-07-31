@@ -5,18 +5,35 @@ import { parseExportResult } from '~/models'
 export function useComposedEvaluation(session: EvaluationSession) {
   const evaluationPass = ref<1 | 2>(1)
 
-  const showAiEvaluation = computed(() => evaluationPass.value === 2)
+  const evaluationMode = computed(() => session.config?.settings?.evaluationMode ?? 'without-ai')
+
+  const showAiEvaluation = computed(() =>
+    evaluationMode.value === 'with-ai'
+    || (evaluationMode.value === 'without-then-with-ai' && evaluationPass.value === 2),
+  )
 
   function startSecondPass() {
     evaluationPass.value = 2
   }
 
-  function resetPass() {
-    evaluationPass.value = 1
+  function isComposedMode(): boolean {
+    return evaluationMode.value === 'without-then-with-ai'
   }
 
-  function isComposedMode(): boolean {
-    return session.config?.settings?.evaluationMode === 'without-then-with-ai'
+  /**
+   * Resumes the pass that matches what's already been saved for this item:
+   * pass 2 once the first pass is saved (whether or not the second pass is
+   * done yet), pass 1 for a fresh item. Never resets progress on revisit.
+   */
+  function setPassForItem(itemId: number) {
+    if (!isComposedMode()) {
+      evaluationPass.value = 1
+      return
+    }
+
+    const existing = (session.results || []).find(r => r.itemId === itemId)
+    const firstPass = existing ? parseExportResult(existing).firstPass : undefined
+    evaluationPass.value = firstPass !== undefined ? 2 : 1
   }
 
   async function saveFirstPass(
@@ -98,7 +115,7 @@ export function useComposedEvaluation(session: EvaluationSession) {
     evaluationPass,
     showAiEvaluation,
     startSecondPass,
-    resetPass,
+    setPassForItem,
     isComposedMode,
     saveFirstPass,
     saveSecondPass,
