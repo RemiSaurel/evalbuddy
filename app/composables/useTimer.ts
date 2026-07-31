@@ -1,6 +1,19 @@
 import type { Ref } from 'vue'
 import { computed, onUnmounted, ref, watch } from 'vue'
 
+/** Milliseconds as HH:MM:SS. Shared so totals format like the live timer. */
+export function formatElapsed(ms: number) {
+  const total = Math.floor(ms / 1000)
+
+  const hours = Math.floor(total / 3600)
+  const minutes = Math.floor((total % 3600) / 60)
+  const seconds = total % 60
+
+  return [hours, minutes, seconds]
+    .map(v => String(v).padStart(2, '0'))
+    .join(':')
+}
+
 export function useTimer(enabled: Ref<boolean>) {
   const elapsed = ref(0)
 
@@ -53,17 +66,7 @@ export function useTimer(enabled: Ref<boolean>) {
     startInterval()
   }
 
-  const formatted = computed(() => {
-    const total = Math.floor(elapsed.value / 1000)
-
-    const hours = Math.floor(total / 3600)
-    const minutes = Math.floor((total % 3600) / 60)
-    const seconds = total % 60
-
-    return [hours, minutes, seconds]
-      .map(v => String(v).padStart(2, '0'))
-      .join(':')
-  })
+  const formatted = computed(() => formatElapsed(elapsed.value))
 
   watch(enabled, (isEnabled) => {
     if (isEnabled) {

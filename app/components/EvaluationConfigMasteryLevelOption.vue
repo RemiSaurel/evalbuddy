@@ -14,11 +14,11 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="flex gap-2 w-full pl-1.5 pr-3 py-3 rounded-lg bg-neutral-100 dark:bg-neutral-900 transition-colors">
+  <div class="flex gap-2 w-full p-3 rounded-lg bg-muted">
     <UIcon
       name="i-lucide-grip-vertical"
       :class="handleClass"
-      class="size-5 text-neutral-500 dark:text-neutral-400 cursor-grab hover:text-neutral-700 dark:hover:text-neutral-200
+      class="size-5 shrink-0 mt-1.5 text-dimmed cursor-grab active:cursor-grabbing hover:text-default
       transition-colors duration-150"
     />
 
@@ -34,7 +34,6 @@ const { t } = useI18n()
           icon="i-lucide:trash-2"
           color="error"
           variant="ghost"
-          size="sm"
           @click="emit('remove')"
         />
       </div>

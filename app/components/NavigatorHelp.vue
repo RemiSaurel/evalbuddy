@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { NAVIGATOR_STATE_CLASSES } from '@/utils/navigatorStyles'
+
 const { t } = useI18n()
 </script>
 
@@ -12,24 +14,25 @@ const { t } = useI18n()
   >
     <UIcon
       name="i-lucide-circle-question-mark"
-      class="size-3.5 hover:text-black dark:hover:text-white transition-colors duration-200"
+      class="size-3.5 text-dimmed transition-colors hover:text-default"
     />
 
     <template #content>
-      <!-- Legend -->
-      <div class="flex items-center gap-4 text-xs p-2 text-neutral-800 dark:text-neutral-200 transition-colors">
+      <!-- Swatches read from the same constants NavigatorItem uses, so the
+           legend can never describe a colour the pills don't have. -->
+      <div class="flex items-center gap-4 p-2 text-xs text-default">
         <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-full bg-neutral-600" />
+          <div class="size-2.5 rounded-full" :class="NAVIGATOR_STATE_CLASSES.evaluated" />
           <span>{{ t('evaluation.navigation.evaluated') }}</span>
         </div>
 
         <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-full bg-neutral-200 dark:bg-neutral-900 transition-colors" />
+          <div class="size-2.5 rounded-full" :class="NAVIGATOR_STATE_CLASSES.pending" />
           <span>{{ t('evaluation.navigation.pending') }}</span>
         </div>
 
         <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-full border border-blue-700 dark:border-blue-400" />
+          <div class="size-2.5 rounded-full bg-elevated ring-2 ring-primary" />
           <span>{{ t('evaluation.navigation.current') }}</span>
         </div>
       </div>

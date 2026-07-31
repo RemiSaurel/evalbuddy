@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   app: {
     head: {
-      title: '🧑‍🏫 EvalBuddy',
+      title: 'EvalBuddy',
     },
   },
   devtools: { enabled: true },
@@ -41,6 +41,9 @@ export default defineNuxtConfig({
       { code: 'fr', iso: 'fr-FR', file: 'fr.json' },
     ],
     defaultLocale: 'fr',
+    bundle: {
+      optimizeTranslationDirective: false,
+    },
   },
 
   ui: {

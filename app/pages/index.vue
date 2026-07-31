@@ -81,10 +81,18 @@ async function loadSessions() {
   }
 }
 
-function openSession(sessionId: string) {
-  router.push({
-    path: `/evaluation/${sessionId}`,
-  })
+function sessionPercent(session: EvaluationSession) {
+  const total = session.dataset.items.length
+  return total ? Math.round((session.results.length / total) * 100) : 0
+}
+
+// Leading status glyph, the column you scan first: done, started, untouched.
+function sessionStatus(session: EvaluationSession) {
+  if (session.results.length >= session.dataset.items.length && session.dataset.items.length > 0)
+    return { icon: 'i-lucide:circle-check-big', class: 'text-success' }
+  if (session.results.length > 0)
+    return { icon: 'i-lucide:circle-dashed', class: 'text-primary' }
+  return { icon: 'i-lucide:circle', class: 'text-dimmed' }
 }
 
 function confirmDelete(session: EvaluationSession) {
@@ -154,11 +162,6 @@ function openCreationEvaluation() {
   evaluatorName.value = ''
   // Force reload configs when opening modal to ensure latest data
   loadConfigs()
-}
-
-function handleFileSelect(event: Event) {
-  const target = event.target as HTMLInputElement
-  selectedFile.value = target.files?.[0] || null
 }
 
 async function createEvaluation() {
@@ -235,6 +238,7 @@ function getDropdownItems(session: EvaluationSession) {
     {
       label: t('evaluation.actions.delete'),
       icon: 'i-lucide:trash-2',
+      color: 'error' as const,
       onSelect: () => confirmDelete(session),
     },
   ]
@@ -242,210 +246,197 @@ function getDropdownItems(session: EvaluationSession) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-8 mt-8">
+  <div class="flex flex-col gap-6">
     <!-- Error Display -->
     <UAlert
       v-if="error"
       icon="i-lucide:alert-circle"
       color="error"
       variant="subtle"
-      :title="$t('evaluation.error')"
+      :title="t('evaluation.error')"
       :description="error"
-      :close-button="{ icon: 'i-lucide:x', color: 'neutral', variant: 'link', padded: false }"
-      @close="error = null"
+      close
+      @update:open="error = null"
     />
 
     <!-- Header -->
-    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-8 dark:bg-neutral-900">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-neutral-900 dark:text-neutral-300 transition-colors">
+        <h1 class="text-xl font-semibold text-highlighted">
           {{ t('evaluation.title') }}
         </h1>
-        <p class="text-neutral-600 mt-2 dark:text-neutral-400 transition-colors">
+        <p class="text-sm text-muted">
           {{ t('evaluation.subtitle') }}
         </p>
       </div>
 
-      <div class="flex gap-3">
+      <div class="flex gap-2">
         <UButton
           icon="i-lucide:plus"
-          size="lg"
+          :label="t('evaluation.actions.create')"
           @click="openCreationEvaluation()"
-        >
-          {{ t('evaluation.actions.create') }}
-        </UButton>
+        />
       </div>
     </div>
 
-    <!-- Existing Sessions -->
-    <div class="flex flex-col gap-4">
-      <div v-if="sortedSessions.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <UCard
+    <div
+      v-if="sortedSessions.length > 0"
+      class="overflow-hidden rounded-lg border border-default transition-[opacity,translate] duration-200 ease-out-expo starting:translate-y-1 starting:opacity-0"
+    >
+      <ul class="divide-y divide-default">
+        <li
           v-for="session in sortedSessions"
           :key="session.id"
-          class="cursor-pointer dark:ring-neutral-600 dark:bg-neutral-800 hover:ring-neutral-300 dark:hover:ring-neutral-500 transition-all"
-          @click="openSession(session.id)"
+          class="group relative flex items-center pe-2 hover:bg-elevated"
         >
-          <template #header>
-            <div class="flex justify-between items-start">
-              <div class="flex flex-col gap-1">
-                <h3 class="font-semibold text-base truncate text-neutral-900 dark:text-neutral-100 transition-colors">
-                  {{ session.name }}
-                </h3>
-                <div class="text-sm text-neutral-500 truncate">
-                  {{ session.config.name }}
-                </div>
-                <div class="text-xs text-neutral-400">
-                  {{ t('evaluation.overview.updated') }}: {{ new Date(session.updatedAt).toLocaleDateString() }}
-                </div>
-              </div>
-              <UDropdownMenu
-                :items="getDropdownItems(session)"
-              >
-                <UButton
-                  icon="i-lucide:more-vertical"
-                  variant="ghost"
-                  size="xs"
-                  class="opacity-60 hover:opacity-100"
-                  @click.stop
-                />
-              </UDropdownMenu>
-            </div>
-          </template>
+          <!-- A real link, so middle-click and ⌘-click open a session in a new
+               tab, and the kebab stays a separate control beside it. -->
+          <NuxtLink
+            :to="`/evaluation/${session.id}`"
+            class="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+          >
+            <UIcon
+              :name="sessionStatus(session).icon"
+              class="size-4 shrink-0"
+              :class="sessionStatus(session).class"
+            />
 
-          <div class="space-y-2 ">
-            <!-- Stats Row -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4 text-sm text-neutral-600">
-                <div class="flex items-center gap-1 dark:text-white">
-                  <UIcon name="i-lucide:help-circle" class="w-3 h-3" />
-                  <span>{{ session.dataset.items.length }}</span>
-                </div>
-                <div class="flex items-center gap-1 dark:text-white">
-                  <UIcon name="i-lucide:check-circle" class="w-3 h-3 text-green-600" />
-                  <span>{{ session.results.length }}</span>
-                </div>
-              </div>
-              <div class="text-right dark:text-white">
-                <div class="text-sm font-medium">
-                  {{ Math.round((session.results.length / session.dataset.items.length) * 100) }}%
-                </div>
-              </div>
+            <div class="flex min-w-0 flex-1 flex-col">
+              <span class="truncate text-sm font-medium text-highlighted">
+                {{ session.name }}
+              </span>
+              <span class="truncate text-xs text-muted">
+                {{ session.config.name }}
+              </span>
             </div>
 
-            <!-- Progress Bar -->
+            <span class="shrink-0 text-xs tabular-nums text-muted">
+              {{ session.results.length }} / {{ session.dataset.items.length }}
+            </span>
+
             <UProgress
               :model-value="session.results.length"
               :max="session.dataset.items.length"
               size="sm"
-              class="h-1.5"
+              class="hidden w-20 shrink-0 sm:block"
             />
-          </div>
-        </UCard>
-      </div>
 
-      <div v-else class="text-center py-8 text-neutral-500">
-        <UIcon name="i-lucide:folder-open" class="text-4xl mb-2" />
-        <p>{{ $t('evaluation.overview.noSessions') }}</p>
-      </div>
+            <span class="w-9 shrink-0 text-end text-xs tabular-nums text-highlighted">
+              {{ sessionPercent(session) }}%
+            </span>
+
+            <span class="hidden w-24 shrink-0 text-end text-xs tabular-nums text-dimmed lg:block">
+              {{ new Date(session.updatedAt).toLocaleDateString() }}
+            </span>
+          </NuxtLink>
+
+          <UDropdownMenu :items="getDropdownItems(session)">
+            <UButton
+              icon="i-lucide:more-vertical"
+              color="neutral"
+              variant="ghost"
+              :aria-label="t('evaluation.actions.edit')"
+            />
+          </UDropdownMenu>
+        </li>
+      </ul>
     </div>
+
+    <UEmpty
+      v-else-if="!isLoading"
+      icon="i-lucide:folder-open"
+      :title="t('evaluation.overview.noSessions')"
+      :description="t('evaluation.subtitle')"
+    >
+      <template #actions>
+        <UButton
+          icon="i-lucide:plus"
+          size="lg"
+          :label="t('evaluation.overview.emptyCta')"
+          @click="openCreationEvaluation()"
+        />
+      </template>
+    </UEmpty>
 
     <!-- Import Modal -->
     <UModal
       v-model:open="isCreationModalOpen"
-      title="Creation Evaluation Modal"
-      description="Creation Evaluation Modal"
+      :title="t('evaluation.creationModal.createEvaluation')"
+      :description="t('evaluation.creationModal.selectFile')"
       :ui="{ content: 'overflow-y-auto' }"
     >
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="font-semibold text-lg">
-              {{ $t('evaluation.creationModal.createEvaluation') }}
-            </h3>
-          </template>
+      <template #body>
+        <div class="space-y-4">
+          <!-- Session Name Input -->
+          <div>
+            <label class="block text-sm font-medium text-default mb-2">
+              {{ t('evaluation.creationModal.sessionName') }}
+            </label>
+            <UInput
+              v-model="sessionName"
+              class="w-full"
+              :placeholder="t('evaluation.creationModal.sessionNamePlaceholder')"
+            />
+          </div>
 
-          <div class="space-y-4">
-            <!-- Session Name Input -->
-            <div>
-              <label class="block text-sm font-medium mb-2">
-                {{ $t('evaluation.creationModal.sessionName') }}
-              </label>
-              <UInput
-                v-model="sessionName"
-                class="w-full"
-                :placeholder="$t('evaluation.creationModal.sessionNamePlaceholder')"
-              />
-            </div>
+          <!-- Evaluator Name Input -->
+          <div>
+            <label class="block text-sm font-medium text-default mb-2">
+              {{ t('evaluation.creationModal.evaluatorName') }}
+            </label>
+            <UInput
+              v-model="evaluatorName"
+              class="w-full"
+              :placeholder="t('evaluation.creationModal.evaluatorNamePlaceholder')"
+            />
+          </div>
 
-            <!-- Evaluator Name Input -->
-            <div>
-              <label class="block text-sm font-medium mb-2">
-                {{ $t('evaluation.creationModal.evaluatorName') }}
-              </label>
-              <UInput
-                v-model="evaluatorName"
-                class="w-full"
-                :placeholder="$t('evaluation.creationModal.evaluatorNamePlaceholder')"
-              />
-            </div>
+          <!-- Configuration Selection -->
+          <div>
+            <label class="block text-sm font-medium text-default mb-2">
+              {{ t('configuration.selectForEvaluation') }}
+            </label>
+            <USelect
+              v-model="selectedConfigId"
+              class="w-full"
+              :items="configItems"
+              :placeholder="t('configuration.selectForEvaluation')"
+            />
+          </div>
 
-            <!-- Configuration Selection -->
-            <div>
-              <label class="block text-sm font-medium mb-2">
-                {{ $t('configuration.selectForEvaluation') }}
-              </label>
-              <USelect
-                v-model="selectedConfigId"
-                class="w-full"
-                :items="configItems"
-                :placeholder="$t('configuration.selectForEvaluation')"
-              />
-            </div>
+          <!-- Dataset File -->
+          <UFileUpload
+            v-model="selectedFile"
+            accept=".json"
+            :label="t('evaluation.creationModal.dropzone')"
+            :description="t('evaluation.creationModal.dropzoneHint')"
+          />
 
-            <div>
-              <label class="block text-sm font-medium mb-2">
-                {{ $t('evaluation.creationModal.selectFile') }}
-              </label>
-              <input
-                type="file"
-                accept=".json"
-                class="block w-full text-sm text-neutral-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-medium
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
-                @change="handleFileSelect"
-              >
-            </div>
+          <div v-if="importErrors.length > 0" class="bg-error/10 border border-error/25 rounded-md p-3">
+            <h4 class="font-medium text-error mb-2">
+              {{ t('evaluation.creationModal.importErrors') }}:
+            </h4>
+            <ul class="list-disc list-inside text-sm text-error space-y-1 max-h-48 overflow-y-auto pr-2">
+              <li v-for="err in importErrors" :key="err">
+                {{ err }}
+              </li>
+            </ul>
+          </div>
 
-            <div v-if="importErrors.length > 0" class="bg-red-50 border border-red-200 rounded-md p-3">
-              <h4 class="font-medium text-red-800 mb-2">
-                {{ $t('evaluation.creationModal.importErrors') }}:
-              </h4>
-              <ul class="list-disc list-inside text-sm text-red-700 space-y-1 max-h-48 overflow-y-auto pr-2">
-                <li v-for="err in importErrors" :key="err">
-                  {{ err }}
-                </li>
-              </ul>
-            </div>
-
-            <!-- File Format Collapsible -->
-            <UCollapsible>
-              <UButton
-                trailing-icon="i-lucide-chevron-down"
-                size="sm"
-                class="group w-full justify-between"
-                color="neutral"
-                variant="soft"
-                :label="$t('evaluation.creationModal.viewFileFormat')"
-                :ui="{
-                  trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
-                }"
-              />
-              <template #content>
-                <pre class="mt-2 rounded-md bg-neutral-100 p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto dark:bg-neutral-900"><code>{
+          <!-- File Format Collapsible -->
+          <UCollapsible>
+            <UButton
+              trailing-icon="i-lucide-chevron-down"
+              class="group w-full justify-between"
+              color="neutral"
+              variant="subtle"
+              :label="t('evaluation.creationModal.viewFileFormat')"
+              :ui="{
+                trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+              }"
+            />
+            <template #content>
+              <pre class="mt-2 rounded-md bg-muted p-4 text-xs overflow-x-auto max-h-72 overflow-y-auto"><code>{
   // optional — dataset-level metadata (string or string[] values)
   "context": {
     "course": "Geography Assessment",
@@ -473,130 +464,113 @@ function getDropdownItems(session: EvaluationSession) {
     }
   ]
 }</code></pre>
-                <div class="mt-2 text-xs text-neutral-500">
-                  {{ $t('evaluation.creationModal.importInstructions') }}
-                  <a
-                    href="https://github.com/RemiSaurel/evalbuddy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-blue-600 hover:text-blue-800 underline"
-                  >
-                    EvalBuddy Repository
-                  </a>
-                </div>
-              </template>
-            </UCollapsible>
-          </div>
+              <div class="mt-2 text-xs text-muted">
+                {{ t('evaluation.creationModal.importInstructions') }}
+                <a
+                  href="https://github.com/RemiSaurel/evalbuddy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary hover:text-primary/80 underline"
+                >
+                  EvalBuddy Repository
+                </a>
+              </div>
+            </template>
+          </UCollapsible>
+        </div>
+      </template>
 
-          <template #footer>
-            <div class="flex justify-end gap-3">
-              <UButton
-                variant="ghost"
-                @click="() => { isCreationModalOpen = false }"
-              >
-                {{ $t('evaluation.actions.cancel') }}
-              </UButton>
-              <UButton
-                :disabled="!selectedFile || isImporting"
-                :loading="isImporting"
-                @click="createEvaluation"
-              >
-                {{ $t('evaluation.actions.import') }}
-              </UButton>
-            </div>
-          </template>
-        </UCard>
+      <template #footer>
+        <UButton
+          :label="t('common.cancel')"
+          color="neutral"
+          variant="ghost"
+          @click="() => { isCreationModalOpen = false }"
+        />
+        <UButton
+          :label="t('evaluation.actions.import')"
+          :disabled="!selectedFile || isImporting"
+          :loading="isImporting"
+          @click="createEvaluation"
+        />
       </template>
     </UModal>
 
     <!-- Edit Session Modal -->
-    <UModal v-model:open="isEditModalOpen" title="Edit Evaluation Session Modal" description="Edit Evaluation Session Modal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">
-              {{ t('evaluation.editModal.title') }}
-            </h3>
-          </template>
-
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium mb-2">
-                {{ $t('evaluation.editModal.sessionName') }}
-              </label>
-              <UInput
-                v-model="editSessionName"
-                :placeholder="$t('evaluation.editModal.sessionNamePlaceholder')"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-2">
-                {{ $t('evaluation.editModal.evaluatorName') }}
-              </label>
-              <UInput
-                v-model="editEvaluatorName"
-                :placeholder="$t('evaluation.editModal.evaluatorNamePlaceholder')"
-              />
-            </div>
+    <UModal
+      v-model:open="isEditModalOpen"
+      :title="t('evaluation.editModal.title')"
+      :description="t('evaluation.editModal.sessionName')"
+    >
+      <template #body>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-default mb-2">
+              {{ t('evaluation.editModal.sessionName') }}
+            </label>
+            <UInput
+              v-model="editSessionName"
+              class="w-full"
+              :placeholder="t('evaluation.editModal.sessionNamePlaceholder')"
+            />
           </div>
+          <div>
+            <label class="block text-sm font-medium text-default mb-2">
+              {{ t('evaluation.editModal.evaluatorName') }}
+            </label>
+            <UInput
+              v-model="editEvaluatorName"
+              class="w-full"
+              :placeholder="t('evaluation.editModal.evaluatorNamePlaceholder')"
+            />
+          </div>
+        </div>
+      </template>
 
-          <template #footer>
-            <div class="flex justify-end gap-3">
-              <UButton
-                variant="ghost"
-                @click="() => { isEditModalOpen = false }"
-              >
-                {{ t('evaluation.actions.cancel') }}
-              </UButton>
-              <UButton
-                :disabled="!editSessionName.trim()"
-                @click="updateSessionName"
-              >
-                {{ t('evaluation.actions.save') }}
-              </UButton>
-            </div>
-          </template>
-        </UCard>
+      <template #footer>
+        <UButton
+          :label="t('common.cancel')"
+          color="neutral"
+          variant="ghost"
+          @click="() => { isEditModalOpen = false }"
+        />
+        <UButton
+          :label="t('evaluation.actions.save')"
+          :disabled="!editSessionName.trim()"
+          @click="updateSessionName"
+        />
       </template>
     </UModal>
 
     <!-- Delete Confirmation Modal -->
-    <UModal v-model:open="isDeleteModalOpen" title="Delete Evaluation Session Modal" description="Delete Evaluation Session Modal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">
-              {{ t('evaluation.deleteModal.title') }}
-            </h3>
-          </template>
+    <UModal
+      v-model:open="isDeleteModalOpen"
+      :title="t('evaluation.deleteModal.title')"
+      :description="t('evaluation.deleteModal.warning')"
+    >
+      <template #body>
+        <div class="space-y-2">
+          <p class="text-sm text-muted">
+            {{ t('evaluation.deleteModal.message', { name: sessionToDelete?.name }) }}
+          </p>
+          <p class="text-sm text-error">
+            {{ t('evaluation.deleteModal.warning') }}
+          </p>
+        </div>
+      </template>
 
-          <div class="space-y-4">
-            <p class="text-neutral-600">
-              {{ t('evaluation.deleteModal.message', { name: sessionToDelete?.name }) }}
-            </p>
-            <p class="text-sm text-error">
-              {{ t('evaluation.deleteModal.warning') }}
-            </p>
-          </div>
-
-          <template #footer>
-            <div class="flex justify-end gap-3">
-              <UButton
-                color="neutral"
-                variant="outline"
-                @click="() => { isDeleteModalOpen = false }"
-              >
-                {{ t('evaluation.actions.cancel') }}
-              </UButton>
-              <UButton
-                color="error"
-                @click="handleDelete"
-              >
-                {{ t('evaluation.actions.delete') }}
-              </UButton>
-            </div>
-          </template>
-        </UCard>
+      <template #footer>
+        <UButton
+          :label="t('common.cancel')"
+          color="neutral"
+          variant="ghost"
+          @click="() => { isDeleteModalOpen = false }"
+        />
+        <UButton
+          :label="t('evaluation.actions.delete')"
+          color="error"
+          @click="handleDelete"
+        />
       </template>
     </UModal>
   </div>

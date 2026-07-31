@@ -1,18 +1,88 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-@theme static {
-  --font-sans: 'Instrument Sans', sans-serif;
+/*
+  Design tokens.
 
-  --color-green-50: #effdf5;
-  --color-green-100: #d9fbe8;
-  --color-green-200: #b3f5d1;
-  --color-green-300: #75edae;
-  --color-green-400: #00dc82;
-  --color-green-500: #00c16a;
-  --color-green-600: #00a155;
-  --color-green-700: #007f45;
-  --color-green-800: #016538;
-  --color-green-900: #0a5331;
-  --color-green-950: #052e16;
+  Typography scale (use these, don't invent new sizes):
+    page title      text-xl  font-semibold text-highlighted
+    section title   text-base font-semibold text-highlighted
+    subsection      text-sm  font-medium   text-highlighted
+    body            text-sm  text-default
+    meta / caption  text-xs  text-muted
+    hint / kbd row  text-xs  text-dimmed
+
+  Surfaces use the Nuxt UI semantic utilities, never `dark:` pairs:
+    bg-default / bg-elevated / bg-muted / bg-accented
+    text-highlighted / text-default / text-muted / text-dimmed
+    border-default / border-accented / ring-default
+*/
+@theme static {
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion curves. Built-in CSS easings are too weak for UI. */
+  --ease-out-expo: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-smooth: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Every bare `transition-*` utility inherits these. */
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: var(--ease-out-expo);
+}
+
+/* Rendered question/answer HTML (ContentRenderer). Kept deliberately tight:
+   this sits in a dense two-panel grading view, not an article. */
+@layer components {
+  .content-body {
+    @apply text-sm text-default leading-relaxed;
+  }
+  .content-body p {
+    @apply my-2 first:mt-0 last:mb-0;
+  }
+  .content-body ul {
+    @apply my-2 list-disc ps-5;
+  }
+  .content-body ol {
+    @apply my-2 list-decimal ps-5;
+  }
+  .content-body li {
+    @apply my-0.5;
+  }
+  .content-body code {
+    @apply rounded-sm bg-muted px-1 py-0.5 font-mono text-[0.85em];
+  }
+  .content-body pre {
+    @apply my-2 overflow-x-auto rounded-md bg-muted p-3 font-mono text-xs;
+  }
+  .content-body pre code {
+    @apply bg-transparent p-0;
+  }
+  .content-body strong {
+    @apply font-semibold text-highlighted;
+  }
+  .content-body a {
+    @apply text-primary underline underline-offset-2;
+  }
+  .content-body blockquote {
+    @apply my-2 border-s-2 border-default ps-3 text-muted;
+  }
+  .content-body table {
+    @apply my-2 w-full text-sm;
+  }
+  .content-body th,
+  .content-body td {
+    @apply border border-default px-2 py-1 text-start;
+  }
+}
+
+/* Reduced motion: gentler, not zero. Opacity and colour still read;
+   distance and duration collapse. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 80ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -18,7 +18,7 @@ const emit = defineEmits<{
 const MAXIMUM_LEVELS = 10
 
 const { t } = useI18n()
-const { getDefaultConfig, validateConfig } = useEvaluationConfig()
+const { getDefaultConfig, validateConfig, getEvaluationTypeMeta } = useEvaluationConfig()
 
 // Local state
 const isOpen = computed({
@@ -39,32 +39,43 @@ function onAfterLeave() {
   activeTab.value = 'basic'
 }
 
-// Initialize local config when props change
-watch(() => props.modelValue, (newConfig) => {
-  if (newConfig) {
-    localConfig.value = JSON.parse(JSON.stringify(newConfig)) // Deep clone
-  }
-  else {
-    localConfig.value = null
-  }
-}, { immediate: true, deep: true })
+// Seed the local copy from the parent's selection, but only while the modal is
+// open. The parent clears its selection the moment closing starts; following
+// that would null localConfig mid-leave-transition, and the closing modal would
+// visibly revert to the "choose a type" creation view. onAfterLeave owns the
+// reset, once the modal is off screen.
+watch(
+  [() => props.open, () => props.modelValue],
+  ([isOpenNow, newConfig]) => {
+    if (!isOpenNow)
+      return
+
+    localConfig.value = newConfig
+      ? JSON.parse(JSON.stringify(newConfig)) // Deep clone
+      : null
+  },
+  { immediate: true, deep: true },
+)
 
 // Evaluation type options
-const evaluationTypes: ComputedRef<Array<{ value: EvaluationType, label: string, description: string }>> = computed(() => [
+const evaluationTypes: ComputedRef<Array<{ value: EvaluationType, label: string, description: string, icon?: string }>> = computed(() => [
   {
     value: 'mastery',
     label: t('configuration.modal.types.mastery.label'),
     description: t('configuration.modal.types.mastery.description'),
+    icon: getEvaluationTypeMeta('mastery')?.icon,
   },
   {
     value: 'boolean',
     label: t('configuration.modal.types.boolean.label'),
     description: t('configuration.modal.types.boolean.description'),
+    icon: getEvaluationTypeMeta('boolean')?.icon,
   },
   {
     value: 'score',
     label: t('configuration.modal.types.score.label'),
     description: t('configuration.modal.types.score.description'),
+    icon: getEvaluationTypeMeta('score')?.icon,
   },
 ])
 
@@ -155,8 +166,11 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
       list,
       localConfig.value?.settings.masterySettings?.levels ?? [],
       {
-        animation: 200,
-        handle: `.${dragAndDropHandle}`, // allow dragging only with the handle
+        animation: 150,
+        handle: `.${dragAndDropHandle}`,
+        ghostClass: 'opacity-40',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'shadow-lg',
       },
     )
   }
@@ -181,99 +195,102 @@ watch(() => localConfig.value, (cfg) => {
 </script>
 
 <template>
-  <UModal v-model:open="isOpen" title="Evaluation Config Modal" description="Evaluation Config Modal" :ui="{ content: 'max-w-2xl' }" @after:leave="onAfterLeave">
-    <template #content>
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold">
-              {{ localConfig ? t('configuration.modal.title.edit') : t('configuration.modal.title.create') }}
-            </h3>
-            <UButton icon="i-lucide:x" color="neutral" variant="ghost" size="sm" @click="cancel" />
-          </div>
-        </template>
-
-        <div class="space-y-6">
-          <!-- Evaluation Type Selection (only for new configs) -->
-          <div v-if="!localConfig" class="space-y-4">
-            <h4 class="font-medium">
-              {{ t('configuration.modal.chooseType') }}
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div
-                v-for="type in evaluationTypes" :key="type.value"
-                class="cursor-pointer hover:shadow-md transition-all duration-200 border border-neutral-200 dark:border-neutral-700 hover:border-primary-300 dark:hover:border-primary-400 p-3 rounded-lg bg-white dark:bg-neutral-900"
-                @click="createNewConfig(type.value)"
-              >
-                <div class="font-medium text-neutral-900 dark:text-neutral-100 transition-colors">
-                  {{ type.label }}
-                </div>
-                <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-                  {{ type.description }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Configuration Form -->
-          <div v-if="localConfig" class="space-y-6">
-            <!-- Tabs -->
-            <UTabs
-              v-model="activeTab" :unmount-on-hide="false" :items="[
-                { label: t('configuration.modal.tabs.basic'), value: 'basic', slot: 'basic', icon: 'i-lucide:settings' },
-                { label: t('configuration.modal.tabs.evaluation'), value: 'evaluation', slot: 'evaluation', icon: 'i-lucide:clipboard-list' },
-                { label: t('configuration.modal.tabs.comments'), value: 'comments', slot: 'comments', icon: 'i-lucide:message-circle' },
-                { label: t('configuration.modal.tabs.others'), value: 'others', slot: 'others', icon: 'i-lucide:list-filter-plus' },
-              ]"
+  <UModal
+    v-model:open="isOpen"
+    :title="localConfig ? t('configuration.modal.title.edit') : t('configuration.modal.title.create')"
+    :description="t('configuration.modal.chooseType')"
+    :ui="{ content: 'max-w-2xl' }"
+    @after:leave="onAfterLeave"
+  >
+    <template #body>
+      <div class="space-y-6">
+        <!-- Evaluation Type Selection (only for new configs) -->
+        <div v-if="!localConfig" class="space-y-4">
+          <h4 class="text-sm font-medium text-highlighted">
+            {{ t('configuration.modal.chooseType') }}
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              v-for="type in evaluationTypes" :key="type.value"
+              type="button"
+              class="group flex flex-col gap-1 rounded-lg border border-default bg-default p-3 text-start transition-[border-color,box-shadow] hover:border-primary hover:shadow-sm active:scale-[0.99] active:duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ui-bg)]"
+              @click="createNewConfig(type.value)"
             >
-              <!-- Basic Settings Tab -->
-              <template #basic>
-                <div class="space-y-4 mt-4">
-                  <UFormField :label="t('configuration.modal.fields.configurationName')">
-                    <UInput
-                      v-model="localConfig.name"
-                      :placeholder="t('configuration.modal.fields.configurationNamePlaceholder')"
-                      class="w-full"
-                    />
-                  </UFormField>
-                  <UFormField :label="t('configuration.modal.fields.instructions')">
-                    <UTextarea
-                      v-model="localConfig.settings.instructions"
-                      :placeholder="t('configuration.modal.fields.instructionsPlaceholder')"
-                      :rows="4"
-                      class="w-full"
-                    />
-                  </UFormField>
-                </div>
-              </template>
+              <span class="flex items-center gap-2">
+                <UIcon v-if="type.icon" :name="type.icon" class="size-4 text-dimmed" />
+                <span class="font-medium text-highlighted">{{ type.label }}</span>
+              </span>
+              <span class="text-sm text-muted">
+                {{ type.description }}
+              </span>
+            </button>
+          </div>
+        </div>
 
-              <!-- Evaluation Options Tab -->
-              <template #evaluation>
-                <div class="space-y-6 mt-4">
-                  <!-- Mastery Level Configuration -->
-                  <div
-                    v-if="localConfig.type === 'mastery' && localConfig.settings.masterySettings"
-                    class="space-y-4"
-                  >
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center gap-2">
-                        <UIcon name="i-lucide:layers" class="w-5 h-5 text-primary-500" />
-                        <h5 class="font-medium">
-                          {{ t('configuration.modal.fields.masteryLevels') }}
-                        </h5>
-                      </div>
-                      <UButton icon="i-lucide:plus" size="sm" @click="addMasteryLevel">
-                        {{ t('configuration.modal.buttons.addLevel') }}
-                      </UButton>
-                    </div>
+        <!-- Configuration Form -->
+        <div v-if="localConfig" class="space-y-6">
+          <!-- Tabs -->
+          <UTabs
+            v-model="activeTab" :unmount-on-hide="false" :ui="{ content: 'min-h-56' }" :items="[
+              { label: t('configuration.modal.tabs.basic'), value: 'basic', slot: 'basic', icon: 'i-lucide:settings' },
+              { label: t('configuration.modal.tabs.evaluation'), value: 'evaluation', slot: 'evaluation', icon: 'i-lucide:clipboard-list' },
+              { label: t('configuration.modal.tabs.comments'), value: 'comments', slot: 'comments', icon: 'i-lucide:message-circle' },
+              { label: t('configuration.modal.tabs.others'), value: 'others', slot: 'others', icon: 'i-lucide:list-filter-plus' },
+            ]"
+          >
+            <!-- Basic Settings Tab -->
+            <template #basic>
+              <div class="space-y-4 mt-4">
+                <UFormField :label="t('configuration.modal.fields.configurationName')">
+                  <UInput
+                    v-model="localConfig.name"
+                    :placeholder="t('configuration.modal.fields.configurationNamePlaceholder')"
+                    class="w-full"
+                  />
+                </UFormField>
+                <UFormField :label="t('configuration.modal.fields.instructions')">
+                  <UTextarea
+                    v-model="localConfig.settings.instructions"
+                    :placeholder="t('configuration.modal.fields.instructionsPlaceholder')"
+                    :rows="4"
+                    class="w-full"
+                  />
+                </UFormField>
+              </div>
+            </template>
 
-                    <ul ref="masteryLevels" class="space-y-3 max-h-[50vh] overflow-y-auto">
+            <!-- Evaluation Options Tab -->
+            <template #evaluation>
+              <div class="space-y-6 mt-4">
+                <!-- Mastery Level Configuration -->
+                <div
+                  v-if="localConfig.type === 'mastery' && localConfig.settings.masterySettings"
+                  class="space-y-4"
+                >
+                  <div class="flex items-center justify-between">
+                    <SectionHeading icon="i-lucide:layers" :label="t('configuration.modal.fields.masteryLevels')" />
+                    <UButton icon="i-lucide:plus" :label="t('configuration.modal.buttons.addLevel')" color="neutral" variant="subtle" @click="addMasteryLevel" />
+                  </div>
+
+                  <!-- The <ul> keeps the ref so useSortable still gets a real
+                       DOM element; the tag-less TransitionGroup renders as a
+                       fragment inside it. Adding and removing a level animates;
+                       reordering is left to sortablejs, which owns the
+                       transform during a drag. -->
+                  <ul ref="masteryLevels" class="max-h-[50vh] space-y-3 overflow-y-auto">
+                    <TransitionGroup
+                      enter-active-class="transition-[opacity,transform] duration-200 ease-out-expo"
+                      leave-active-class="transition-[opacity,transform] duration-150 ease-out-expo"
+                      enter-from-class="opacity-0 translate-y-1"
+                      leave-to-class="opacity-0 scale-95"
+                      move-class="transition-transform duration-200 ease-out-expo"
+                    >
                       <li
                         v-for="(level, index) in localConfig.settings.masterySettings.levels"
                         :key="level.id"
                       >
                         <div class="flex w-full gap-3">
-                          <span class="mt-1.5 text-neutral-700 dark:text-neutral-300 transition-colors">
+                          <span class="mt-3 text-sm text-dimmed tabular-nums">
                             {{ index + 1 }}.
                           </span>
                           <EvaluationConfigMasteryLevelOption
@@ -285,184 +302,159 @@ watch(() => localConfig.value, (cfg) => {
                           />
                         </div>
                       </li>
-                    </ul>
-                  </div>
+                    </TransitionGroup>
+                  </ul>
+                </div>
 
-                  <!-- Boolean Configuration -->
-                  <div
-                    v-if="localConfig.type === 'boolean' && localConfig.settings.booleanSettings"
-                    class="space-y-4"
-                  >
-                    <USeparator />
-                    <div class="flex items-center gap-2">
-                      <UIcon name="i-lucide:check-circle" class="w-5 h-5 text-primary-500" />
-                      <h5 class="font-medium">
-                        {{ t('configuration.modal.fields.booleanLabels') }}
-                      </h5>
-                    </div>
+                <!-- Boolean Configuration -->
+                <div
+                  v-if="localConfig.type === 'boolean' && localConfig.settings.booleanSettings"
+                  class="space-y-4"
+                >
+                  <SectionHeading icon="i-lucide:check-circle" :label="t('configuration.modal.fields.booleanLabels')" />
 
-                    <div class="grid grid-cols-2 gap-4">
-                      <UFormField :label="t('configuration.modal.fields.trueLabel')">
-                        <UInput
-                          v-model="localConfig.settings.booleanSettings.trueLabel"
-                          :placeholder="t('configuration.modal.fields.trueLabelPlaceholder')"
-                        />
-                      </UFormField>
-
-                      <UFormField :label="t('configuration.modal.fields.falseLabel')">
-                        <UInput
-                          v-model="localConfig.settings.booleanSettings.falseLabel"
-                          :placeholder="t('configuration.modal.fields.falseLabelPlaceholder')"
-                        />
-                      </UFormField>
-                    </div>
-                  </div>
-
-                  <!-- Score Configuration -->
-                  <div
-                    v-if="localConfig.type === 'score' && localConfig.settings.scoreSettings"
-                    class="space-y-4"
-                  >
-                    <USeparator />
-                    <div class="flex items-center gap-2">
-                      <UIcon name="i-lucide:hash" class="w-5 h-5 text-primary-500" />
-                      <h5 class="font-medium">
-                        {{ t('configuration.modal.fields.scoreSettings') }}
-                      </h5>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                      <UFormField :label="t('configuration.modal.fields.minimumValue')">
-                        <UInput
-                          :model-value="localConfig.settings.scoreSettings.minValue"
-                          type="number"
-                          @update:model-value="localConfig.settings.scoreSettings.minValue = Number($event)"
-                        />
-                      </UFormField>
-
-                      <UFormField :label="t('configuration.modal.fields.maximumValue')">
-                        <UInput
-                          :model-value="localConfig.settings.scoreSettings.maxValue"
-                          type="number"
-                          @update:model-value="localConfig.settings.scoreSettings.maxValue = Number($event)"
-                        />
-                      </UFormField>
-
-                      <UFormField :label="t('configuration.modal.fields.step')">
-                        <UInput
-                          :model-value="localConfig.settings.scoreSettings.step"
-                          type="number" :min="0.1" :step="0.1"
-                          @update:model-value="localConfig.settings.scoreSettings.step = Number($event)"
-                        />
-                      </UFormField>
-
-                      <UFormField :label="t('configuration.modal.fields.unit')">
-                        <UInput
-                          v-model="localConfig.settings.scoreSettings.unit"
-                          :placeholder="t('configuration.modal.fields.unitPlaceholder')"
-                        />
-                      </UFormField>
-                    </div>
-
-                    <UFormField :label="t('configuration.modal.fields.passingScore')">
+                  <div class="grid grid-cols-2 gap-4">
+                    <UFormField :label="t('configuration.modal.fields.trueLabel')">
                       <UInput
-                        :model-value="localConfig.settings.scoreSettings.passingScore"
-                        type="number" :placeholder="t('configuration.modal.fields.passingScorePlaceholder')"
-                        @update:model-value="localConfig.settings.scoreSettings.passingScore = Number($event)"
+                        v-model="localConfig.settings.booleanSettings.trueLabel"
+                        :placeholder="t('configuration.modal.fields.trueLabelPlaceholder')"
+                      />
+                    </UFormField>
+
+                    <UFormField :label="t('configuration.modal.fields.falseLabel')">
+                      <UInput
+                        v-model="localConfig.settings.booleanSettings.falseLabel"
+                        :placeholder="t('configuration.modal.fields.falseLabelPlaceholder')"
                       />
                     </UFormField>
                   </div>
                 </div>
-              </template>
 
-              <!-- Comments Tab -->
-              <template #comments>
-                <div class="space-y-4 mt-4">
-                  <div class="flex items-center gap-2">
-                    <UIcon name="i-lucide:message-circle" class="w-5 h-5 text-primary-500" />
-                    <h5 class="font-medium">
-                      {{ t('configuration.modal.fields.commentSettings') }}
-                    </h5>
+                <!-- Score Configuration -->
+                <div
+                  v-if="localConfig.type === 'score' && localConfig.settings.scoreSettings"
+                  class="space-y-4"
+                >
+                  <SectionHeading icon="i-lucide:hash" :label="t('configuration.modal.fields.scoreSettings')" />
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <UFormField :label="t('configuration.modal.fields.minimumValue')">
+                      <UInput
+                        :model-value="localConfig.settings.scoreSettings.minValue"
+                        type="number"
+                        @update:model-value="localConfig.settings.scoreSettings.minValue = Number($event)"
+                      />
+                    </UFormField>
+
+                    <UFormField :label="t('configuration.modal.fields.maximumValue')">
+                      <UInput
+                        :model-value="localConfig.settings.scoreSettings.maxValue"
+                        type="number"
+                        @update:model-value="localConfig.settings.scoreSettings.maxValue = Number($event)"
+                      />
+                    </UFormField>
+
+                    <UFormField :label="t('configuration.modal.fields.step')">
+                      <UInput
+                        :model-value="localConfig.settings.scoreSettings.step"
+                        type="number" :min="0.1" :step="0.1"
+                        @update:model-value="localConfig.settings.scoreSettings.step = Number($event)"
+                      />
+                    </UFormField>
+
+                    <UFormField :label="t('configuration.modal.fields.unit')">
+                      <UInput
+                        v-model="localConfig.settings.scoreSettings.unit"
+                        :placeholder="t('configuration.modal.fields.unitPlaceholder')"
+                      />
+                    </UFormField>
                   </div>
 
-                  <div class="space-y-3">
-                    <UCheckbox
-                      v-model="localConfig.settings.allowComments"
-                      :label="t('configuration.modal.fields.allowComments')"
+                  <UFormField :label="t('configuration.modal.fields.passingScore')">
+                    <UInput
+                      :model-value="localConfig.settings.scoreSettings.passingScore"
+                      type="number" :placeholder="t('configuration.modal.fields.passingScorePlaceholder')"
+                      @update:model-value="localConfig.settings.scoreSettings.passingScore = Number($event)"
                     />
-
-                    <UCheckbox
-                      v-model="localConfig.settings.requireComments"
-                      :disabled="!localConfig.settings.allowComments" :label="t('configuration.modal.fields.requireComments')"
-                    />
-                  </div>
+                  </UFormField>
                 </div>
-              </template>
+              </div>
+            </template>
 
-              <!-- Others Tab -->
-              <template #others>
-                <div class="space-y-4 mt-4">
-                  <div class="flex items-center gap-2">
-                    <UIcon name="i-lucide:timer" class="w-5 h-5 text-primary-500" />
-                    <h5 class="font-medium">
-                      {{ t('configuration.modal.fields.timerSettings') }}
-                    </h5>
-                  </div>
+            <!-- Comments Tab -->
+            <template #comments>
+              <div class="space-y-4 mt-4">
+                <SectionHeading icon="i-lucide:message-circle" :label="t('configuration.modal.fields.commentSettings')" />
 
-                  <div class="space-y-3">
-                    <UCheckbox
-                      v-model="localConfig.settings.timerEnabled"
-                      :label="t('configuration.modal.fields.addTimer')"
-                    />
-                  </div>
+                <div class="space-y-3">
+                  <UCheckbox
+                    v-model="localConfig.settings.allowComments"
+                    :label="t('configuration.modal.fields.allowComments')"
+                  />
 
-                  <div class="flex items-center gap-2">
-                    <UIcon name="i-lucide:bot" class="w-5 h-5 text-primary-500" />
-                    <h5 class="font-medium">
-                      {{ t('configuration.modal.evaluationMode') }}
-                    </h5>
-                  </div>
-
-                  <div class="space-y-3">
-                    <URadioGroup
-                      v-model="localConfig.settings.evaluationMode"
-                      :items="evaluationModes"
-                    />
-                  </div>
+                  <UCheckbox
+                    v-model="localConfig.settings.requireComments"
+                    :disabled="!localConfig.settings.allowComments" :label="t('configuration.modal.fields.requireComments')"
+                  />
                 </div>
-              </template>
-            </UTabs>
+              </div>
+            </template>
 
-            <!-- Validation Errors -->
-            <UAlert
-              v-if="validationErrors.length > 0" icon="i-lucide:alert-circle" color="error"
-              variant="subtle" :title="t('configuration.modal.validation.title')"
-            >
-              <template #description>
-                <ul class="list-disc list-inside space-y-1">
-                  <li v-for="error in validationErrors" :key="error">
-                    {{ error }}
-                  </li>
-                </ul>
-              </template>
-            </UAlert>
-          </div>
+            <!-- Others Tab -->
+            <template #others>
+              <div class="space-y-4 mt-4">
+                <SectionHeading icon="i-lucide:timer" :label="t('configuration.modal.fields.timerSettings')" />
+
+                <div class="space-y-3">
+                  <UCheckbox
+                    v-model="localConfig.settings.timerEnabled"
+                    :label="t('configuration.modal.fields.addTimer')"
+                  />
+                </div>
+
+                <SectionHeading icon="i-lucide:bot" :label="t('configuration.modal.evaluationMode')" />
+
+                <div class="space-y-3">
+                  <URadioGroup
+                    v-model="localConfig.settings.evaluationMode"
+                    :items="evaluationModes"
+                  />
+                </div>
+              </div>
+            </template>
+          </UTabs>
+
+          <!-- Validation Errors -->
+          <UAlert
+            v-if="validationErrors.length > 0" icon="i-lucide:alert-circle" color="error"
+            variant="subtle" :title="t('configuration.modal.validation.title')"
+          >
+            <template #description>
+              <ul class="list-disc list-inside space-y-1">
+                <li v-for="error in validationErrors" :key="error">
+                  {{ error }}
+                </li>
+              </ul>
+            </template>
+          </UAlert>
         </div>
+      </div>
+    </template>
 
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton color="neutral" variant="ghost" @click="cancel">
-              {{ t('configuration.modal.buttons.cancel') }}
-            </UButton>
-            <UButton
-              v-if="localConfig" color="primary" :loading="isSaving" :disabled="isSaving"
-              @click="validateAndSave"
-            >
-              {{ t('configuration.modal.buttons.save') }}
-            </UButton>
-          </div>
-        </template>
-      </UCard>
+    <template #footer>
+      <UButton :label="t('common.cancel')" color="neutral" variant="ghost" @click="cancel" />
+      <UButton
+        v-if="localConfig" :label="t('configuration.modal.buttons.save')" :loading="isSaving" :disabled="isSaving"
+        @click="validateAndSave"
+      />
     </template>
   </UModal>
 </template>
+
+<style scoped>
+@reference "~/assets/css/main.css";
+
+.sortable-chosen {
+  @apply ring-2 ring-primary;
+}
+</style>

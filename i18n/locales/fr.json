@@ -4,13 +4,25 @@
     "evaluations": "Évaluations",
     "configurations": "Configurations"
   },
+  "common": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "delete": "Supprimer"
+  },
+  "error": {
+    "title": "Une erreur est survenue",
+    "notFound": "Page introuvable",
+    "notFoundMessage": "Cette évaluation n'existe pas ou a été supprimée.",
+    "message": "Quelque chose s'est mal passé. Vous pouvez revenir à l'accueil et réessayer.",
+    "backHome": "Retour à l'accueil"
+  },
   "configuration": {
     "title": "Configurations d'évaluation",
     "subtitle": "Créez et gérez différents configurations pour vos évaluations",
     "new": "Nouvelle configuration",
     "noConfigurations": "Aucune configuration trouvée",
     "noConfigurationsMessage": "Créez votre première configuration d'évaluation pour commencer.",
-    "noSearchResults": "Aucune configuration ne correspond à votre recherche.",
     "created": "Créé",
     "updated": "Mis à jour",
     "comments": "Commentaires",
@@ -120,10 +132,26 @@
     "selectForEvaluation": "Sélectionner une configuration pour l'évaluation",
     "useDefault": "Par défaut (Niveau de maîtrise)",
     "defaultMastery": "Évaluation par niveau de maîtrise par défaut",
-    "defaultIfNone": "Utilisera la configuration de maîtrise par défaut si aucune n'est sélectionnée"
+    "defaultIfNone": "Utilisera la configuration de maîtrise par défaut si aucune n'est sélectionnée",
+    "emptyCta": "Nouvelle configuration",
+    "toasts": {
+      "created": "Configuration créée",
+      "updated": "Configuration mise à jour",
+      "deleted": "Configuration supprimée",
+      "cloned": "Configuration dupliquée",
+      "imported": "Configuration importée",
+      "saveError": "Impossible d’enregistrer la configuration",
+      "deleteError": "Impossible de supprimer la configuration",
+      "cloneError": "Impossible de dupliquer la configuration",
+      "exportError": "Impossible d’exporter la configuration",
+      "importError": "Impossible d’importer la configuration"
+    }
   },
   "evaluation": {
     "passingScore": "Score de réussite",
+    "score": {
+      "range": "Note ({min}–{max})"
+    },
     "shortcuts": {
       "selectOption": "sélectionner",
       "confirm": "confirmer",
@@ -151,7 +179,8 @@
       "progress": "Progression",
       "updated": "Mis à jour",
       "completed": "Terminé",
-      "continue": "Continuer"
+      "continue": "Continuer",
+      "emptyCta": "Créer une évaluation"
     },
     "progress": {
       "current": "Progression question actuelle",
@@ -196,7 +225,9 @@
       "title": "Évaluation terminée !",
       "message": "Vous avez évalué toutes les questions avec succès. Que souhaitez-vous faire maintenant ?",
       "review": "Revoir les évaluations",
-      "goHome": "Retour à l'accueil"
+      "goHome": "Retour à l'accueil",
+      "statsItems": "{count} réponses évaluées",
+      "statsDuration": "en {duration}"
     },
     "creationModal": {
       "createEvaluation": "Créer une évaluation",
@@ -207,7 +238,9 @@
       "evaluatorNamePlaceholder": "Entrez votre nom (optionnel)",
       "importErrors": "Erreurs d'import",
       "importInstructions": "Pour le format de l'import et la documentation, visitez :",
-      "viewFileFormat": "Voir le format attendu du fichier"
+      "viewFileFormat": "Voir le format attendu du fichier",
+      "dropzone": "Choisir un fichier ou le déposer ici",
+      "dropzoneHint": "Fichier JSON exporté depuis votre outil de collecte"
     },
     "editModal": {
       "title": "Modifier la session d'évaluation",
@@ -250,6 +283,13 @@
     "title": "Évaluation",
     "instructions": "Consignes d'évaluation",
     "subtitle": "Évaluez les réponses et reprenez les sessions quand vous le souhaitez",
-    "displayContext": "Afficher le contexte de l'évaluation"
+    "displayContext": "Afficher le contexte de l'évaluation",
+    "toasts": {
+      "created": "Évaluation créée",
+      "updated": "Évaluation mise à jour",
+      "deleted": "Évaluation supprimée",
+      "exportError": "Impossible d’exporter l’évaluation",
+      "importError": "Impossible d’importer le fichier"
+    }
   }
 }

@@ -13,12 +13,13 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 
-/* Difficulty badge helpers */
-const difficultyLevels: { [key: string]: string } = {
-  easy: 'bg-blue-200 text-blue-900',
-  medium: 'bg-purple-300 text-purple-800',
-  hard: 'bg-pink-200 text-pink-800',
-}
+// Difficulty maps onto the semantic colours so it stays readable in both
+// colour modes and matches the rest of the app's status vocabulary.
+const difficultyColors = {
+  easy: 'success',
+  medium: 'warning',
+  hard: 'error',
+} as const
 
 const difficultyLabel = computed(() =>
   props.currentQuestion?.difficulty
@@ -26,28 +27,28 @@ const difficultyLabel = computed(() =>
     : '',
 )
 
-const difficultyClass = computed(() =>
+const difficultyColor = computed(() =>
   props.currentQuestion?.difficulty
-    ? difficultyLevels[props.currentQuestion.difficulty]
-    : '',
+    ? difficultyColors[props.currentQuestion.difficulty]
+    : 'neutral',
 )
 </script>
 
 <template>
-  <UCard class="dark:bg-neutral-800 dark:ring-neutral-600">
+  <UCard>
     <div class="flex flex-col gap-4">
-      <div class="flex justify-between items-center">
-        <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
-          Question {{ currentQuestion.questionID }}
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-semibold text-default">
+          {{ t('evaluation.question.title') }} {{ currentQuestion.questionID }}
         </div>
 
-        <div v-if="currentQuestion.difficulty">
-          <UBadge
-            :label="difficultyLabel"
-            class="text-xs"
-            :class="difficultyClass"
-          />
-        </div>
+        <UBadge
+          v-if="currentQuestion.difficulty"
+          :label="difficultyLabel"
+          :color="difficultyColor"
+          variant="subtle"
+          size="sm"
+        />
       </div>
 
       <ContentRenderer :content="currentQuestion.questionText || ''" />
@@ -55,7 +56,7 @@ const difficultyClass = computed(() =>
 
     <template v-if="currentQuestion.referenceAnswer" #footer>
       <div class="flex flex-col gap-4">
-        <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
+        <div class="text-sm font-semibold text-default">
           {{ t('evaluation.question.referenceAnswer') }}
         </div>
 

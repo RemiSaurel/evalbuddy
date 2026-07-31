@@ -21,9 +21,14 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const { getEvaluationOptions, isScoreType, getScoreSettings } = useEvaluationConfig()
+const reduceMotion = useReducedMotion()
 
 const selectedValue = ref<EvaluatedValue>(null)
 const localComment = ref('')
+
+// The "comment required" message used to mount and unmount on every keystroke.
+// It now waits until the field has been left, or a confirm has been attempted.
+const commentTouched = ref(false)
 
 watch(() => props.currentItem, () => {
   loadEvaluationForCurrentItem()
@@ -53,6 +58,8 @@ function loadEvaluationForCurrentItem() {
     selectedValue.value = null
     localComment.value = ''
   }
+
+  commentTouched.value = false
 }
 
 const evaluationOptions = computed(() => {
@@ -100,6 +107,10 @@ const commentsRequired = computed(() => {
   return false
 })
 
+const commentInvalid = computed(() =>
+  commentsRequired.value && commentTouched.value && !localComment.value.trim(),
+)
+
 const canConfirmEvaluation = computed(() => {
   const hasValue = selectedValue.value !== null && selectedValue.value !== undefined
   const hasRequiredComment = !commentsRequired.value || (localComment.value && localComment.value.trim())
@@ -140,8 +151,11 @@ function decrementScore() {
 }
 
 async function confirmEvaluation() {
-  if (!canConfirmEvaluation.value)
+  if (!canConfirmEvaluation.value) {
+    // Surfaces the "comment required" message on a blocked confirm attempt.
+    commentTouched.value = true
     return
+  }
 
   const comment = commentsAllowed.value ? localComment.value : undefined
 
@@ -193,52 +207,56 @@ const aiJustificationDisplay = computed(() => {
 </script>
 
 <template>
-  <UCard class="dark:bg-neutral-800 dark:ring-neutral-600">
-    <!-- Submitted answer -->
-    <div class="flex flex-col gap-3">
-      <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
-        {{ t('evaluation.question.submittedAnswer') }}
-      </div>
+  <UCard>
+    <!-- Submitted answer.
+         min-h, not an animation: arrowing between a one-line answer and a
+         paragraph would otherwise jump the option buttons under the cursor.
+         Stability beats a transition on a swap this frequent. -->
+    <div class="flex min-h-24 flex-col gap-2">
+      <SectionHeading icon="i-lucide:message-square-quote" :label="t('evaluation.question.submittedAnswer')" />
       <ContentRenderer :content="currentItem.submittedAnswer" />
     </div>
 
     <template #footer>
-      <div :class="showAiEvaluation ? 'grid grid-cols-2 gap-5' : 'grid grid-cols-1 gap-5'">
-        <div v-if="showAiEvaluation" class="gap-2">
-          <!-- AI Evaluation Informations -->
-          <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold pb-2">
-            <UIcon name="i-lucide-bot" />
-            {{ t('evaluation.aiEvaluation.title') }}
-          </div>
-          <div class="grid grid-cols-[1fr_3fr] gap-2">
-            <div>
-              <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                {{ t('evaluation.aiEvaluation.score') }}
+      <!-- Grid column count flips 1 → 2 when the AI pass starts. The flip
+           itself stays instant (track counts don't interpolate); the incoming
+           panel animates so the reflow is explained rather than jarring. -->
+      <div class="grid gap-5" :class="showAiEvaluation ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'">
+        <Motion
+          v-if="showAiEvaluation"
+          :initial="reduceMotion ? { opacity: 0 } : { opacity: 0, transform: 'translateX(8px)' }"
+          :animate="{ opacity: 1, transform: 'translateX(0px)' }"
+          :transition="{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }"
+        >
+          <div class="flex flex-col gap-2">
+            <SectionHeading icon="i-lucide:bot" :label="t('evaluation.aiEvaluation.title')" />
+            <div class="grid grid-cols-[1fr_3fr] gap-2">
+              <div class="flex flex-col gap-1">
+                <div class="text-xs font-medium text-muted">
+                  {{ t('evaluation.aiEvaluation.score') }}
+                </div>
+                <div class="rounded-md bg-muted p-2 text-sm tabular-nums text-default">
+                  {{ aiScoreDisplay }}
+                </div>
               </div>
-              <div class="rounded-lg bg-neutral-200 dark:bg-neutral-900 p-2">
-                {{ aiScoreDisplay }}
+              <div class="flex flex-col gap-1">
+                <div class="text-xs font-medium text-muted">
+                  {{ t('evaluation.aiEvaluation.justification') }}
+                </div>
+                <div class="rounded-md bg-muted p-2 text-sm text-default">
+                  {{ aiJustificationDisplay }}
+                </div>
               </div>
             </div>
-            <div>
-              <div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                {{ t('evaluation.aiEvaluation.justification') }}
-              </div>
-              <div class="rounded-lg bg-neutral-200 dark:bg-neutral-900 p-2">
-                {{ aiJustificationDisplay }}
-              </div>
-            </div>
           </div>
-        </div>
+        </Motion>
 
-        <div>
-          <!-- Evaluation Type Header -->
-          <div class="flex justify-between items-center pb-2">
-            <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
-              <UIcon name="i-lucide-user-round-pen" />
-              {{ t('evaluation.title') }}
-            </div>
-            <div v-if="evaluationConfig" class="text-xs text-neutral-500 dark:text-neutral-400">
-              {{ evaluationConfig.name }} ({{ evaluationConfig.type }})
+        <div class="flex flex-col gap-3">
+          <!-- Evaluation header -->
+          <div class="flex items-center justify-between gap-2">
+            <SectionHeading icon="i-lucide:user-round-pen" :label="t('evaluation.title')" />
+            <div v-if="evaluationConfig" class="truncate text-xs text-dimmed">
+              {{ evaluationConfig.name }}
             </div>
           </div>
 
@@ -247,34 +265,36 @@ const aiJustificationDisplay = computed(() => {
             <UButton
               icon="i-lucide-message-circle-more"
               trailing-icon="i-lucide-chevron-down"
-              size="sm"
               class="group justify-between"
               color="neutral"
-              variant="soft"
+              variant="subtle"
               :label="$t('evaluation.instructions')"
               :ui="{
                 trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
               }"
             />
             <template #content>
-              <div class="px-2 py-2 text-sm text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap transition-colors">
+              <div class="whitespace-pre-wrap px-2 py-2 text-sm text-default">
                 {{ evaluationConfig.settings.instructions }}
               </div>
             </template>
           </UCollapsible>
 
           <!-- Score-based Evaluation: Stepper + Input + Comments side by side -->
-          <div v-if="isScoreEvaluation && scoreSettings" class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1 space-y-3">
-              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 transition-colors">
-                Score ({{ scoreSettings.minValue }}–{{ scoreSettings.maxValue }}{{ scoreSettings.unit || '' }})
+          <div v-if="isScoreEvaluation && scoreSettings" class="flex flex-col gap-4 sm:flex-row">
+            <div class="flex flex-1 flex-col gap-3">
+              <label class="block text-sm font-medium text-default">
+                {{ t('evaluation.score.range', {
+                  min: scoreSettings.minValue,
+                  max: `${scoreSettings.maxValue}${scoreSettings.unit || ''}`,
+                }) }}
               </label>
 
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
                 <UButton
                   icon="i-lucide-minus"
                   color="neutral"
-                  variant="soft"
+                  variant="subtle"
                   size="lg"
                   :disabled="selectedValue !== null && Number(selectedValue) <= scoreSettings.minValue"
                   @click="decrementScore"
@@ -287,7 +307,7 @@ const aiJustificationDisplay = computed(() => {
                   :max="scoreSettings.maxValue"
                   :step="scoreSettings.step"
                   placeholder="—"
-                  class="w-20 text-center [&_input]:text-center"
+                  class="w-20 [&_input]:text-center [&_input]:tabular-nums"
                   size="lg"
                   @update:model-value="(v: string | number) => {
                     const num = Number(v)
@@ -300,7 +320,7 @@ const aiJustificationDisplay = computed(() => {
                 <UButton
                   icon="i-lucide-plus"
                   color="neutral"
-                  variant="soft"
+                  variant="subtle"
                   size="lg"
                   :disabled="selectedValue !== null && Number(selectedValue) >= scoreSettings.maxValue"
                   @click="incrementScore"
@@ -308,68 +328,59 @@ const aiJustificationDisplay = computed(() => {
               </div>
 
               <!-- Passing score indicator -->
-              <div v-if="scoreSettings.passingScore" class="text-xs text-neutral-500 dark:text-neutral-400">
+              <div v-if="scoreSettings.passingScore" class="text-xs text-muted">
                 {{ t('evaluation.passingScore') }}: {{ scoreSettings.passingScore }}{{ scoreSettings.unit || '' }}
               </div>
 
               <!-- Keyboard shortcut hint for score -->
-              <div class="text-xs text-neutral-400 dark:text-neutral-500 transition-colors">
-                <UKbd>+</UKbd> / <UKbd>-</UKbd> {{ t('evaluation.shortcuts.adjustScore', 'adjust score') }}
-                &middot; <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm', 'confirm') }}
+              <div class="flex items-center gap-1 text-xs text-dimmed">
+                <UKbd>+</UKbd> / <UKbd>-</UKbd> {{ t('evaluation.shortcuts.adjustScore') }}
+                <span class="text-dimmed">&middot;</span> <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm') }}
               </div>
             </div>
 
-            <!-- Comments (inline with score on larger screens) -->
-            <div v-if="commentsAllowed" class="flex-1 flex flex-col gap-1">
-              <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
-                {{ t('evaluation.evaluator.comment') }}
-                <span v-if="commentsRequired" class="text-red-500">*</span>
-              </div>
-              <UTextarea
-                :model-value="localComment"
-                :placeholder="t('evaluation.evaluator.commentPlaceholder')"
-                :rows="3"
-                :required="commentsRequired"
-                class="w-full"
-                @update:model-value="onCommentUpdate"
-              />
-
-              <div v-if="commentsRequired && !localComment.trim()" class="text-sm text-red-600">
-                {{ t('evaluation.evaluator.commentRequired') }}
-              </div>
-            </div>
+            <EvaluatorCommentField
+              v-if="commentsAllowed"
+              :model-value="localComment"
+              :required="commentsRequired"
+              :invalid="commentInvalid"
+              @update:model-value="onCommentUpdate"
+              @blur="commentTouched = true"
+            />
           </div>
 
           <!-- Option-based Evaluation (Mastery, Boolean) -->
-          <div v-else>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div v-else class="flex flex-col gap-3">
+            <!-- min-h keeps the frame from jumping between short and long
+                 option sets as the grader arrows through items. -->
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Motion
                 v-for="(option, index) in evaluationOptions"
                 :key="option.id"
-                :while-hover="{ scale: 1.02 }"
-                :while-press="{ scale: 0.97 }"
+                :while-hover="reduceMotion ? undefined : { scale: 1.02 }"
+                :while-press="reduceMotion ? undefined : { scale: 0.97 }"
                 :transition="{ type: 'spring', stiffness: 500, damping: 30 }"
                 as-child
               >
                 <UButton
                   :class="[option.color || '', {
-                    'ring-2 ring-offset-1': selectedValue === option.value,
+                    'ring-2 ring-primary ring-offset-2 ring-offset-[var(--ui-bg)]': selectedValue === option.value,
                     'opacity-60': selectedValue !== null && selectedValue !== option.value,
                   }]"
                   size="lg"
                   block
                   @click="selectValue(option.value)"
                 >
-                  <div class="flex items-center justify-between w-full">
-                    <div class="text-left">
-                      <div class="font-semibold">
+                  <div class="flex w-full items-center justify-between gap-2">
+                    <div class="text-start">
+                      <div class="font-medium">
                         {{ option.label }}
                       </div>
-                      <div v-if="'description' in option && option.description" class="text-xs opacity-75 mt-0.5">
+                      <div v-if="'description' in option && option.description" class="mt-0.5 text-xs opacity-75">
                         {{ option.description }}
                       </div>
                     </div>
-                    <UKbd class="opacity-50 ml-2">
+                    <UKbd class="shrink-0 opacity-60">
                       {{ index }}
                     </UKbd>
                   </div>
@@ -378,38 +389,25 @@ const aiJustificationDisplay = computed(() => {
             </div>
 
             <!-- Keyboard shortcut hint -->
-            <div class="text-xs text-neutral-400 dark:text-neutral-500 transition-colors mt-2">
-              <UKbd>0</UKbd>–<UKbd>{{ evaluationOptions.length - 1 }}</UKbd> {{ t('evaluation.shortcuts.selectOption', 'select') }}
-              &middot; <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm', 'confirm') }}
+            <div class="flex items-center gap-1 text-xs text-dimmed">
+              <UKbd>0</UKbd>–<UKbd>{{ evaluationOptions.length - 1 }}</UKbd> {{ t('evaluation.shortcuts.selectOption') }}
+              <span>&middot;</span> <UKbd>Enter</UKbd> {{ t('evaluation.shortcuts.confirm') }}
             </div>
-          </div>
 
-          <!-- Comments Section (only for non-score evaluations) -->
-          <div v-if="commentsAllowed && !isScoreEvaluation" class="flex flex-col gap-1">
-            <div class="text-neutral-800 dark:text-neutral-200 transition-colors text-sm font-semibold">
-              {{ t('evaluation.evaluator.comment') }}
-              <span v-if="commentsRequired" class="text-red-500">*</span>
-            </div>
-            <UTextarea
+            <EvaluatorCommentField
+              v-if="commentsAllowed"
               :model-value="localComment"
-              :placeholder="t('evaluation.evaluator.commentPlaceholder')"
-              :rows="3"
               :required="commentsRequired"
-              class="w-full"
+              :invalid="commentInvalid"
               @update:model-value="onCommentUpdate"
+              @blur="commentTouched = true"
             />
-
-            <div v-if="commentsRequired && !localComment.trim()" class="text-sm text-red-600">
-              {{ t('evaluation.evaluator.commentRequired') }}
-            </div>
           </div>
 
           <!-- Confirm Evaluation Button -->
           <div class="flex justify-end">
             <UButton
               icon="i-lucide:check"
-              color="primary"
-              variant="solid"
               :disabled="!canConfirmEvaluation"
               :label="t('evaluation.actions.confirm')"
               @click="confirmEvaluation"

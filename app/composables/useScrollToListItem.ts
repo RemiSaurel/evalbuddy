@@ -1,11 +1,23 @@
-import type { EvaluationItem } from '~/models'
+/** Below this gap between calls, scrolling snaps instead of animating. */
+const RAPID_CALL_MS = 250
 
 /**
- * Composable for handling scroll to list items in navigation components
+ * Auto-scrolling for the navigator strips.
+ *
+ * Arrow keys are the primary navigation in this app, and holding one fires far
+ * faster than a smooth scroll can settle. Browsers cancel and restart each
+ * overlapping smooth scroll, which reads as stutter. So calls are coalesced
+ * into a single frame, and rapid ones snap (`behavior: 'auto'`) instead —
+ * holding an arrow gives instant tracking, a single press still animates.
  */
 export function useScrollToListItem() {
+  const reducedMotion = usePreferredReducedMotion()
+
+  let frame = 0
+  let lastCallAt = 0
+
   /**
-   * Scroll into view to a specific item in a v-for list
+   * Scroll a specific item of a v-for list into view.
    *
    * @param container - The element that holds the list items
    * @param itemIndex - The index of the item to scroll into view
@@ -14,59 +26,24 @@ export function useScrollToListItem() {
     container: Ref<HTMLElement | undefined>,
     itemIndex: number,
   ) => {
-    if (!container.value) {
-      return
-    }
+    const now = performance.now()
+    const isRapid = now - lastCallAt < RAPID_CALL_MS
+    lastCallAt = now
 
-    const item = container.value.children[itemIndex] as HTMLElement
-    if (!item) {
-      return
-    }
+    // Only the last request in a frame survives — no queue of competing scrolls.
+    cancelAnimationFrame(frame)
+    frame = requestAnimationFrame(() => {
+      const item = container.value?.children[itemIndex] as HTMLElement | undefined
+      if (!item)
+        return
 
-    item.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-      inline: 'center', // for better centering
+      item.scrollIntoView({
+        behavior: (isRapid || reducedMotion.value === 'reduce') ? 'auto' : 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      })
     })
   }
 
-  /**
-   * Scroll to active question in navigation based on evaluation mode
-   *
-   * @param isSingleEvaluation - Whether it's single evaluation mode
-   * @param questionContainer - Container for individual questions
-   * @param groupContainer - Container for question groups
-   * @param questionIndex - Index of the current question
-   * @param currentQuestionGroup - Current question group data
-   * @param groupedQuestions - All grouped questions
-   */
-  const scrollToActiveQuestion = (
-    isSingleEvaluation: boolean,
-    questionContainer: Ref<HTMLElement | undefined>,
-    groupContainer: Ref<HTMLElement | undefined>,
-    questionIndex: number,
-    currentQuestionGroup: readonly EvaluationItem[],
-    groupedQuestions: { [key: string]: readonly EvaluationItem[] },
-  ) => {
-    if (isSingleEvaluation) {
-      // For single evaluation mode, scroll in the questions container
-      scrollToItem(questionContainer, questionIndex)
-    }
-    else {
-      // For grouped evaluations, scroll to the current group
-      const currentGroup = currentQuestionGroup[0]?.questionID
-      if (currentGroup != null) {
-        const groupNames = Object.keys(groupedQuestions)
-        const groupIndex = groupNames.indexOf(currentGroup.toString())
-        if (groupIndex >= 0) {
-          scrollToItem(groupContainer, groupIndex)
-        }
-      }
-    }
-  }
-
-  return {
-    scrollToItem,
-    scrollToActiveQuestion,
-  }
+  return { scrollToItem }
 }

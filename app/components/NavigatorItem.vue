@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { NAVIGATOR_STATE_CLASSES } from '@/utils/navigatorStyles'
+
 defineProps<{
   buttonSize: 'xs' | 'sm'
   itemIndex: number | string
@@ -9,21 +11,25 @@ defineProps<{
 </script>
 
 <template>
+  <!-- Hottest element in the app: one of these re-renders per arrow press,
+       dozens at a time. Only colour and shadow transition — never width or
+       size, which would animate layout. -->
   <button
-    class="rounded-full text-xs font-medium transition-all duration-200 flex
-    flex-col items-center justify-center gap-1 hover:shadow-md"
-    :class="{
-      'ring-2 ring-blue-700 ring-offset-2': isCurrentItem,
-      'bg-neutral-600 text-white transition-colors dark:bg-neutral-400 dark:text-neutral-700': isItemEvaluated,
-      'bg-neutral-200 text-neutral-500 dark:bg-neutral-600 dark:text-white': !isItemEvaluated,
-      'size-10 min-w-10': buttonSize === 'xs',
-      'size-12 min-w-12': buttonSize === 'sm',
-    }"
+    type="button"
+    class="flex shrink-0 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-medium transition-[background-color,color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ui-bg)]"
+    :class="[
+      isItemEvaluated ? NAVIGATOR_STATE_CLASSES.evaluated : NAVIGATOR_STATE_CLASSES.pending,
+      {
+        [NAVIGATOR_STATE_CLASSES.current]: isCurrentItem,
+        'size-9': buttonSize === 'xs',
+        'size-10': buttonSize === 'sm',
+      },
+    ]"
   >
-    <span class="font-bold text-lg leading-none">
+    <span class="text-sm font-semibold leading-none">
       {{ itemIndex }}
     </span>
-    <span v-if="subItemIndex" class="text-xs leading-none">
+    <span v-if="subItemIndex" class="text-[10px] leading-none opacity-70">
       {{ subItemIndex }}
     </span>
   </button>
