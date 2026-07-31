@@ -167,10 +167,9 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
       localConfig.value?.settings.masterySettings?.levels ?? [],
       {
         animation: 150,
-        handle: `.${dragAndDropHandle}`, // allow dragging only with the handle
-        // The dragged row lifts; the placeholder it left behind recedes.
+        handle: `.${dragAndDropHandle}`, 
         ghostClass: 'opacity-40',
-        chosenClass: 'ring-2 ring-primary',
+        chosenClass: 'sortable-chosen',
         dragClass: 'shadow-lg',
       },
     )
@@ -232,7 +231,7 @@ watch(() => localConfig.value, (cfg) => {
         <div v-if="localConfig" class="space-y-6">
           <!-- Tabs -->
           <UTabs
-            v-model="activeTab" :unmount-on-hide="false" :items="[
+            v-model="activeTab" :unmount-on-hide="false" :ui="{ content: 'min-h-56' }" :items="[
               { label: t('configuration.modal.tabs.basic'), value: 'basic', slot: 'basic', icon: 'i-lucide:settings' },
               { label: t('configuration.modal.tabs.evaluation'), value: 'evaluation', slot: 'evaluation', icon: 'i-lucide:clipboard-list' },
               { label: t('configuration.modal.tabs.comments'), value: 'comments', slot: 'comments', icon: 'i-lucide:message-circle' },
@@ -451,3 +450,11 @@ watch(() => localConfig.value, (cfg) => {
     </template>
   </UModal>
 </template>
+
+<style scoped>
+@reference "~/assets/css/main.css";
+
+.sortable-chosen {
+  @apply ring-2 ring-primary;
+}
+</style>
