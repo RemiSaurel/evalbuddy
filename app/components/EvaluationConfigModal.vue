@@ -167,7 +167,7 @@ watch([isOpen, masteryLevelsList], async ([isOpenNow, list]) => {
       localConfig.value?.settings.masterySettings?.levels ?? [],
       {
         animation: 150,
-        handle: `.${dragAndDropHandle}`, 
+        handle: `.${dragAndDropHandle}`,
         ghostClass: 'opacity-40',
         chosenClass: 'sortable-chosen',
         dragClass: 'shadow-lg',
