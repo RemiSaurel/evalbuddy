@@ -89,8 +89,13 @@ const isEvaluationComplete = computed(() =>
   items.value.length > 0 && totalEvaluated.value === items.value.length,
 )
 
-whenever(isEvaluationComplete, () => {
+whenever(isEvaluationComplete, async () => {
   isCompletionModalOpen.value = true
+
+  if (!session.isCompleted) {
+    session.isCompleted = true
+    await evaluationStorage.saveSession(session)
+  }
 })
 
 function goToHomePage() {
@@ -133,6 +138,15 @@ const secondPersistedElapsedTimes = ref<Record<number, number>>({})
 const isStartModalOpen = ref(isTimerEnabled.value)
 const timerActive = computed(() => isTimerEnabled.value && !isStartModalOpen.value && !isCompletionModalOpen.value && !isDeleteModalOpen.value)
 
+// Arrow-key navigation must not fire while a modal is on screen.
+const isAnyModalOpen = computed(() =>
+  isCompletionModalOpen.value
+  || isDeleteModalOpen.value
+  || isBlurPauseModalOpen.value
+  || isPausedModalOpen.value
+  || isStartModalOpen.value,
+)
+
 const {
   formatted,
   elapsed,
@@ -163,6 +177,26 @@ const pausedActions = computed(() => [
     },
   },
 ])
+
+// Whole-session time for the completion summary: every item's persisted time
+// across both passes, plus whatever the live timer holds for the current item.
+const totalElapsedFormatted = computed(() => {
+  const sum = (times: Record<number, number>) =>
+    Object.values(times).reduce((acc, ms) => acc + ms, 0)
+
+  const currentId = currentItem.value?.id
+  const persisted = evaluationPass.value === 2
+    ? secondPersistedElapsedTimes.value
+    : firstPersistedElapsedTimes.value
+  const alreadyCounted = currentId != null ? persisted[currentId] ?? 0 : 0
+
+  return formatElapsed(
+    sum(firstPersistedElapsedTimes.value)
+    + sum(secondPersistedElapsedTimes.value)
+    - alreadyCounted
+    + elapsed.value,
+  )
+})
 
 function elapsedTimeFor(itemId: number, pass: 1 | 2): number {
   return pass === 2
@@ -337,8 +371,8 @@ onBeforeUnmount(async () => {
 
   <div class="flex flex-col flex-1 min-h-0">
     <!-- Session title bar spanning full width -->
-    <div class="flex shrink-0 items-center gap-2 px-4 py-2 border-b border-neutral-200 bg-white dark:bg-neutral-900 transition-colors">
-      <h1 class="font-bold text-lg text-neutral-900 dark:text-neutral-100 truncate">
+    <div class="flex shrink-0 items-center gap-2 px-4 py-2 border-b border-default bg-default">
+      <h1 class="truncate text-base font-semibold text-highlighted">
         {{ session.name }}
       </h1>
       <ContextDataCollapsible
@@ -346,25 +380,28 @@ onBeforeUnmount(async () => {
         :label="$t('evaluation.displayContext')"
         :context="session.dataset.context"
       />
-      <div v-if="isTimerEnabled">
-        {{ formatted }}
-      </div>
-      <div class="ml-auto flex items-center gap-2">
-        <UButton
+      <div class="ms-auto flex items-center gap-1">
+        <!-- Timer and its control read as one unit, not as peers of the
+             session metadata. tabular-nums stops the 1Hz digit jitter. -->
+        <div
           v-if="isTimerEnabled"
-          :icon="running ? 'i-lucide:pause' : 'i-lucide:play'"
-          variant="ghost"
-          color="neutral"
-          @click="running ? handlePauseClick() : resume()"
+          class="flex items-center gap-1 rounded-md bg-elevated py-1 pe-1 ps-2.5"
         >
-          {{ running ? $t('evaluation.actions.pause') : $t('evaluation.actions.resume') }}
-        </UButton>
+          <span class="font-mono text-sm tabular-nums text-highlighted">{{ formatted }}</span>
+          <UButton
+            :icon="running ? 'i-lucide:pause' : 'i-lucide:play'"
+            variant="ghost"
+            color="neutral"
+            size="xs"
+            :aria-label="running ? $t('evaluation.actions.pause') : $t('evaluation.actions.resume')"
+            @click="running ? handlePauseClick() : resume()"
+          />
+        </div>
         <UDropdownMenu :items="sessionMenuItems" :modal="false">
           <UButton
             icon="i-lucide:more-vertical"
             variant="ghost"
             color="neutral"
-            size="sm"
           />
         </UDropdownMenu>
       </div>
@@ -391,10 +428,9 @@ onBeforeUnmount(async () => {
         :default-size="50"
         :min-size="30"
         :max-size="70"
-        :ui="{ root: 'min-h-[0px]!', body: 'min-h-[0px]!' }"
       >
         <template #header>
-          <div class="flex flex-col gap-3 p-4 pb-0 dark:bg-neutral-900">
+          <div class="flex flex-col gap-3 p-4 pb-0 bg-default">
             <QuestionProgress
               v-if="!hideProgressBar"
               :label="$t('evaluation.progress.total')"
@@ -436,10 +472,9 @@ onBeforeUnmount(async () => {
       <!-- RIGHT PANEL: Answer + Scoring -->
       <UDashboardPanel
         id="answer-panel"
-        :ui="{ root: 'min-h-[0px]!', body: 'min-h-[0px]!' }"
       >
         <template #header>
-          <div class="flex flex-col gap-3 p-4 pb-0 dark:bg-neutral-900">
+          <div class="flex flex-col gap-3 p-4 pb-0 bg-default">
             <QuestionProgress
               v-if="!hideProgressBar"
               :label="$t('evaluation.progress.current')"
@@ -458,6 +493,7 @@ onBeforeUnmount(async () => {
               :on-navigate="goToItem"
               :go-to-previous="goToPreviousItem"
               :go-to-next="goToNextItem"
+              :shortcuts-enabled="!isAnyModalOpen"
             />
           </div>
         </template>
@@ -486,50 +522,10 @@ onBeforeUnmount(async () => {
           </div>
         </template>
       </UDashboardPanel>
-
-      <!-- Completion Modal -->
-      <UModal
-        v-model:open="isCompletionModalOpen"
-        title="Evaluation Completed"
-        description="Evaluation Completed"
-      >
-        <template #content>
-          <UCard>
-            <template #header>
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">🎉</span>
-                <h3 class="text-lg font-semibold">
-                  {{ $t('evaluation.completion.title') }}
-                </h3>
-              </div>
-            </template>
-
-            <p class="text-muted">
-              {{ $t('evaluation.completion.message') }}
-            </p>
-
-            <template #footer>
-              <div class="flex justify-end gap-3">
-                <UButton
-                  :label="$t('evaluation.completion.review')"
-                  color="neutral"
-                  variant="outline"
-                  @click="reviewEvaluations"
-                />
-                <UButton
-                  :label="$t('evaluation.completion.goHome')"
-                  color="primary"
-                  @click="goToHomePage"
-                />
-              </div>
-            </template>
-          </UCard>
-        </template>
-      </UModal>
     </UDashboardGroup>
 
     <!-- Mobile: single column scrollable -->
-    <div v-else class="flex flex-col gap-4 p-4 bg-white dark:bg-neutral-900">
+    <div v-else class="flex flex-col gap-4 p-4 bg-default">
       <!-- Total progress -->
       <QuestionProgress
         v-if="!hideProgressBar"
@@ -585,6 +581,7 @@ onBeforeUnmount(async () => {
         :on-navigate="goToItem"
         :go-to-previous="goToPreviousItem"
         :go-to-next="goToNextItem"
+        :shortcuts-enabled="!isAnyModalOpen"
       />
 
       <ContextDataCollapsible
@@ -609,43 +606,58 @@ onBeforeUnmount(async () => {
       />
     </div>
 
+    <!-- Completion modal — outside the desktop-only branch so it also fires on mobile -->
+    <UModal
+      v-model:open="isCompletionModalOpen"
+      :title="$t('evaluation.completion.title')"
+      :description="$t('evaluation.completion.message')"
+      :ui="{ description: 'sr-only' }"
+    >
+      <template #body>
+        <CompletionCelebration
+          :item-count="totalEvaluated"
+          :duration="isTimerEnabled ? totalElapsedFormatted : undefined"
+        />
+      </template>
+
+      <template #footer>
+        <UButton
+          :label="$t('evaluation.completion.review')"
+          color="neutral"
+          variant="ghost"
+          @click="reviewEvaluations"
+        />
+        <UButton
+          :label="$t('evaluation.completion.goHome')"
+          @click="goToHomePage"
+        />
+      </template>
+    </UModal>
+
     <!-- Delete confirmation modal -->
-    <UModal v-model:open="isDeleteModalOpen" title="Delete Evaluation Session Modal" description="Delete Evaluation Session Modal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">
-              {{ $t('evaluation.deleteModal.title') }}
-            </h3>
-          </template>
+    <UModal
+      v-model:open="isDeleteModalOpen"
+      :title="$t('evaluation.deleteModal.title')"
+      :description="$t('evaluation.deleteModal.message', { name: session.name })"
+    >
+      <template #body>
+        <p class="text-sm text-error">
+          {{ $t('evaluation.deleteModal.warning') }}
+        </p>
+      </template>
 
-          <div class="space-y-4">
-            <p class="text-neutral-600">
-              {{ $t('evaluation.deleteModal.message', { name: session.name }) }}
-            </p>
-            <p class="text-sm text-error">
-              {{ $t('evaluation.deleteModal.warning') }}
-            </p>
-          </div>
-
-          <template #footer>
-            <div class="flex justify-end gap-3">
-              <UButton
-                color="neutral"
-                variant="outline"
-                @click="() => { isDeleteModalOpen = false }"
-              >
-                {{ $t('evaluation.actions.cancel') }}
-              </UButton>
-              <UButton
-                color="error"
-                @click="handleDelete"
-              >
-                {{ $t('evaluation.actions.delete') }}
-              </UButton>
-            </div>
-          </template>
-        </UCard>
+      <template #footer>
+        <UButton
+          :label="$t('common.cancel')"
+          color="neutral"
+          variant="ghost"
+          @click="() => { isDeleteModalOpen = false }"
+        />
+        <UButton
+          :label="$t('common.delete')"
+          color="error"
+          @click="handleDelete"
+        />
       </template>
     </UModal>
   </div>

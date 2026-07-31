@@ -2,6 +2,7 @@
 import type { EvaluationConfig, EvaluationType } from '@/models/index'
 
 const { t } = useI18n()
+const toast = useToast()
 const {
   configs,
   createConfig,
@@ -20,25 +21,12 @@ const isViewModalOpen = ref(false)
 const configToView = ref<EvaluationConfig | null>(null)
 const isDeleteModalOpen = ref(false)
 const configToDelete = ref<EvaluationConfig | null>(null)
-const searchQuery = ref('')
 
 // Import functionality
 const isImportModalOpen = ref(false)
 const selectedImportFile = ref<File | null>(null)
 const importErrors = ref<string[]>([])
 const isImporting = ref(false)
-
-// Computed
-const filteredConfigs = computed(() => {
-  if (!searchQuery.value)
-    return configs.value
-
-  const query = searchQuery.value.toLowerCase()
-  return configs.value.filter(config =>
-    config.name.toLowerCase().includes(query)
-    || config.type.toLowerCase().includes(query),
-  )
-})
 
 // Methods
 function openCreateModal() {
@@ -52,10 +40,12 @@ function openEditModal(config: EvaluationConfig) {
 }
 
 async function handleConfigSave(config: EvaluationConfig) {
+  const isUpdate = !!(selectedConfig.value && configs.value.find(c => c.id === selectedConfig.value!.id))
+
   try {
-    if (selectedConfig.value && configs.value.find(c => c.id === selectedConfig.value!.id)) {
+    if (isUpdate) {
       // Update existing
-      await updateConfig(selectedConfig.value.id, {
+      await updateConfig(selectedConfig.value!.id, {
         name: config.name,
         settings: config.settings,
       })
@@ -67,9 +57,21 @@ async function handleConfigSave(config: EvaluationConfig) {
 
     selectedConfig.value = null
     isConfigModalOpen.value = false
+
+    toast.add({
+      title: t(isUpdate ? 'configuration.toasts.updated' : 'configuration.toasts.created'),
+      color: 'success',
+      icon: 'i-lucide:check',
+    })
   }
   catch (error) {
     console.error('Failed to save configuration:', error)
+    toast.add({
+      title: t('configuration.toasts.saveError'),
+      description: error instanceof Error ? error.message : undefined,
+      color: 'error',
+      icon: 'i-lucide:circle-alert',
+    })
   }
 }
 
@@ -79,7 +81,9 @@ function handleConfigModalClose() {
 }
 
 function openViewModal(config: EvaluationConfig) {
-  configToView.value = config
+  // Clone: the row click hands over a reactive proxy, and the view modal
+  // must get plain data like the dropdown action already passes.
+  configToView.value = JSON.parse(JSON.stringify(config))
   isViewModalOpen.value = true
 }
 
@@ -95,10 +99,21 @@ async function handleDelete() {
     }
     configToDelete.value = null
     isDeleteModalOpen.value = false
+
+    toast.add({
+      title: t('configuration.toasts.deleted'),
+      color: 'success',
+      icon: 'i-lucide:check',
+    })
   }
   catch (error) {
     console.error('Failed to delete configuration:', error)
-    // TODO: Show error toast/notification
+    toast.add({
+      title: t('configuration.toasts.deleteError'),
+      description: error instanceof Error ? error.message : undefined,
+      color: 'error',
+      icon: 'i-lucide:circle-alert',
+    })
   }
 }
 
@@ -107,10 +122,21 @@ async function handleClone(config: EvaluationConfig) {
     const clonedName = `${config.name} (${t('configuration.actions.clone')})`
     const cloned = cloneConfig(config, clonedName) // Already serializable from getConfigActions
     await createConfig(cloned.type, cloned.name, cloned.settings)
+
+    toast.add({
+      title: t('configuration.toasts.cloned'),
+      color: 'success',
+      icon: 'i-lucide:check',
+    })
   }
   catch (error) {
     console.error('Failed to clone configuration:', error)
-    // TODO: Show error toast/notification
+    toast.add({
+      title: t('configuration.toasts.cloneError'),
+      description: error instanceof Error ? error.message : undefined,
+      color: 'error',
+      icon: 'i-lucide:circle-alert',
+    })
   }
 }
 
@@ -122,6 +148,65 @@ function getTypeIcon(type: EvaluationType) {
 function getTypeLabel(type: EvaluationType) {
   const meta = getEvaluationTypeMeta(type)
   return meta?.label || type
+}
+
+interface ConfigFact {
+  key: string
+  label: string
+  icon?: string
+}
+
+/**
+ * At-a-glance facts shown on a configuration row: what the scale looks like,
+ * whether comments are expected, and whether the timer runs. Everything is
+ * derived from `settings` so the row never lies about the stored config.
+ */
+function getConfigFacts(config: EvaluationConfig): ConfigFact[] {
+  const facts: ConfigFact[] = []
+  const settings = config.settings
+
+  if (config.type === 'mastery' && settings.masterySettings) {
+    facts.push({
+      key: 'scale',
+      label: `${t('configuration.levels')}: ${settings.masterySettings.levels.length}`,
+    })
+  }
+  else if (config.type === 'boolean' && settings.booleanSettings) {
+    const { trueLabel, falseLabel } = settings.booleanSettings
+    facts.push({
+      key: 'scale',
+      label: `${t('configuration.options')}: ${trueLabel} / ${falseLabel}`,
+    })
+  }
+  else if (config.type === 'score' && settings.scoreSettings) {
+    const { minValue, maxValue, unit } = settings.scoreSettings
+    const range = `${minValue}–${maxValue}${unit ? ` ${unit}` : ''}`
+    facts.push({
+      key: 'scale',
+      label: `${t('configuration.range')}: ${range}`,
+    })
+  }
+
+  const commentsState = settings.requireComments
+    ? t('configuration.required')
+    : settings.allowComments
+      ? t('configuration.optional')
+      : t('configuration.disabled')
+
+  facts.push({
+    key: 'comments',
+    label: `${t('configuration.comments')}: ${commentsState}`,
+  })
+
+  if (settings.timerEnabled) {
+    facts.push({
+      key: 'timer',
+      label: t('configuration.modal.fields.timerSettings'),
+      icon: 'i-lucide:timer',
+    })
+  }
+
+  return facts
 }
 
 // Dropdown items for each config
@@ -156,6 +241,7 @@ function getConfigActions(config: EvaluationConfig) {
       {
         label: t('configuration.actions.delete'),
         icon: 'i-lucide:trash-2',
+        color: 'error' as const,
         onSelect: () => confirmDelete(serializableConfig),
       },
     ],
@@ -169,7 +255,12 @@ function handleExport(config: EvaluationConfig) {
   }
   catch (error) {
     console.error('Failed to export configuration:', error)
-    // TODO: Show error toast/notification
+    toast.add({
+      title: t('configuration.toasts.exportError'),
+      description: error instanceof Error ? error.message : undefined,
+      color: 'error',
+      icon: 'i-lucide:circle-alert',
+    })
   }
 }
 
@@ -178,11 +269,6 @@ function openImportModal() {
   isImportModalOpen.value = true
   selectedImportFile.value = null
   importErrors.value = []
-}
-
-function handleImportFileSelect(event: Event) {
-  const target = event.target as HTMLInputElement
-  selectedImportFile.value = target.files?.[0] || null
 }
 
 async function handleImport() {
@@ -198,7 +284,12 @@ async function handleImport() {
     if (importedConfig) {
       isImportModalOpen.value = false
       selectedImportFile.value = null
-      // TODO: Show success toast/notification
+
+      toast.add({
+        title: t('configuration.toasts.imported'),
+        color: 'success',
+        icon: 'i-lucide:check',
+      })
     }
   }
   catch (error) {
@@ -212,83 +303,106 @@ async function handleImport() {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto mt-8">
+  <div class="flex flex-col gap-6">
     <!-- Header -->
-    <div class="flex flex-col gap-4 md:flex-row justify-between items-center mb-4 dark:bg-neutral-900">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-neutral-900 dark:text-neutral-100 transition-colors">
+        <h1 class="text-xl font-semibold text-highlighted">
           {{ t('configuration.title') }}
         </h1>
-        <p class="text-neutral-600 dark:text-neutral-400 transition-colors mt-2">
+        <p class="text-sm text-muted">
           {{ t('configuration.subtitle') }}
         </p>
       </div>
 
-      <div class="flex gap-3">
+      <div class="flex gap-2">
         <UButton
           icon="i-lucide:upload"
-          variant="outline"
-          size="lg"
+          color="neutral"
+          variant="subtle"
+          :label="t('configuration.actions.import')"
           @click="openImportModal"
-        >
-          {{ t('configuration.actions.import') }}
-        </UButton>
+        />
         <UButton
           icon="i-lucide:plus"
-          size="lg"
+          :label="t('configuration.new')"
           @click="openCreateModal"
-        >
-          {{ t('configuration.new') }}
-        </UButton>
+        />
       </div>
     </div>
 
     <!-- Empty State -->
-    <div v-if="filteredConfigs.length === 0" class="text-center py-12">
-      <div class="text-neutral-400 mb-4">
-        <UIcon name="i-lucide:settings" class="text-6xl dark:text-neutral-600" />
-      </div>
-      <h3 class="text-lg font-medium text-neutral-900 dark:text-neutral-100 transition-colors mb-2">
-        {{ t('configuration.noConfigurations') }}
-      </h3>
-      <p class="text-neutral-600 dark:text-neutral-400 transition-colors mb-4">
-        {{ searchQuery ? t('configuration.noSearchResults') : t('configuration.noConfigurationsMessage') }}
-      </p>
-    </div>
+    <UEmpty
+      v-if="configs.length === 0"
+      icon="i-lucide:sliders-horizontal"
+      :title="t('configuration.noConfigurations')"
+      :description="t('configuration.noConfigurationsMessage')"
+    >
+      <template #actions>
+        <UButton
+          icon="i-lucide:plus"
+          size="lg"
+          :label="t('configuration.emptyCta')"
+          @click="openCreateModal()"
+        />
+      </template>
+    </UEmpty>
 
-    <!-- Configurations Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      <div
-        v-for="config in filteredConfigs"
-        :key="config.id"
-        class="p-3 border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 dark:hover:border-neutral-500 transition-colors rounded-lg"
-      >
-        <div class="flex flex-1 items-center justify-between">
-          <div class="flex items-center gap-3">
-            <UIcon
-              :name="getTypeIcon(config.type)"
-              class="text-blue-600 text-xl"
-            />
-            <div>
-              <h3 class="font-semibold text-neutral-900 dark:text-neutral-100 transition-colors">
+    <div
+      v-else
+      class="overflow-hidden rounded-lg border border-default transition-[opacity,translate] duration-200 ease-out-expo starting:translate-y-1 starting:opacity-0"
+    >
+      <ul class="divide-y divide-default">
+        <li
+          v-for="config in configs"
+          :key="config.id"
+          class="group relative flex items-center pe-2 hover:bg-elevated"
+        >
+          <!-- Opening the detail view is a modal, not a route, so this is a
+               button rather than a link. -->
+          <button
+            type="button"
+            class="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+            @click="openViewModal(config)"
+          >
+            <UIcon :name="getTypeIcon(config.type)" class="size-4 shrink-0 text-dimmed" />
+
+            <div class="flex min-w-0 flex-1 flex-col">
+              <span class="truncate text-sm font-medium text-highlighted">
                 {{ config.name }}
-              </h3>
-              <p class="text-sm text-neutral-500">
+              </span>
+              <span class="truncate text-xs text-muted">
                 {{ getTypeLabel(config.type) }}
-              </p>
+              </span>
             </div>
-          </div>
+
+            <div class="hidden shrink-0 flex-wrap items-center gap-1.5 md:flex">
+              <UBadge
+                v-for="fact in getConfigFacts(config)"
+                :key="fact.key"
+                color="neutral"
+                variant="subtle"
+                size="sm"
+                :icon="fact.icon"
+                :label="fact.label"
+              />
+            </div>
+
+            <span class="hidden w-24 shrink-0 text-end text-xs tabular-nums text-dimmed lg:block">
+              {{ new Date(config.updatedAt).toLocaleDateString() }}
+            </span>
+          </button>
 
           <UDropdownMenu :items="getConfigActions(config)">
             <UButton
-              icon="i-lucide:more-horizontal"
+              icon="i-lucide:more-vertical"
               color="neutral"
               variant="ghost"
-              size="sm"
+              :aria-label="t('configuration.actions.edit')"
             />
           </UDropdownMenu>
-        </div>
-      </div>
+        </li>
+      </ul>
     </div>
 
     <!-- Configuration Modal -->
@@ -306,120 +420,95 @@ async function handleImport() {
     />
 
     <!-- Delete Confirmation Modal -->
-    <UModal v-model:open="isDeleteModalOpen" title="Delete Configuration Modal" description="Delete Configuration Modal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">
-              {{ t('configuration.deleteModal.title') }}
-            </h3>
-          </template>
+    <UModal
+      v-model:open="isDeleteModalOpen"
+      :title="t('configuration.deleteModal.title')"
+      :description="t('configuration.deleteModal.warning')"
+    >
+      <template #body>
+        <div class="space-y-2">
+          <p class="text-sm text-muted">
+            {{ t('configuration.deleteModal.message', { name: configToDelete?.name }) }}
+          </p>
+          <p class="text-sm text-error">
+            {{ t('configuration.deleteModal.warning') }}
+          </p>
+        </div>
+      </template>
 
-          <div class="space-y-4">
-            <p class="text-neutral-600 dark:text-neutral-400 transition-colors">
-              {{ t('configuration.deleteModal.message', { name: configToDelete?.name }) }}
-            </p>
-            <p class="text-sm text-error">
-              {{ t('configuration.deleteModal.warning') }}
-            </p>
-          </div>
-
-          <template #footer>
-            <div class="flex justify-end gap-3">
-              <UButton
-                color="neutral"
-                variant="outline"
-                @click="() => { isDeleteModalOpen = false }"
-              >
-                {{ t('configuration.actions.cancel') }}
-              </UButton>
-              <UButton
-                color="error"
-                @click="handleDelete"
-              >
-                {{ t('configuration.actions.delete') }}
-              </UButton>
-            </div>
-          </template>
-        </UCard>
+      <template #footer>
+        <UButton
+          :label="t('common.cancel')"
+          color="neutral"
+          variant="ghost"
+          @click="() => { isDeleteModalOpen = false }"
+        />
+        <UButton
+          :label="t('configuration.actions.delete')"
+          color="error"
+          @click="handleDelete"
+        />
       </template>
     </UModal>
 
     <!-- Import Configuration Modal -->
-    <UModal v-model:open="isImportModalOpen" title="Import Configuration Modal" description="Import Configuration Modal">
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">
-              {{ t('configuration.importModal.title') }}
-            </h3>
-          </template>
+    <UModal
+      v-model:open="isImportModalOpen"
+      :title="t('configuration.importModal.title')"
+      :description="t('configuration.importModal.importInstructions')"
+    >
+      <template #body>
+        <div class="space-y-4">
+          <UFileUpload
+            v-model="selectedImportFile"
+            accept=".conf,.json"
+            :label="t('evaluation.creationModal.dropzone')"
+            :description="t('evaluation.creationModal.dropzoneHint')"
+          />
 
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium mb-2">
-                {{ t('configuration.importModal.selectFile') }}
-              </label>
-              <input
-                type="file"
-                accept=".conf,.json"
-                class="block w-full text-sm text-neutral-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-lg file:border-0
-                file:text-sm file:font-medium
-                file:bg-primary-50 file:text-primary-700
-                hover:file:bg-primary-100"
-                @change="handleImportFileSelect"
-              >
-            </div>
-
-            <!-- Import Errors -->
-            <UAlert
-              v-if="importErrors.length > 0"
-              icon="i-lucide:alert-circle"
-              color="error"
-              variant="subtle"
-              :title="t('configuration.importModal.importErrors')"
-            >
-              <template #description>
-                <ul class="list-disc list-inside space-y-1">
-                  <li v-for="error in importErrors" :key="error">
-                    {{ error }}
-                  </li>
-                </ul>
-              </template>
-            </UAlert>
-
-            <!-- Import Instructions -->
-            <div class="text-sm text-neutral-600 dark:text-neutral-400 transition-colors">
-              <h4 class="font-medium mb-2">
-                {{ t('configuration.importModal.importInstructions') }}
-              </h4>
+          <!-- Import Errors -->
+          <UAlert
+            v-if="importErrors.length > 0"
+            icon="i-lucide:alert-circle"
+            color="error"
+            variant="subtle"
+            :title="t('configuration.importModal.importErrors')"
+          >
+            <template #description>
               <ul class="list-disc list-inside space-y-1">
-                <li>{{ t('configuration.importModal.importFormat') }}</li>
-                <li>{{ t('configuration.importModal.importVersion') }}</li>
+                <li v-for="error in importErrors" :key="error">
+                  {{ error }}
+                </li>
               </ul>
-            </div>
-          </div>
+            </template>
+          </UAlert>
 
-          <template #footer>
-            <div class="flex justify-end gap-3">
-              <UButton
-                variant="ghost"
-                @click="() => { isImportModalOpen = false }"
-              >
-                {{ t('configuration.actions.cancel') }}
-              </UButton>
-              <UButton
-                :disabled="!selectedImportFile || isImporting"
-                :loading="isImporting"
-                @click="handleImport"
-              >
-                {{ t('configuration.actions.import') }}
-              </UButton>
-            </div>
-          </template>
-        </UCard>
+          <!-- Import Instructions -->
+          <div class="text-sm text-muted">
+            <h4 class="font-medium text-default mb-2">
+              {{ t('configuration.importModal.importInstructions') }}
+            </h4>
+            <ul class="list-disc list-inside space-y-1">
+              <li>{{ t('configuration.importModal.importFormat') }}</li>
+              <li>{{ t('configuration.importModal.importVersion') }}</li>
+            </ul>
+          </div>
+        </div>
+      </template>
+
+      <template #footer>
+        <UButton
+          :label="t('common.cancel')"
+          color="neutral"
+          variant="ghost"
+          @click="() => { isImportModalOpen = false }"
+        />
+        <UButton
+          :label="t('configuration.actions.import')"
+          :disabled="!selectedImportFile || isImporting"
+          :loading="isImporting"
+          @click="handleImport"
+        />
       </template>
     </UModal>
   </div>

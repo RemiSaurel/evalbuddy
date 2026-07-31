@@ -9,10 +9,10 @@ defineProps<{
 <template>
   <div class="flex flex-col gap-1">
     <div class="flex justify-between items-center">
-      <div class="text-sm text-neutral-600 dark:text-neutral-300 transition-colors">
+      <div class="text-sm text-default">
         {{ label }}
       </div>
-      <div class="text-xs text-neutral-500 dark:text-neutral-400">
+      <div class="text-xs text-muted">
         {{ progress }} / {{ max }}
       </div>
     </div>

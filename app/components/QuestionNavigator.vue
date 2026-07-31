@@ -14,39 +14,20 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const { scrollToItem, scrollToActiveQuestion } = useScrollToListItem()
+const { scrollToItem } = useScrollToListItem()
 
 // Reference to the scrollable containers
 const questionScrollContainer = ref<HTMLElement>()
 const questionGroupScrollContainer = ref<HTMLElement>()
 
-// Handle navigation and auto-scroll
+// Navigation only moves the index. Scrolling is owned solely by the watcher
+// below, so a click and an arrow press take the exact same path — previously a
+// click queued three overlapping smooth scrolls on the same container.
 function handleSingleNavigation(itemIndex: number) {
   props.onNavigate(0, itemIndex)
-  nextTick(() => {
-    scrollToActiveQuestion(
-      true, // single navigation
-      questionScrollContainer,
-      questionGroupScrollContainer,
-      itemIndex,
-      props.currentItemGroup,
-      props.groupedItems,
-    )
-  })
 }
 function handleGroupNavigation(groupIndex: number) {
   props.onNavigate(groupIndex, 0)
-  nextTick(() => {
-    scrollToActiveQuestion(
-      false,
-      questionScrollContainer,
-      questionGroupScrollContainer,
-      groupIndex,
-      props.currentItemGroup,
-      props.groupedItems,
-    )
-    scrollToItem(questionGroupScrollContainer, groupIndex)
-  })
 }
 
 // Check if a question is evaluated by looking for the specific item ID
@@ -77,7 +58,7 @@ function scrollToCurrentQuestion() {
 <template>
   <div class="w-full overflow-x-auto pb-2">
     <!-- Legend -->
-    <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100 transition-colors">
+    <div class="mb-2 flex items-center gap-1.5 text-sm font-medium text-highlighted">
       <h3>
         {{ isSingleEvaluation
           ? t('evaluation.navigation.overviewAnswers')
@@ -92,7 +73,7 @@ function scrollToCurrentQuestion() {
       <div
         v-if="isSingleEvaluation"
         ref="questionScrollContainer"
-        class="flex overflow-auto gap-2 p-1 bg-white dark:bg-neutral-900 transition-colors"
+        class="flex gap-2 overflow-auto p-1"
       >
         <NavigatorItem
           v-for="(question, itemIndex) in items"
@@ -106,7 +87,7 @@ function scrollToCurrentQuestion() {
       </div>
 
       <!-- Group navigation otherwise -->
-      <div v-else ref="questionGroupScrollContainer" class="flex overflow-auto gap-2 p-1 bg-white dark:bg-neutral-900 transition-colors">
+      <div v-else ref="questionGroupScrollContainer" class="flex gap-2 overflow-auto p-1">
         <NavigatorItem
           v-for="(groupKey, groupIndex) in groupKeys"
           :key="groupKey"

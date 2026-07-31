@@ -13,6 +13,8 @@ import { ImportExportService } from '@/utils/importExport'
 import { evaluationStorage } from '@/utils/storage'
 
 export function useEvaluationConfig() {
+  const { t } = useI18n()
+
   // Use Nuxt's global state to ensure sharing across components
   const configs = useState<EvaluationConfig[]>('evaluation-configs', () => [])
   const currentConfig = useState<EvaluationConfig | null>('current-config', () => null)
@@ -248,8 +250,24 @@ export function useEvaluationConfig() {
   }
 
   // Get evaluation type metadata
+  // EVALUATION_TYPE_META carries English label/description fallbacks; the
+  // user-facing strings come from i18n, which already has them per type.
+  const typeI18nKey: Record<EvaluationType, string> = {
+    mastery: 'mastery',
+    boolean: 'boolean',
+    score: 'score',
+  }
+
   const getEvaluationTypeMeta = (type: EvaluationType) => {
-    return EVALUATION_TYPE_META[type]
+    const meta = EVALUATION_TYPE_META[type]
+    if (!meta)
+      return meta
+
+    return {
+      ...meta,
+      label: t(`configuration.modal.types.${typeI18nKey[type]}.label`),
+      description: t(`configuration.modal.types.${typeI18nKey[type]}.description`),
+    }
   }
 
   // Clone a configuration

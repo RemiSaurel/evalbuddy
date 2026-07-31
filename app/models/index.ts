@@ -150,18 +150,26 @@ export function parseExportResult(result: ExportResult): ParsedEvaluationResult 
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
-// Mastery levels color definition
+/**
+ * Mastery level colours, red → emerald.
+ *
+ * Soft tints rather than saturated fills: these buttons sit next to dense text
+ * all day and loud colour is fatiguing. Each entry is a static literal so
+ * Tailwind can extract it, and carries its own `dark:` variants so the palette
+ * works in both colour modes. No `ring-*` here — the selected state owns the
+ * ring (see HybridEvaluationCard).
+ */
 export const MASTERY_COLOR_CLASSES = [
-  'bg-red-400 text-red-900 hover:bg-red-400',
-  'bg-red-300 text-red-700 hover:bg-red-300',
-  'bg-orange-400 text-orange-800 hover:bg-orange-400',
-  'bg-orange-300 text-orange-700 hover:bg-orange-300',
-  'bg-amber-300 text-amber-800 hover:bg-amber-400',
-  'bg-yellow-300 text-yellow-800 hover:bg-yellow-400',
-  'bg-lime-300 text-lime-800 hover:bg-lime-400',
-  'bg-green-200 text-green-700 hover:bg-green-300',
-  'bg-green-300 text-green-800 hover:bg-green-400',
-  'bg-emerald-300 text-emerald-800 hover:bg-emerald-400',
+  'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-400/20 dark:text-red-200 dark:hover:bg-red-400/30',
+  'bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-400/10 dark:text-red-300 dark:hover:bg-red-400/20',
+  'bg-orange-100 text-orange-800 hover:bg-orange-200 dark:bg-orange-400/20 dark:text-orange-200 dark:hover:bg-orange-400/30',
+  'bg-orange-50 text-orange-700 hover:bg-orange-100 dark:bg-orange-400/10 dark:text-orange-300 dark:hover:bg-orange-400/20',
+  'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-400/20 dark:text-amber-200 dark:hover:bg-amber-400/30',
+  'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-400/20 dark:text-yellow-200 dark:hover:bg-yellow-400/30',
+  'bg-lime-100 text-lime-800 hover:bg-lime-200 dark:bg-lime-400/20 dark:text-lime-200 dark:hover:bg-lime-400/30',
+  'bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-400/10 dark:text-green-300 dark:hover:bg-green-400/20',
+  'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-400/20 dark:text-green-200 dark:hover:bg-green-400/30',
+  'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-400/20 dark:text-emerald-200 dark:hover:bg-emerald-400/30',
 ] as const
 
 // Default mastery level configuration
@@ -202,8 +210,8 @@ export const DEFAULT_MASTERY_CONFIG: MasterySettings = {
 export const DEFAULT_BOOLEAN_CONFIG: BooleanSettings = {
   trueLabel: 'Correct',
   falseLabel: 'Incorrect',
-  trueColor: 'bg-green-300 text-green-800 hover:bg-green-400',
-  falseColor: 'bg-red-300 text-red-800 hover:bg-red-400',
+  trueColor: MASTERY_COLOR_CLASSES[8],
+  falseColor: MASTERY_COLOR_CLASSES[0],
 }
 
 // Default score configuration

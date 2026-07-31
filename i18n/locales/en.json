@@ -4,13 +4,25 @@
     "evaluations": "Evaluations",
     "configurations": "Configurations"
   },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "delete": "Delete"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "notFound": "Page not found",
+    "notFoundMessage": "This evaluation doesn't exist or has been deleted.",
+    "message": "Something went wrong. You can go back home and try again.",
+    "backHome": "Back to home"
+  },
   "configuration": {
     "title": "Evaluation Configurations",
     "subtitle": "Create and manage different configurations for your evaluations",
     "new": "New Configuration",
     "noConfigurations": "No configurations found",
     "noConfigurationsMessage": "Create your first evaluation configuration to get started.",
-    "noSearchResults": "No configurations match your search.",
     "created": "Created",
     "updated": "Updated",
     "comments": "Comments",
@@ -120,10 +132,26 @@
     "selectForEvaluation": "Select Configuration for Evaluation",
     "useDefault": "Use Default (Mastery Level)",
     "defaultMastery": "Default mastery level evaluation",
-    "defaultIfNone": "Will use default mastery configuration if none selected"
+    "defaultIfNone": "Will use default mastery configuration if none selected",
+    "emptyCta": "New configuration",
+    "toasts": {
+      "created": "Configuration created",
+      "updated": "Configuration updated",
+      "deleted": "Configuration deleted",
+      "cloned": "Configuration duplicated",
+      "imported": "Configuration imported",
+      "saveError": "Could not save the configuration",
+      "deleteError": "Could not delete the configuration",
+      "cloneError": "Could not duplicate the configuration",
+      "exportError": "Could not export the configuration",
+      "importError": "Could not import the configuration"
+    }
   },
   "evaluation": {
     "passingScore": "Passing Score",
+    "score": {
+      "range": "Score ({min}–{max})"
+    },
     "shortcuts": {
       "selectOption": "select",
       "confirm": "confirm",
@@ -151,7 +179,8 @@
       "progress": "Progress",
       "updated": "Updated",
       "completed": "Completed",
-      "continue": "Continue"
+      "continue": "Continue",
+      "emptyCta": "Create evaluation"
     },
     "progress": {
       "current": "Current Question Progress",
@@ -196,7 +225,9 @@
       "title": "Evaluation Completed!",
       "message": "You have successfully evaluated all questions. What would you like to do next?",
       "review": "Review Evaluations",
-      "goHome": "Go to Home"
+      "goHome": "Go to Home",
+      "statsItems": "{count} answers evaluated",
+      "statsDuration": "in {duration}"
     },
     "creationModal": {
       "createEvaluation": "Create Evaluation",
@@ -207,7 +238,9 @@
       "evaluatorNamePlaceholder": "Enter your name (optional)",
       "importErrors": "Import Errors",
       "importInstructions": "For import format and documentation, visit:",
-      "viewFileFormat": "View expected file format"
+      "viewFileFormat": "View expected file format",
+      "dropzone": "Choose a file or drop it here",
+      "dropzoneHint": "JSON file exported from your collection tool"
     },
     "editModal": {
       "title": "Edit Evaluation Session",
@@ -250,6 +283,13 @@
     "title": "Evaluation",
     "instructions": "Instructions",
     "subtitle": "Evaluate answers and resume sessions whenever you want",
-    "displayContext": "Display the evaluation context"
+    "displayContext": "Display the evaluation context",
+    "toasts": {
+      "created": "Evaluation created",
+      "updated": "Evaluation updated",
+      "deleted": "Evaluation deleted",
+      "exportError": "Could not export the evaluation",
+      "importError": "Could not import the file"
+    }
   }
 }

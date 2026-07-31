@@ -12,6 +12,7 @@ const props = defineProps<{
   onNavigate: (groupIndex: number, itemIndexInGroup: number) => void
   goToPrevious: () => void
   goToNext: () => void
+  shortcutsEnabled?: boolean
 }>()
 
 const { t } = useI18n()
@@ -49,10 +50,13 @@ onMounted(() => {
   scrollToActiveItem(props.currentItemIndexInGroup)
 })
 
-// Shortcuts with arrow keys to navigate
+// Shortcuts with arrow keys to navigate.
+// Guarded so navigation never fires from behind an open modal.
+const shortcutsEnabled = computed(() => props.shortcutsEnabled !== false)
+
 defineShortcuts({
-  ArrowLeft: () => props.goToPrevious(),
-  ArrowRight: () => props.goToNext(),
+  ArrowLeft: () => shortcutsEnabled.value && props.goToPrevious(),
+  ArrowRight: () => shortcutsEnabled.value && props.goToNext(),
 })
 </script>
 
@@ -60,7 +64,7 @@ defineShortcuts({
   <!-- Evaluation navigation if there is more than one evaluation per question -->
   <div v-if="!isSingleEvaluation" class="w-full overflow-x-auto">
     <!-- Legend -->
-    <div class="flex items-center mb-2 gap-1.5 text-sm font-medium text-neutral-900 dark:text-neutral-100 transition-colors">
+    <div class="mb-2 flex items-center gap-1.5 text-sm font-medium text-highlighted">
       <h3>
         {{ t('evaluation.navigation.overviewAnswers') }}
       </h3>
@@ -70,7 +74,7 @@ defineShortcuts({
 
     <!-- Navigation -->
     <div class="flex flex-col gap-1">
-      <div ref="itemScrollContainer" class="flex overflow-auto gap-2 p-1 bg-white dark:bg-neutral-900 transition-colors">
+      <div ref="itemScrollContainer" class="flex gap-2 overflow-auto p-1">
         <NavigatorItem
           v-for="(item, itemIndex) in currentItemGroup"
           :key="item.id"
