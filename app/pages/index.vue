@@ -492,7 +492,7 @@ function getDropdownItems(session: EvaluationSession) {
             <div class="flex justify-end gap-3">
               <UButton
                 variant="ghost"
-                @click="isCreationModalOpen = false"
+                @click="() => { isCreationModalOpen = false }"
               >
                 {{ $t('evaluation.actions.cancel') }}
               </UButton>
@@ -544,7 +544,7 @@ function getDropdownItems(session: EvaluationSession) {
             <div class="flex justify-end gap-3">
               <UButton
                 variant="ghost"
-                @click="isEditModalOpen = false"
+                @click="() => { isEditModalOpen = false }"
               >
                 {{ t('evaluation.actions.cancel') }}
               </UButton>
@@ -584,7 +584,7 @@ function getDropdownItems(session: EvaluationSession) {
               <UButton
                 color="neutral"
                 variant="outline"
-                @click="isDeleteModalOpen = false"
+                @click="() => { isDeleteModalOpen = false }"
               >
                 {{ t('evaluation.actions.cancel') }}
               </UButton>

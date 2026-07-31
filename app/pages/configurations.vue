@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EvaluationConfig } from '@/models/index'
+import type { EvaluationConfig, EvaluationType } from '@/models/index'
 
 const { t } = useI18n()
 const {
@@ -114,13 +114,13 @@ async function handleClone(config: EvaluationConfig) {
   }
 }
 
-function getTypeIcon(type: string) {
-  const meta = getEvaluationTypeMeta(type as any)
+function getTypeIcon(type: EvaluationType) {
+  const meta = getEvaluationTypeMeta(type)
   return meta?.icon || 'i-lucide:settings'
 }
 
-function getTypeLabel(type: string) {
-  const meta = getEvaluationTypeMeta(type as any)
+function getTypeLabel(type: EvaluationType) {
+  const meta = getEvaluationTypeMeta(type)
   return meta?.label || type
 }
 
@@ -329,7 +329,7 @@ async function handleImport() {
               <UButton
                 color="neutral"
                 variant="outline"
-                @click="isDeleteModalOpen = false"
+                @click="() => { isDeleteModalOpen = false }"
               >
                 {{ t('configuration.actions.cancel') }}
               </UButton>
@@ -406,7 +406,7 @@ async function handleImport() {
             <div class="flex justify-end gap-3">
               <UButton
                 variant="ghost"
-                @click="isImportModalOpen = false"
+                @click="() => { isImportModalOpen = false }"
               >
                 {{ t('configuration.actions.cancel') }}
               </UButton>

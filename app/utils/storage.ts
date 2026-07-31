@@ -1,4 +1,4 @@
-import type { DatasetStructure, EvaluationConfig, EvaluationSession } from '@/models/index'
+import type { DatasetStructure, EvaluationConfig, EvaluationSession, ExportResult } from '@/models/index'
 import { DEFAULT_MASTERY_CONFIG } from '@/models/index'
 
 const DB_NAME = 'EvalBuddyDB'
@@ -6,6 +6,14 @@ const DB_VERSION = 4
 const SESSIONS_STORE = 'sessions'
 const CONFIGS_STORE = 'configs'
 const ELAPSED_TIME_ITEMS_STORE = 'elapsedTimeItems'
+
+interface ElapsedTimeItemRecord {
+  id: string
+  sessionId: string
+  itemId: number
+  elapsedTime?: number
+  secondElapsedTime?: number
+}
 
 class EvaluationStorage {
   private db: IDBDatabase | null = null
@@ -50,20 +58,39 @@ class EvaluationStorage {
     })
   }
 
-  async saveSessionElapsedTime(sessionId: string, itemId: number, elapsedTime: number): Promise<void> {
+  async saveSessionElapsedTime(sessionId: string, itemId: number, elapsedTime: number, pass: 'first' | 'second' = 'first'): Promise<void> {
     const db = await this.initDB()
     const transaction = db.transaction([ELAPSED_TIME_ITEMS_STORE], 'readwrite')
     const store = transaction.objectStore(ELAPSED_TIME_ITEMS_STORE)
 
     return new Promise((resolve, reject) => {
-      const request = store.put({
-        id: `${sessionId}:${itemId}`,
-        sessionId,
-        itemId,
-        elapsedTime,
-      })
-      request.onsuccess = () => resolve()
-      request.onerror = () => reject(request.error)
+      const id = `${sessionId}:${itemId}`
+      const readRequest = store.get(id)
+
+      readRequest.onsuccess = () => {
+        const existing = (readRequest.result || null) as ElapsedTimeItemRecord | null
+        const nextRecord: ElapsedTimeItemRecord = existing
+          ? {
+              ...existing,
+              ...(pass === 'first'
+                ? { elapsedTime }
+                : { secondElapsedTime: elapsedTime }),
+            }
+          : {
+              id,
+              sessionId,
+              itemId,
+              ...(pass === 'first'
+                ? { elapsedTime }
+                : { secondElapsedTime: elapsedTime }),
+            }
+
+        const writeRequest = store.put(nextRecord)
+        writeRequest.onsuccess = () => resolve()
+        writeRequest.onerror = () => reject(writeRequest.error)
+      }
+
+      readRequest.onerror = () => reject(readRequest.error)
     })
   }
 
@@ -76,8 +103,29 @@ class EvaluationStorage {
     return new Promise((resolve, reject) => {
       const request = index.getAll(sessionId)
       request.onsuccess = () => {
-        const elapsedTimes = (request.result || []).reduce((accumulator: Record<number, number>, entry: any) => {
-          accumulator[entry.itemId] = entry.elapsedTime
+        const elapsedTimes = (request.result || []).reduce((accumulator: Record<number, number>, entry: ElapsedTimeItemRecord) => {
+          accumulator[entry.itemId] = entry.elapsedTime ?? entry.secondElapsedTime ?? 0
+          return accumulator
+        }, {})
+
+        resolve(elapsedTimes)
+      }
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  async getSessionSecondElapsedTimes(sessionId: string): Promise<Record<number, number>> {
+    const db = await this.initDB()
+    const transaction = db.transaction([ELAPSED_TIME_ITEMS_STORE], 'readonly')
+    const store = transaction.objectStore(ELAPSED_TIME_ITEMS_STORE)
+    const index = store.index('sessionId')
+
+    return new Promise((resolve, reject) => {
+      const request = index.getAll(sessionId)
+      request.onsuccess = () => {
+        const elapsedTimes = (request.result || []).reduce((accumulator: Record<number, number>, entry: ElapsedTimeItemRecord) => {
+          if (entry.secondElapsedTime !== undefined)
+            accumulator[entry.itemId] = entry.secondElapsedTime
           return accumulator
         }, {})
 
@@ -111,14 +159,13 @@ class EvaluationStorage {
           questionID: item.questionID,
           submittedAnswer: item.submittedAnswer,
           context: item.context,
+          aiEvaluation: item.aiEvaluation,
         })),
       },
-      results: session.results.map(result => ({
-        itemId: result.itemId,
+      results: session.results.map((result: ExportResult) => ({
+        itemId: result.itemId ?? result.questionId,
         questionId: result.questionId,
-        value: result.value,
-        comment: result.comment,
-        elapsedTime: result.elapsedTime,
+        evaluations: JSON.parse(JSON.stringify(result.evaluations)),
         evaluatedAt: result.evaluatedAt,
       })),
       config: session.config,
@@ -251,6 +298,7 @@ class EvaluationStorage {
         allowComments: true,
         requireComments: false,
         timerEnabled: false,
+        evaluationMode: 'without-ai',
         masterySettings: DEFAULT_MASTERY_CONFIG,
       },
       createdAt: new Date().toISOString(),

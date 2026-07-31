@@ -43,17 +43,8 @@ export class ImportExportService {
     if (!session) {
       throw new Error('Session not found')
     }
-
-    const storedElapsedTimes = await evaluationStorage.getSessionElapsedTimes(sessionId)
-
     const exportData: ExportData = {
-      session: {
-        ...session,
-        results: session.results.map(result => ({
-          ...result,
-          elapsedTime: formatElapsedTime(storedElapsedTimes[result.itemId]) ?? result.elapsedTime,
-        })),
-      },
+      session: JSON.parse(JSON.stringify(session)),
       exportedAt: new Date().toISOString(),
       version: '1.0',
     }
@@ -221,20 +212,6 @@ export class ImportExportService {
   }
 }
 
-function formatElapsedTime(elapsedTimeMs?: number): string | undefined {
-  if (elapsedTimeMs == null)
-    return undefined
-
-  const totalSeconds = Math.floor(elapsedTimeMs / 1000)
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-
-  return [hours, minutes, seconds]
-    .map(value => String(value).padStart(2, '0'))
-    .join(':')
-}
-
 /**
  * Validate DatasetStructure
  */
@@ -307,6 +284,17 @@ function validateDataset(dataset: any): string[] {
     // Validate context if present
     if (item.context && !validateContextData(item.context)) {
       errors.push(`Item at index ${index}: context must be an object with string or string[] values`)
+    }
+
+    // Validate aiEvaluation if present
+    if (item.aiEvaluation !== undefined) {
+      const { score, justification } = item.aiEvaluation
+      if (score !== undefined && (typeof score !== 'number' || !Number.isInteger(score) || score < 0 || score > 10)) {
+        errors.push(`Item at index ${index}: aiEvaluation.score must be an integer between 0 and 10`)
+      }
+      if (justification !== undefined && typeof justification !== 'string') {
+        errors.push(`Item at index ${index}: aiEvaluation.justification must be a string`)
+      }
     }
   })
 

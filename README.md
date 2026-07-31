@@ -101,6 +101,10 @@ Datasets should be provided as a JSON object with the following structure:
         "studentName": "Alice Johnson",
         "submissionTime": "2025-01-14T10:00:00Z",
         "attempt": "1"
+      },
+      "aiEvaluation": {
+        "score": 10,
+        "justification": "Correct and precise answer"
       }
     }
   ]
@@ -124,6 +128,11 @@ Datasets should be provided as a JSON object with the following structure:
 - `questionID`: References the question this item belongs to
 - `submittedAnswer`: The student's submitted answer
 - `context`: Optional metadata (supports string and string[] values for better display)
+
+**AI Evaluation Item Field:**
+- `aiEvaluation`: Optional - contains the AI evaluation result
+  - `score`: Integer between 0 and 10
+  - `justification`: Explanation of the assigned score (string)
 
 ### Evaluating Questions
 

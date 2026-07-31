@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EvaluationItem } from '~/models'
+import type { EvaluatedItem, EvaluationItem } from '~/models'
 
 const props = defineProps<{
   isSingleEvaluation: boolean
@@ -8,9 +8,7 @@ const props = defineProps<{
   currentItemGroup: readonly EvaluationItem[]
   currentGroupIndex: number
   currentItemIndexInGroup: number
-  evaluatedItems: {
-    [itemId: string]: { value?: any, masteryLevel?: string, comment?: string }
-  }
+  evaluatedItems: Record<string, EvaluatedItem>
   onNavigate: (groupIndex: number, itemIndexInGroup: number) => void
   goToPrevious: () => void
   goToNext: () => void

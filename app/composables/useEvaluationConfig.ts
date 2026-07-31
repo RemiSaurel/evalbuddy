@@ -60,6 +60,7 @@ export function useEvaluationConfig() {
           settings: {
             allowComments: true,
             requireComments: false,
+            evaluationMode: 'without-ai',
             masterySettings: DEFAULT_MASTERY_CONFIG,
           },
         }
@@ -70,6 +71,7 @@ export function useEvaluationConfig() {
           settings: {
             allowComments: true,
             requireComments: false,
+            evaluationMode: 'without-ai',
             booleanSettings: DEFAULT_BOOLEAN_CONFIG,
           },
         }
@@ -81,6 +83,7 @@ export function useEvaluationConfig() {
           settings: {
             allowComments: true,
             requireComments: false,
+            evaluationMode: 'without-ai',
             scoreSettings: DEFAULT_SCORE_CONFIG,
           },
         }
