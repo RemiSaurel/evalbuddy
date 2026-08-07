@@ -17,7 +17,7 @@
     "@iconify-json/simple-icons": "^1.2.34",
     "@nuxt/fonts": "^0.14.0",
     "@nuxt/icon": "^1.13.0",
-    "@nuxt/ui": "^4.6.1",
+    "@nuxt/ui": "^4.8.1",
     "@nuxtjs/color-mode": "4.0.0",
     "@nuxtjs/i18n": "^9.5.4",
     "@vueuse/core": "^13.2.0",
@@ -26,7 +26,7 @@
     "dompurify": "^3.2.6",
     "katex": "^0.16.22",
     "motion-v": "^2.2.1",
-    "nuxt": "^4.4.2",
+    "nuxt": "^4.5.1",
     "sortablejs": "^1.15.6",
     "tailwindcss": "^4.2.2",
     "vue": "^3.5.14"
