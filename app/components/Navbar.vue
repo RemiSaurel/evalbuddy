@@ -23,7 +23,7 @@ const items = computed(() => [
       class="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ui-bg)]"
     >
       <span class="flex size-6 items-center justify-center rounded-md bg-primary">
-        <UIcon name="i-lucide:check" class="size-4 text-inverted" />
+        <BrandMark class="size-4 text-inverted" />
       </span>
       <span class="text-sm font-semibold tracking-tight text-highlighted">EvalBuddy</span>
     </NuxtLink>

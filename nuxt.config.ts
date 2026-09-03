@@ -3,6 +3,10 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'EvalBuddy',
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'alternate icon', href: '/favicon.ico' },
+      ],
     },
   },
   devtools: { enabled: true },
